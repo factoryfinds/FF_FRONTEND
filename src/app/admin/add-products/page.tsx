@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import MultiImageInput from "react-multiple-image-input";
+import { MultiImageInput } from "react-multiple-image-input"; // ✅ Named export
 import { getAllProducts } from '../../../../utlis/api'
 import ProductCard from "@/components/ProductCard"; // only for product 
 import { useRouter } from "next/navigation";
@@ -214,25 +214,25 @@ export default function AddProductPage() {
                                     buttonColor: "#444",     // For delete/change buttons
                                     modalColor: "#111",      // Crop modal bg
                                 }}
-                                style={{
-                                    container: {
-                                        maxHeight: "90vh",         // Limit height of image modal
-                                        overflowY: "auto",         // Enable scroll
-                                        paddingBottom: "4rem",     // Room for button
-                                    },
-                                    cropArea: {
-                                        maxHeight: "60vh",         // Make image appear smaller
-                                        objectFit: "contain",
-                                    },
-                                    modal: {
-                                        padding: "1rem",
-                                        borderRadius: "8px",
-                                    },
-                                    input: {
-                                        backgroundColor: "#222",
-                                        color: "#fff",
-                                    }
-                                }}
+                                // style={{
+                                //     container: {
+                                //         maxHeight: "90vh",         // Limit height of image modal
+                                //         overflowY: "auto",         // Enable scroll
+                                //         paddingBottom: "4rem",     // Room for button
+                                //     },
+                                //     cropArea: {
+                                //         maxHeight: "60vh",         // Make image appear smaller
+                                //         objectFit: "contain",
+                                //     },
+                                //     modal: {
+                                //         padding: "1rem",
+                                //         borderRadius: "8px",
+                                //     },
+                                //     input: {
+                                //         backgroundColor: "#222",
+                                //         color: "#fff",
+                                //     }
+                                // }}
                             />
 
                         </div>
