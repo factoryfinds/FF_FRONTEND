@@ -51,10 +51,14 @@ export interface Product {
 }
 
 export interface CartItem {
-  productId: string;
+  _id: string;
   quantity: number;
   size: string;
-  product?: Product;
+  product: {
+    _id: string;
+    title: string;
+    images: string[];
+  };
 }
 
 export interface Cart {
@@ -109,7 +113,7 @@ const apiRequest = async <T>(
   options: RequestInit = {}
 ): Promise<T> => {
   const token = getToken();
-  
+
   const config: RequestInit = {
     headers: {
       'Content-Type': 'application/json',
@@ -121,7 +125,7 @@ const apiRequest = async <T>(
 
   try {
     const response = await fetch(`${BASE_URL}${endpoint}`, config);
-    
+
     // Handle cases where response is not JSON
     let data;
     try {
@@ -140,13 +144,13 @@ const apiRequest = async <T>(
         toast.error('Session expired. Please login again.');
         throw new APIError('Unauthorized', 401, 'UNAUTHORIZED');
       }
-      
+
       // Handle validation errors from express-validator
       if (data.errors && Array.isArray(data.errors)) {
         const errorMessage = data.errors.map((err: any) => err.msg).join(', '); // eslint-disable-line @typescript-eslint/no-explicit-any
         throw new APIError(errorMessage, response.status, 'VALIDATION_ERROR');
       }
-      
+
       throw new APIError(
         data.message || data.error || 'An error occurred',
         response.status,
@@ -159,7 +163,7 @@ const apiRequest = async <T>(
     if (error instanceof APIError) {
       throw error;
     }
-    
+
     // Network or other errors
     console.error('API Request failed:', error);
     throw new APIError('Network error. Please check your connection.');
@@ -202,7 +206,7 @@ export const logout = async (): Promise<void> => {
 // 🔄 Token refresh utility - Updated to match backend endpoint
 export const refreshAccessToken = async (): Promise<{ accessToken: string; refreshToken: string }> => {
   const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
-  
+
   if (!refreshToken) {
     throw new APIError('No refresh token available', 401, 'NO_REFRESH_TOKEN');
   }
@@ -216,7 +220,7 @@ export const refreshAccessToken = async (): Promise<{ accessToken: string; refre
     localStorage.setItem('accessToken', data.accessToken);
     localStorage.setItem('refreshToken', data.refreshToken);
   }
-  
+
   return data;
 };
 
@@ -273,7 +277,7 @@ export const addProductToCart = async ({
   size: string;
 }): Promise<{ message: string; cart: CartItem[] }> => {
   const token = getToken();
-  
+
   if (!token) {
     toast.error('Please log in to add items to cart');
     throw new APIError('Authentication required', 401, 'AUTH_REQUIRED');
@@ -285,6 +289,12 @@ export const addProductToCart = async ({
   });
 };
 
+// In your api.js file, update the getProductsFromUserCart function:
+
+interface BackendCartResponse {
+  cart: CartItem[];
+}
+
 export const getProductsFromUserCart = async (): Promise<Cart> => {
   const token = getToken();
 
@@ -293,7 +303,12 @@ export const getProductsFromUserCart = async (): Promise<Cart> => {
     throw new APIError('Authentication required', 401, 'AUTH_REQUIRED');
   }
 
-  return apiRequest('/user/cart');
+  const response = await apiRequest<BackendCartResponse>('/user/cart');
+
+  return {
+    items: response.cart || [],
+    totalAmount: 0
+  };
 };
 
 export const updateCartItem = async ({

@@ -35,8 +35,8 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
         setAuthError(false);
         const data = await getProductsFromUserCart();
         console.log("Cart Data:", data);
-        setCart(data?.cart ?? []);
-      } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+        setCart(data?.items ?? []);  // ✅ Corrected
+      } catch (err: any) {
         console.error("failed to load products", err);
         if (err.message === "UNAUTHORIZED") {
           setAuthError(true);
@@ -48,6 +48,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
 
     fetchProductInCart();
   }, []);
+
 
   const subTotal = cart.reduce((sum, item) => sum + 1250 * item.quantity, 0);
   const shippingCost = 150;
@@ -87,9 +88,9 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
             You need to be logged in to view your cart items
           </p>
           <div className={`${isDrawer ? 'space-y-2' : 'space-x-4'} ${isDrawer ? 'flex flex-col' : 'flex justify-center'}`}>
-            
+
             {isDrawer && (
-              <button 
+              <button
                 onClick={onClose}
                 className="border border-gray-300 text-gray-700 px-6 py-3 rounded hover:bg-gray-50 transition-colors"
               >
@@ -97,7 +98,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
               </button>
             )}
             {!isDrawer && (
-              <button 
+              <button
                 onClick={() => router.push('/')}
                 className="border border-gray-300 text-gray-700 px-6 py-3 rounded hover:bg-gray-50 transition-colors"
               >
@@ -117,7 +118,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
         <div className="text-6xl mb-4">🛒</div>
         <h3 className="text-lg font-semibold mb-2">Your cart is empty</h3>
         <p className="text-gray-500 text-sm mb-4">Add some items to get started</p>
-        <button 
+        <button
           onClick={onClose}
           className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800 transition-colors"
         >
@@ -135,7 +136,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
           <div className="text-8xl mb-6">🛒</div>
           <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
           <p className="text-gray-600 mb-6">Looks like you haven&rsquo;t added any items to your cart yet</p>
-          <button 
+          <button
             onClick={() => router.push('/')}
             className="bg-black text-white px-8 py-3 rounded hover:bg-gray-800 transition-colors"
           >
@@ -168,8 +169,8 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
           <div className={`${isDrawer ? 'space-y-3' : 'space-y-4 lg:space-y-0'}`}>
             {cart.map((item, index) => (
               <div key={index} className={`
-                ${isDrawer 
-                  ? 'border border-gray-200 rounded-lg p-3' 
+                ${isDrawer
+                  ? 'border border-gray-200 rounded-lg p-3'
                   : 'border border-gray-200 lg:border-t lg:border-x-0 lg:border-b-0 rounded-lg lg:rounded-none p-4 lg:px-2 lg:py-6'
                 }
               `}>
@@ -193,7 +194,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
                       </p>
                     </div>
                   </div>
-                  
+
                   {/* Quantity Controls */}
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Quantity:</span>
@@ -247,8 +248,8 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
 
         {/* ✅ Summary Panel */}
         <div className={`
-          ${isDrawer 
-            ? 'border-t border-gray-200 p-4 bg-white' 
+          ${isDrawer
+            ? 'border-t border-gray-200 p-4 bg-white'
             : 'w-full xl:w-1/3 xl:max-w-sm border border-gray-300 rounded-lg shadow-sm'
           }
         `}>
@@ -256,7 +257,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
             {!isDrawer && (
               <h3 className="text-xl sm:text-2xl font-semibold text-center mb-4 sm:mb-6">Summary</h3>
             )}
-            
+
             <div className={`${isDrawer ? 'space-y-2 mb-4' : 'space-y-3'}`}>
               <div className="flex justify-between py-1">
                 <p className={`${isDrawer ? 'text-sm' : 'text-sm sm:text-base'}`}>Sub-total:</p>
@@ -275,13 +276,13 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
                 <p>₹{total}.00</p>
               </div>
             </div>
-            
+
             <div className={`${isDrawer ? 'space-y-2' : ''}`}>
               <button className={`w-full bg-black text-white py-3 rounded hover:bg-gray-800 transition-colors ${isDrawer ? 'text-sm' : 'text-sm sm:text-base mt-4 sm:mt-6'}`}>
                 Check-Out
               </button>
               {isDrawer && (
-                <button 
+                <button
                   onClick={onClose}
                   className="w-full border border-gray-300 text-gray-700 py-3 rounded hover:bg-gray-50 transition-colors text-sm"
                 >
