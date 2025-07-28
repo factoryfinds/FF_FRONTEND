@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect } from "react";
 // ✅ Try different import patterns for MultiImageInput
-import MultiImageInput from "react-multiple-image-input"; // Default import
+// import MultiImageInput from "react-multiple-image-input"; // Default import
 // If the above doesn't work, try:
 // import { MultiImageInput } from "react-multiple-image-input";
 // Or if it's a default export:
-// const MultiImageInput = require("react-multiple-image-input").default;
+const MultiImageInput = require("react-multiple-image-input").default;
 
 import { getAllProducts, Product } from '../../../../utlis/api';
 import ProductCard from "@/components/ProductCard";
