@@ -1,7 +1,7 @@
 import { toast } from 'react-hot-toast';
 
 // Base configuration
-const BASE_URL = 'http://192.168.29.110:5000/api';
+const BASE_URL = 'https://ff-backend-00ri.onrender.com/api';
 
 // Types
 export interface User {

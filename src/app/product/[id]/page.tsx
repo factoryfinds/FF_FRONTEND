@@ -46,7 +46,7 @@ export default function ProductDetails() {
       try {
         setLoadingProducts(true);
 
-        const res = await fetch(`http://192.168.29.110:5000/api/products/${id}`);
+        const res = await fetch(`https://ff-backend-00ri.onrender.com/api/products/${id}`);
 
         if (!res.ok) {
           throw new Error(`Failed to fetch product: ${res.status} ${res.statusText}`);

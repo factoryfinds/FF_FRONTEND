@@ -6,6 +6,7 @@ import React, { useState, useEffect } from "react";
 // If the above doesn't work, try:
 // import { MultiImageInput } from "react-multiple-image-input";
 // Or if it's a default export:
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const MultiImageInput = require("react-multiple-image-input").default;
 
 
