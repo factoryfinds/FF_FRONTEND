@@ -25,14 +25,28 @@ function dataURLtoFile(dataUrl: string, filename: string): File {
     return new File([u8arr], filename, { type: mime });
 }
 
-// ✅ Define interfaces for better type safety
+// ✅ Define proper interfaces for better type safety
+interface ImageFile {
+    file?: File;
+    dataURL?: string;
+}
+
 interface ImageInputType {
-    [key: string]: any;
+    [key: string]: ImageFile | string;
 }
 
 interface ColorType {
     name: string;
     hex: string;
+}
+
+interface UploadResponse {
+    imageUrls: string[];
+    message?: string;
+}
+
+interface ErrorResponse {
+    message: string;
 }
 
 export default function AddProductPage() {
@@ -131,7 +145,7 @@ export default function AddProductPage() {
         setInventory('');
     };
 
-    // ✅ Form submission
+    // ✅ Form submission with proper typing
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -154,10 +168,10 @@ export default function AddProductPage() {
         setSubmitting(true);
 
         try {
-            // 1. Upload images
+            // 1. Upload images with proper typing
             const formData = new FormData();
-            Object.values(images).forEach((img: any, index: number) => {
-                if (img?.file) {
+            Object.values(images).forEach((img: ImageFile | string, index: number) => {
+                if (typeof img === 'object' && img.file) {
                     formData.append("images", img.file);
                 } else if (typeof img === "string" && img.startsWith("data:image")) {
                     const file = dataURLtoFile(img, `image${index}.jpg`);
@@ -174,11 +188,11 @@ export default function AddProductPage() {
             });
 
             if (!uploadRes.ok) {
-                const errorData = await uploadRes.json().catch(() => ({}));
+                const errorData: ErrorResponse = await uploadRes.json().catch(() => ({ message: 'Upload failed' }));
                 throw new Error(errorData.message || "Image upload failed");
             }
 
-            const uploadData = await uploadRes.json();
+            const uploadData: UploadResponse = await uploadRes.json();
             const uploadedImageUrls = uploadData.imageUrls;
 
             // 2. Filter out empty colors
@@ -214,12 +228,13 @@ export default function AddProductPage() {
                 await fetchProducts(); // Refresh product list
                 setShowForm(false); // Hide form after successful submission
             } else {
-                const errData = await res.json();
+                const errData: ErrorResponse = await res.json();
                 throw new Error(errData.message || "Product creation failed");
             }
-        } catch (err: any) {
+        } catch (err) {
             console.error("Product submission error:", err);
-            alert("❌ Something went wrong: " + err.message);
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+            alert("❌ Something went wrong: " + errorMessage);
         } finally {
             setSubmitting(false);
         }

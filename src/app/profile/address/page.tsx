@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   getAddresses,
   addAddress,
@@ -19,6 +19,42 @@ interface Address {
   isDefault?: boolean;
 }
 
+// ✅ Define proper response types
+interface AddressResponse {
+  addresses?: Address[];
+  data?: Address[];
+  result?: Address[];
+  address?: Address[];
+  addressData?: Address[];
+  [key: string]: unknown;
+}
+
+interface ErrorWithMessage {
+  message: string;
+}
+
+// ✅ Type guard for error handling
+function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "message" in error &&
+    typeof (error as Record<string, unknown>).message === "string"
+  );
+}
+
+function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
+  if (isErrorWithMessage(maybeError)) return maybeError;
+
+  try {
+    return new Error(JSON.stringify(maybeError));
+  } catch {
+    // fallback in case there's an error stringifying the maybeError
+    // like with circular references for example.
+    return new Error(String(maybeError));
+  }
+}
+
 export default function AddressPage() {
   const [showForm, setShowForm] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -35,8 +71,8 @@ export default function AddressPage() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  // ✅ Extract addresses from API response
-  const extractAddresses = (response: any): Address[] => {
+  // ✅ Extract addresses from API response with proper typing
+  const extractAddresses = (response: AddressResponse | Address[]): Address[] => {
     console.log("Raw API response:", response);
     
     // Handle different response structures
@@ -45,7 +81,7 @@ export default function AddressPage() {
     }
     
     // Common response structures
-    const possiblePaths = [
+    const possiblePaths: (keyof AddressResponse)[] = [
       'addresses',
       'data',
       'result',
@@ -54,9 +90,10 @@ export default function AddressPage() {
     ];
     
     for (const path of possiblePaths) {
-      if (response && Array.isArray(response[path])) {
-        console.log(`Found addresses in response.${path}:`, response[path]);
-        return response[path];
+      const value = response[path];
+      if (Array.isArray(value)) {
+        console.log(`Found addresses in response.${String(path)}:`, value);
+        return value;
       }
     }
     
@@ -64,8 +101,8 @@ export default function AddressPage() {
     return [];
   };
 
-  // ✅ Fetch addresses on component mount
-  const loadAddresses = async () => {
+  // ✅ Fetch addresses with useCallback to fix dependency warning
+  const loadAddresses = useCallback(async () => {
     try {
       console.log("Fetching addresses...");
       const response = await getAddresses();
@@ -74,10 +111,11 @@ export default function AddressPage() {
       setAddresses(addressList);
     } catch (err) {
       console.error("Failed to load addresses:", err);
-      alert("Failed to load addresses. Please try again.");
+      const errorMessage = toErrorWithMessage(err).message;
+      alert(`Failed to load addresses: ${errorMessage}. Please try again.`);
       setAddresses([]);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -86,13 +124,13 @@ export default function AddressPage() {
       setInitialLoading(false);
     };
     init();
-  }, []);
+  }, [loadAddresses]); // ✅ Fixed dependency array
 
   // ✅ Validate form data
   const validateAddress = (address: Address): boolean => {
-    const requiredFields = ['fullName', 'phone', 'street', 'city', 'state', 'pincode'];
+    const requiredFields: (keyof Address)[] = ['fullName', 'phone', 'street', 'city', 'state', 'pincode'];
     return requiredFields.every(field => {
-      const value = address[field as keyof Address];
+      const value = address[field];
       return typeof value === 'string' && value.trim() !== '';
     });
   };
@@ -128,7 +166,8 @@ export default function AddressPage() {
         alert("Address updated successfully!");
       } else {
         console.log("Adding new address:", newAddress);
-        const { _id, ...addressWithoutId } = newAddress;
+        // ✅ Destructure properly without unused variable
+        const { _id: _, ...addressWithoutId } = newAddress;
         const result = await addAddress(addressWithoutId);
         console.log("Add result:", result);
         
@@ -150,15 +189,16 @@ export default function AddressPage() {
       setShowForm(false);
       setEditingId(null);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to save address:", err);
-      alert(err.message || "Failed to save address. Please try again.");
+      const errorMessage = toErrorWithMessage(err).message;
+      alert(errorMessage || "Failed to save address. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Delete Address
+  // ✅ Delete Address with proper error handling
   const handleDelete = async (id: string | undefined) => {
     console.log("Delete function called with ID:", id);
     
@@ -179,9 +219,10 @@ export default function AddressPage() {
       await loadAddresses();
       alert("Address deleted successfully!");
       
-    } catch (err: any) {
+    } catch (err) {
       console.error("Failed to delete address:", err);
-      alert(err.message || "Failed to delete address. Please try again.");
+      const errorMessage = toErrorWithMessage(err).message;
+      alert(errorMessage || "Failed to delete address. Please try again.");
     }
   };
 
@@ -420,7 +461,7 @@ export default function AddressPage() {
       {addresses.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-600 text-lg">No addresses saved yet.</p>
-          <p className="text-gray-500 text-sm mt-2">Click "Add Address" to get started.</p>
+          <p className="text-gray-500 text-sm mt-2">Click &quot;Add Address&quot; to get started.</p>
         </div>
       ) : (
         <div className="space-y-4">
