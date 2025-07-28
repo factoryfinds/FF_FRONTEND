@@ -28,6 +28,12 @@ import LoginDrawer from "@/components/LoginDrawer";
 import { useRouter } from "next/navigation";
 import { toast } from 'react-hot-toast';
 
+// ✅ Define user interface for better type safety
+interface User {
+    role?: string;
+    [key: string]: unknown;
+}
+
 const Navbar = () => {
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,13 +41,13 @@ const Navbar = () => {
     const [isAccountOpen, setIsAccountOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoginDrawerOpen, setIsLoginDrawerOpen] = useState(false);
-    const [role, setRole] = useState(null);
+    const [role, setRole] = useState<string | null>(null);
     const [showMen, setShowMen] = useState(false);
     const [showWomen, setShowWomen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-    const accountRef = useRef(null);
+    const accountRef = useRef<HTMLDivElement>(null);
 
     // Check if mobile on mount and resize
     useEffect(() => {
@@ -56,8 +62,8 @@ const Navbar = () => {
 
     // Close account dropdown when clicking outside
     useEffect(() => {
-        function handleClickOutside(event) {
-            if (accountRef.current && !accountRef.current.contains(event.target)) {
+        function handleClickOutside(event: MouseEvent) {
+            if (accountRef.current && !accountRef.current.contains(event.target as Node)) {
                 setIsAccountOpen(false);
             }
         }
@@ -68,7 +74,8 @@ const Navbar = () => {
     // Check auth state on component mount
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
-        const user = JSON.parse(localStorage.getItem("user") || "null");
+        const userString = localStorage.getItem("user");
+        const user: User | null = userString ? JSON.parse(userString) : null;
 
         setIsLoggedIn(!!token);
         setRole(user?.role || null);
@@ -77,7 +84,8 @@ const Navbar = () => {
     // Update auth state when login drawer opens/closes
     useEffect(() => {
         const token = localStorage.getItem("accessToken");
-        const user = JSON.parse(localStorage.getItem("user") || "null");
+        const userString = localStorage.getItem("user");
+        const user: User | null = userString ? JSON.parse(userString) : null;
 
         setIsLoggedIn(!!token);
         setRole(user?.role || null);
