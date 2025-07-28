@@ -8,6 +8,7 @@ import React, { useState, useEffect } from "react";
 // Or if it's a default export:
 const MultiImageInput = require("react-multiple-image-input").default;
 
+
 import { getAllProducts, Product } from '../../../../utlis/api';
 import ProductCard from "@/components/ProductCard";
 import { useRouter } from "next/navigation";
@@ -83,7 +84,7 @@ export default function AddProductPage() {
 
     useEffect(() => {
         fetchProducts();
-        
+
         // ✅ Check for admin access (avoid localStorage on server side)
         if (typeof window !== "undefined") {
             const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -259,7 +260,7 @@ export default function AddProductPage() {
                 {showForm && (
                     <div className="bg-white p-8 rounded-lg shadow-sm border mb-8">
                         <h2 className="text-2xl font-semibold text-gray-900 mb-6">Add New Product</h2>
-                        
+
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {/* Product Images */}
                             <div>
@@ -499,7 +500,7 @@ export default function AddProductPage() {
                     <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                         All Products ({products.length})
                     </h2>
-                    
+
                     {products.length === 0 ? (
                         <div className="text-center py-12">
                             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
