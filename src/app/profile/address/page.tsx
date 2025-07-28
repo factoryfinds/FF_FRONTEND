@@ -167,6 +167,7 @@ export default function AddressPage() {
       } else {
         console.log("Adding new address:", newAddress);
         // ✅ Destructure properly without unused variable
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { _id: _, ...addressWithoutId } = newAddress;
         const result = await addAddress(addressWithoutId);
         console.log("Add result:", result);
