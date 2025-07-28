@@ -1,20 +1,23 @@
 "use client";
 
 import Image from "next/image";
+import img1 from "@/photos/t-shirt-cateogry.png"
+import img2 from "@/photos/jacket-category.png"
+import img3 from "@/photos/jeans-category.png"
 
 const MainScreen = () => {
   const items = [
     {
       title: "T-Shirts",
-      image: require("@/photos/t-shirt-cateogry.png"),
+      image:  img1,
     },
     {
       title: "Jeans",
-      image: require("@/photos/jacket-category.png"),
+      image: img2,
     },
     {
       title: "Jackets",
-      image: require("@/photos/jeans-category.png"),
+      image: img3,
     },
   ];
 

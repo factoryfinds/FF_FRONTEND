@@ -313,7 +313,7 @@ const Navbar = () => {
 
                                         ) : (
                                             <div className="p-4 text-sm">
-                                                <p className="mb-2 text-center">You're not logged in.</p>
+                                                <p className="mb-2 text-center">You&rsquo;re not logged in.</p>
                                                 <button
                                                     className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-900"
                                                     onClick={() => {
