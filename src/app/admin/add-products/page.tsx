@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-
-import { MultiImageInput } from "react-multiple-image-input";
+import MultiImageInput from "react-multiple-image-input";
 import { getAllProducts } from '../../../../utlis/api'
 import ProductCard from "@/components/ProductCard"; // only for product 
 import { useRouter } from "next/navigation";
@@ -53,16 +52,6 @@ export default function AddProductPage() {
         }
     };
 
-    if (loadingProducts) {
-    return (
-        <div className="flex justify-center items-center h-full">
-            <p>Loading products...</p>
-            {/* Or replace with a custom spinner component */}
-        </div>
-    );
-}
-
-
     useEffect(() => {
         fetchProducts();
         const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -71,6 +60,16 @@ export default function AddProductPage() {
             router.push("/unauthorized"); // or homepage
         }
     }, []);
+
+    if (loadingProducts) {
+        return (
+            <div className="flex justify-center items-center h-full">
+                <p>Loading products...</p>
+                {/* Or replace with a custom spinner component */}
+            </div>
+        );
+    }
+
 
     const handleSizeChange = (size: string) => {
         setSizes((prev) =>
