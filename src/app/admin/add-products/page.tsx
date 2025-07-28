@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
-const MultiImageInput = require("react-multiple-image-input").default;
+import { MultiImageInput } from "react-multiple-image-input";
 import { getAllProducts } from '../../../../utlis/api'
 import ProductCard from "@/components/ProductCard"; // only for product 
 import { useRouter } from "next/navigation";
@@ -52,6 +52,16 @@ export default function AddProductPage() {
             setLoadingProducts(false); // ✅ stop loading
         }
     };
+
+    if (loadingProducts) {
+    return (
+        <div className="flex justify-center items-center h-full">
+            <p>Loading products...</p>
+            {/* Or replace with a custom spinner component */}
+        </div>
+    );
+}
+
 
     useEffect(() => {
         fetchProducts();
