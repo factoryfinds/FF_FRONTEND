@@ -4,16 +4,7 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { getAllProducts } from "../../../../utlis/api";
 import ProductCard from "@/components/ProductCard";
 import LoadingOverlay from "@/components/LoadingOverlay";
-
-// TypeScript interfaces
-interface Product {
-  _id: string;
-  title: string;
-  images: string[];
-  originalPrice: number;
-  discountedPrice: number;
-  category: string;
-}
+import { Product } from '../../../../utlis/api';
 
 interface ErrorState {
   hasError: boolean;
@@ -81,6 +72,8 @@ export default function AllProductsPage() {
       setLoading(true);
       setError({ hasError: false, message: "" });
       const data = await getAllProducts();
+      
+      console.log("Fetched products:", data);
       setProducts(data);
     } catch (error) {
       console.error("Failed to fetch products:", error);

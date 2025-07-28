@@ -20,23 +20,34 @@ export interface AuthResponse {
 
 export interface Address {
   _id?: string;
+  fullName: string;
+  phone: string;
   street: string;
   city: string;
   state: string;
-  zipCode: string;
+  pincode: string;
   country: string;
   isDefault?: boolean;
 }
 
 export interface Product {
   _id: string;
-  name: string;
+  title: string;
   description: string;
-  price: number;
-  images: string[];
   category: string;
+  gender: 'men' | 'women' | 'unisex';
+  originalPrice: number;
+  discountedPrice: number;
+  images: string[];
   sizes: string[];
-  stock: number;
+  colors: { name: string; hex: string }[];
+  inventory: number;
+  inStock: boolean;
+  createdBy: string;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface CartItem {
