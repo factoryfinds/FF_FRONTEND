@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getProductsFromUserCart } from '../../utlis/api';
+import { getProductsFromUserCart, APIError } from '../../utlis/api';
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useRouter } from "next/navigation";
 
@@ -14,6 +14,8 @@ type CartItem = {
     _id: string;
     title: string;
     images: string[];
+    originalPrice?: number;
+    discountedPrice?: number;
   };
 };
 
@@ -35,11 +37,17 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
         setAuthError(false);
         const data = await getProductsFromUserCart();
         console.log("Cart Data:", data);
-        setCart(data?.items ?? []);  // ✅ Corrected
-      } catch (err: any) {
+        setCart(data?.items ?? []);
+      } catch (err) {
         console.error("failed to load products", err);
-        if (err.message === "UNAUTHORIZED") {
+        // ✅ Properly handle different error types
+        if (err instanceof APIError && err.code === "UNAUTHORIZED") {
           setAuthError(true);
+        } else if (err instanceof Error && err.message === "UNAUTHORIZED") {
+          setAuthError(true);
+        } else {
+          // Handle other types of errors
+          console.error("Unexpected error:", err);
         }
       } finally {
         setLoadingProducts(false);
@@ -49,16 +57,20 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
     fetchProductInCart();
   }, []);
 
-
-  const subTotal = cart.reduce((sum, item) => sum + 1250 * item.quantity, 0);
+  // ✅ Dynamic price calculation instead of hard-coded 1250
+  const subTotal = cart.reduce((sum, item) => {
+    const price = item.product?.discountedPrice || item.product?.originalPrice || 1250;
+    return sum + (price * item.quantity);
+  }, 0);
+  
   const shippingCost = 150;
   const discount = 250;
   const total = subTotal + shippingCost - discount;
 
-  // const handleLoginRedirect = () => {
-  //   if (onClose) onClose(); // Close drawer if open
-  //   router.push('/login'); // Adjust this path to your login route
-  // };
+  // Helper function to get item price
+  const getItemPrice = (item: CartItem): number => {
+    return item.product?.discountedPrice || item.product?.originalPrice || 1250;
+  };
 
   if (loadingProducts) {
     if (isDrawer) {
@@ -88,7 +100,6 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
             You need to be logged in to view your cart items
           </p>
           <div className={`${isDrawer ? 'space-y-2' : 'space-x-4'} ${isDrawer ? 'flex flex-col' : 'flex justify-center'}`}>
-
             {isDrawer && (
               <button
                 onClick={onClose}
@@ -168,7 +179,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
           {/* Cart Items */}
           <div className={`${isDrawer ? 'space-y-3' : 'space-y-4 lg:space-y-0'}`}>
             {cart.map((item, index) => (
-              <div key={index} className={`
+              <div key={item._id || index} className={`
                 ${isDrawer
                   ? 'border border-gray-200 rounded-lg p-3'
                   : 'border border-gray-200 lg:border-t lg:border-x-0 lg:border-b-0 rounded-lg lg:rounded-none p-4 lg:px-2 lg:py-6'
@@ -190,7 +201,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
                         Size: {item.size}
                       </p>
                       <p className={`${isDrawer ? 'text-sm' : 'text-sm sm:text-base'} font-semibold mt-2`}>
-                        ₹{1250 * item.quantity}.00
+                        ₹{getItemPrice(item) * item.quantity}.00
                       </p>
                     </div>
                   </div>
@@ -238,7 +249,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
                     </div>
 
                     {/* Subtotal */}
-                    <div className="text-right font-semibold">₹{1250 * item.quantity}.00</div>
+                    <div className="text-right font-semibold">₹{getItemPrice(item) * item.quantity}.00</div>
                   </div>
                 )}
               </div>
