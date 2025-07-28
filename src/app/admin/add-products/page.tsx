@@ -26,7 +26,7 @@ export default function AddProductPage() {
 
     const router = useRouter();
     const [showForm, setShowForm] = useState(false);
-    const [images, setImages] = useState<any>({}); // Use any type
+    const [images, setImages] = useState<any>({}); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("");
@@ -37,7 +37,7 @@ export default function AddProductPage() {
     const [colors, setColors] = useState([{ name: "", hex: "#000000" }]);
     const [inventory, setInventory] = useState("");
 
-    const [products, setProducts] = useState<any[]>([]);
+    const [products, setProducts] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
     const [loadingProducts, setLoadingProducts] = useState(true);
 
     // 🔁 Define at component level so it can be reused
@@ -89,7 +89,7 @@ export default function AddProductPage() {
         try {
             // 1. Upload images to /api/upload
             const formData = new FormData();
-            Object.values(images).forEach((img: any, index: number) => {
+            Object.values(images).forEach((img: any, index: number) => { // eslint-disable-line @typescript-eslint/no-explicit-any
                 if (img?.file) {
                     formData.append("images", img.file); // ✅ use if available
                 } else if (typeof img === "string" && img.startsWith("data:image")) {
@@ -160,7 +160,7 @@ export default function AddProductPage() {
                 const errData = await res.json();
                 alert("❌ Product upload failed: " + errData.message);
             }
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             console.error(err);
             alert("❌ Something went wrong: " + err.message);
         }

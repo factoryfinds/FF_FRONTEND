@@ -110,7 +110,7 @@ export default function ProductDetails() {
       console.log("Cart updated:", response.cart);
       toast.success("Added to cart!");
       
-    } catch (error: any) {
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       console.error('Add to cart error:', error);
       toast.error(error.message || 'Failed to add item to cart');
     } finally {

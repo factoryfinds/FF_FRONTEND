@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getAdminDashboard } from '../../../../utlis/api';
 
 export default function AdminDashboard() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

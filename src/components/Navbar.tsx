@@ -16,12 +16,9 @@ import {
     FiChevronUp,
     FiPower,
 } from "react-icons/fi";
-import { TbBabyCarriage } from "react-icons/tb";
 import { FiSettings } from "react-icons/fi";
 import {
     FaWhatsapp,
-    FaFacebookMessenger,
-    FaApple,
     FaPhoneAlt,
     FaQuestion,
     FaPeopleArrows

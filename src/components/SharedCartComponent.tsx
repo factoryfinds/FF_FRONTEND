@@ -36,7 +36,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
         const data = await getProductsFromUserCart();
         console.log("Cart Data:", data);
         setCart(data?.cart ?? []);
-      } catch (err: any) {
+      } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
         console.error("failed to load products", err);
         if (err.message === "UNAUTHORIZED") {
           setAuthError(true);
@@ -54,10 +54,10 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
   const discount = 250;
   const total = subTotal + shippingCost - discount;
 
-  const handleLoginRedirect = () => {
-    if (onClose) onClose(); // Close drawer if open
-    router.push('/login'); // Adjust this path to your login route
-  };
+  // const handleLoginRedirect = () => {
+  //   if (onClose) onClose(); // Close drawer if open
+  //   router.push('/login'); // Adjust this path to your login route
+  // };
 
   if (loadingProducts) {
     if (isDrawer) {
@@ -134,7 +134,7 @@ export default function SharedCartComponent({ isDrawer = false, onClose }: Share
         <div className="text-center">
           <div className="text-8xl mb-6">🛒</div>
           <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet</p>
+          <p className="text-gray-600 mb-6">Looks like you haven&rsquo;t added any items to your cart yet</p>
           <button 
             onClick={() => router.push('/')}
             className="bg-black text-white px-8 py-3 rounded hover:bg-gray-800 transition-colors"

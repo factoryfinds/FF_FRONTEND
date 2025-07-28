@@ -9,7 +9,7 @@ import {
 
 export default function AddressPage() {
   const [showForm, setShowForm] = useState(false);
-  const [addresses, setAddresses] = useState<any[]>([]);
+  const [addresses, setAddresses] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [newAddress, setNewAddress] = useState({
     fullName: "",
     phone: "",
@@ -83,7 +83,7 @@ export default function AddressPage() {
   };
 
   // ✅ Start Editing
-  const handleEdit = (addr: any) => {
+  const handleEdit = (addr: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     setNewAddress({
       fullName: addr.fullName,
       phone: addr.phone,

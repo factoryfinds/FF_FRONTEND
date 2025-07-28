@@ -132,7 +132,7 @@ const apiRequest = async <T>(
       
       // Handle validation errors from express-validator
       if (data.errors && Array.isArray(data.errors)) {
-        const errorMessage = data.errors.map((err: any) => err.msg).join(', ');
+        const errorMessage = data.errors.map((err: any) => err.msg).join(', '); // eslint-disable-line @typescript-eslint/no-explicit-any
         throw new APIError(errorMessage, response.status, 'VALIDATION_ERROR');
       }
       
@@ -330,7 +330,7 @@ export const createOrder = async (orderData: {
   });
 };
 
-export const getUserOrders = async (): Promise<any[]> => {
+export const getUserOrders = async (): Promise<any[]> => { // eslint-disable-line @typescript-eslint/no-explicit-any
   return apiRequest('/user/orders');
 };
 

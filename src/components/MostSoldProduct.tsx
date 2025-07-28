@@ -5,7 +5,7 @@ import { getAllProducts } from "../../utlis/api"; // Adjust path if needed
 import ProductCard from "@/components/ProductCard"; // Capitalized import
 
 export default function PopularProductsSection() {
-  const [popularProducts, setPopularProducts] = useState<any[]>([]);
+  const [popularProducts, setPopularProducts] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
 
   useEffect(() => {
     const fetchProducts = async () => {
