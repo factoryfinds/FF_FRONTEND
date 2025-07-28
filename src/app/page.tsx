@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import HeroBanner from '@/components/HeroBanner';
 import MainScreen from '@/components/MainScreen';
 import MostSoldProduct from '@/components/MostSoldProduct';
-import PackageService from '@/components/PackagingService';
+// import PackageService from '@/components/PackagingService';
 import MiddleBanner from '@/components/MiddleBanner';
 import LoadingOverlay from '@/components/LoadingOverlay';
 

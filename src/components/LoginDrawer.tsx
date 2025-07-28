@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { FiX } from "react-icons/fi";
 import { toast } from 'react-hot-toast';
-import { sendOTP, verifyOTP, setTokens, APIError } from "../../utlis/api";
+import { sendOTP, verifyOTP, APIError } from "../../utlis/api";
 
 interface LoginDrawerProps {
   isOpen: boolean;

@@ -84,13 +84,13 @@ export default function ProductDetails() {
     setQuantity((prev) => Math.max(1, Math.min(prev + change, product.inventory)));
   };
 
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
-  };
+  // const handleNextImage = () => {
+  //   setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
+  // };
 
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
-  };
+  // const handlePrevImage = () => {
+  //   setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
+  // };
 
   const handleAddToCart = async () => {
     // Validation check

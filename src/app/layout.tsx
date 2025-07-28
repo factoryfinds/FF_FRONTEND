@@ -4,7 +4,7 @@ import Footer from '@/components/Footer'
 import CheckOutTray from '@/components/CheckoutTray'
 
 // app/layout.tsx (Next.js 13+)
-import { Inter, Montserrat } from 'next/font/google';
+import { Montserrat } from 'next/font/google';
 
 
 const inter = Montserrat({
