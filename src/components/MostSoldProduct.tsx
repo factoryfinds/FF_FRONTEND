@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAllProducts } from "../../utlis/api"; // Adjust path if needed
-import ProductCard from "@/components/ProductCard"; // Capitalized import
+import { getAllProducts } from "../../utlis/api";
+import ProductCard from "@/components/ProductCard";
 
 export default function PopularProductsSection() {
   const [popularProducts, setPopularProducts] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -12,7 +12,6 @@ export default function PopularProductsSection() {
       try {
         const allProducts = await getAllProducts();
 
-        // Sort by discount amount (original - discounted)
         const sortedByPopularity = [...allProducts].sort(
           (a, b) =>
             (b.originalPrice - b.discountedPrice) -
@@ -35,14 +34,12 @@ export default function PopularProductsSection() {
         <h2 className="text-3xl font-light mt-2">Most Popular Products</h2>
       </div>
 
-      <div className="flex overflow-x-auto gap-6 px-4 snap-x snap-mandatory scroll-smooth">
+      {/* ✅ Grid layout */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {popularProducts.map((product) => (
-          <div key={product._id} className="w-[280px] flex-shrink-0 snap-center">
-            <ProductCard {...product} />
-          </div>
+          <ProductCard key={product._id} {...product} />
         ))}
       </div>
-
     </section>
   );
 }

@@ -13,9 +13,7 @@ const Footer = () => {
               <span className="underline">India</span>
             </div>
             <div className="space-y-1">
-              <p className="font-bold">Full Name and Address</p>
-              <p>Factory Finds</p>
-              <p>Friends Colony</p>
+              <p className="font-bold">Factory Finds</p>
               <p>263153, Rudrapur</p>
               <p>Uttarakhand</p>
             </div>
@@ -31,7 +29,7 @@ const Footer = () => {
               <p>factoryfinds.business@gmail.com | +91-9027661442</p>
               <br />
               <p>For a quicker response, DM us on Instagram</p>
-              <p>@factory_finds_</p>
+              <p>@factoryfinds.store</p>
               <p>INDIA</p>
             </div>
           </div>

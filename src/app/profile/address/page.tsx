@@ -1,11 +1,19 @@
 "use client";
+
 import { useEffect, useState, useCallback } from "react";
 import {
   getAddresses,
   addAddress,
   updateAddress,
   deleteAddress,
-} from "../../../../utlis/api"; // ✅ Correct this path as needed
+} from "../../../../utlis/api";
+import { toast } from "react-hot-toast";
+import {
+  MapPin,
+  Edit3,
+  Trash2,
+  Plus
+} from "lucide-react";
 
 interface Address {
   _id?: string;
@@ -19,7 +27,6 @@ interface Address {
   isDefault?: boolean;
 }
 
-// ✅ Define proper response types
 interface AddressResponse {
   addresses?: Address[];
   data?: Address[];
@@ -33,7 +40,6 @@ interface ErrorWithMessage {
   message: string;
 }
 
-// ✅ Type guard for error handling
 function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
   return (
     typeof error === "object" &&
@@ -45,12 +51,9 @@ function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
 
 function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
   if (isErrorWithMessage(maybeError)) return maybeError;
-
   try {
     return new Error(JSON.stringify(maybeError));
   } catch {
-    // fallback in case there's an error stringifying the maybeError
-    // like with circular references for example.
     return new Error(String(maybeError));
   }
 }
@@ -71,113 +74,81 @@ export default function AddressPage() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  // ✅ Extract addresses from API response with proper typing
   const extractAddresses = (response: AddressResponse | Address[]): Address[] => {
-    console.log("Raw API response:", response);
-    
-    // Handle different response structures
-    if (Array.isArray(response)) {
-      return response;
-    }
-    
-    // Common response structures
+    if (Array.isArray(response)) return response;
     const possiblePaths: (keyof AddressResponse)[] = [
-      'addresses',
-      'data',
-      'result',
-      'address',
-      'addressData'
+      "addresses",
+      "data",
+      "result",
+      "address",
+      "addressData",
     ];
-    
     for (const path of possiblePaths) {
       const value = response[path];
-      if (Array.isArray(value)) {
-        console.log(`Found addresses in response.${String(path)}:`, value);
-        return value;
-      }
+      if (Array.isArray(value)) return value;
     }
-    
-    console.log("No addresses found in response, returning empty array");
     return [];
   };
 
-  // ✅ Fetch addresses with useCallback to fix dependency warning
   const loadAddresses = useCallback(async () => {
     try {
-      console.log("Fetching addresses...");
       const response = await getAddresses();
-      const addressList = extractAddresses(response);
-      console.log("Processed addresses:", addressList);
-      setAddresses(addressList);
+      setAddresses(extractAddresses(response));
     } catch (err) {
-      console.error("Failed to load addresses:", err);
       const errorMessage = toErrorWithMessage(err).message;
-      alert(`Failed to load addresses: ${errorMessage}. Please try again.`);
+      toast.error(`Failed to load addresses: ${errorMessage}`);
       setAddresses([]);
     }
   }, []);
 
   useEffect(() => {
-    const init = async () => {
+    (async () => {
       setInitialLoading(true);
       await loadAddresses();
       setInitialLoading(false);
-    };
-    init();
-  }, [loadAddresses]); // ✅ Fixed dependency array
+    })();
+  }, [loadAddresses]);
 
-  // ✅ Validate form data
   const validateAddress = (address: Address): boolean => {
-    const requiredFields: (keyof Address)[] = ['fullName', 'phone', 'street', 'city', 'state', 'pincode'];
-    return requiredFields.every(field => {
+    const requiredFields: (keyof Address)[] = [
+      "fullName",
+      "phone",
+      "street",
+      "city",
+      "state",
+      "pincode",
+    ];
+    return requiredFields.every((field) => {
       const value = address[field];
-      return typeof value === 'string' && value.trim() !== '';
+      return typeof value === "string" && value.trim() !== "";
     });
   };
 
-  // ✅ Save (Add or Update)
   const handleSave = async () => {
     if (!validateAddress(newAddress)) {
-      alert("Please fill in all required fields");
+      toast.error("Please fill in all required fields");
       return;
     }
-
-    // Basic phone validation
-    if (!/^\d{10}$/.test(newAddress.phone.replace(/\D/g, ''))) {
-      alert("Please enter a valid 10-digit phone number");
+    if (!/^\d{10}$/.test(newAddress.phone)) {
+      toast.error("Enter a valid 10-digit phone number");
       return;
     }
-
-    // Basic pincode validation
     if (!/^\d{6}$/.test(newAddress.pincode)) {
-      alert("Please enter a valid 6-digit PIN code");
+      toast.error("Enter a valid 6-digit PIN code");
       return;
     }
 
     setLoading(true);
     try {
       if (editingId) {
-        console.log("Updating address with ID:", editingId, "Data:", newAddress);
-        const result = await updateAddress(editingId, newAddress);
-        console.log("Update result:", result);
-        
-        // For update, we'll refresh the entire list to be safe
-        await loadAddresses();
-        alert("Address updated successfully!");
+        await updateAddress(editingId, newAddress);
+        toast.success("Address updated successfully!");
       } else {
-        console.log("Adding new address:", newAddress);
-        // ✅ Destructure properly without unused variable
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { _id: _, ...addressWithoutId } = newAddress;
-        const result = await addAddress(addressWithoutId);
-        console.log("Add result:", result);
-        
-        // For add, we'll also refresh the entire list
-        await loadAddresses();
-        alert("Address added successfully!");
+        const { _id, ...addressData } = newAddress;
+        await addAddress(addressData);
+        toast.success("Address added successfully!");
       }
-
-      // Reset form
+      await loadAddresses();
       setNewAddress({
         fullName: "",
         phone: "",
@@ -189,47 +160,26 @@ export default function AddressPage() {
       });
       setShowForm(false);
       setEditingId(null);
-
     } catch (err) {
-      console.error("Failed to save address:", err);
-      const errorMessage = toErrorWithMessage(err).message;
-      alert(errorMessage || "Failed to save address. Please try again.");
+      toast.error(toErrorWithMessage(err).message);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Delete Address with proper error handling
-  const handleDelete = async (id: string | undefined) => {
-    console.log("Delete function called with ID:", id);
-    
-    if (!id) {
-      console.error("No ID provided for deletion");
-      alert("Invalid address ID - cannot delete");
-      return;
-    }
-
-    if (!confirm("Are you sure you want to delete this address?")) return;
-
+  const handleDelete = async (id?: string) => {
+    if (!id) return toast.error("Invalid address ID");
+    if (!confirm("Delete this address?")) return;
     try {
-      console.log("Calling deleteAddress API with ID:", id);
-      const result = await deleteAddress(id);
-      console.log("Delete API result:", result);
-      
-      // Refresh the addresses list after successful deletion
+      await deleteAddress(id);
+      toast.success("Address deleted successfully!");
       await loadAddresses();
-      alert("Address deleted successfully!");
-      
     } catch (err) {
-      console.error("Failed to delete address:", err);
-      const errorMessage = toErrorWithMessage(err).message;
-      alert(errorMessage || "Failed to delete address. Please try again.");
+      toast.error(toErrorWithMessage(err).message);
     }
   };
 
-  // ✅ Start Editing
   const handleEdit = (addr: Address) => {
-    console.log("Editing address:", addr);
     setNewAddress({
       fullName: addr.fullName,
       phone: addr.phone,
@@ -243,7 +193,6 @@ export default function AddressPage() {
     setShowForm(true);
   };
 
-  // ✅ Cancel form
   const handleCancel = () => {
     setShowForm(false);
     setNewAddress({
@@ -260,190 +209,137 @@ export default function AddressPage() {
 
   if (initialLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
-        <div className="flex items-center justify-center">
-          <p className="text-lg">Loading addresses...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-white text-black">
+        <p className="text-lg">Loading addresses...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">Address Management</h2>
+    <div className="min-h-screen bg-white text-black p-4 lg:px-30">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg sm:text-lg font-semibold">Address Book</h2>
         <button
-          className="px-4 py-2 bg-black text-white font-medium rounded hover:bg-gray-800 transition-colors"
-          onClick={() => {
-            if (showForm) {
-              handleCancel();
-            } else {
-              setShowForm(true);
-            }
-          }}
+          onClick={() => (showForm ? handleCancel() : setShowForm(true))}
+          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
         >
-          {showForm ? "Cancel" : "+ Add Address"}
-        </button>
-      </div>
-
-      {/* Debug Section - Remove in production */}
-      <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded">
-        <h4 className="font-semibold text-yellow-800">Debug Info:</h4>
-        <p className="text-yellow-700">Addresses count: {addresses.length}</p>
-        <p className="text-yellow-700">First address ID: {addresses[0]?._id || 'N/A'}</p>
-        <button 
-          onClick={loadAddresses}
-          className="mt-2 px-3 py-1 bg-yellow-200 rounded text-yellow-800 hover:bg-yellow-300"
-        >
-          Refresh Addresses
+          {showForm ? "Cancel" : <Plus/>}
         </button>
       </div>
 
       {showForm && (
-        <div className="p-6 bg-white rounded-lg shadow-md max-w-2xl mb-6">
-          <h3 className="text-xl font-bold mb-4">
+        <div className="p-6 bg-white border border-gray-300 rounded-xl shadow-sm max-w-2xl mb-6">
+          <h3 className="text-lg font-medium mb-4">
             {editingId ? "Edit Address" : "Add New Address"}
           </h3>
           <div className="space-y-4">
-            <div className="flex space-x-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full name *
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter full name"
-                  value={newAddress.fullName}
-                  onChange={(e) => setNewAddress((prev) => ({ ...prev, fullName: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Street Address *
-              </label>
+            {/* Full Name */}
+            <input
+              type="text"
+              placeholder="Full name"
+              value={newAddress.fullName}
+              onChange={(e) =>
+                setNewAddress((prev) => ({ ...prev, fullName: e.target.value }))
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:border-black"
+            />
+            {/* Street */}
+            <input
+              type="text"
+              placeholder="Street address"
+              value={newAddress.street}
+              onChange={(e) =>
+                setNewAddress((prev) => ({ ...prev, street: e.target.value }))
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:border-black"
+            />
+            {/* City / State / PIN */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <input
                 type="text"
-                placeholder="Enter street address"
-                value={newAddress.street}
-                onChange={(e) => setNewAddress((prev) => ({ ...prev, street: e.target.value }))}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
+                placeholder="City"
+                value={newAddress.city}
+                onChange={(e) =>
+                  setNewAddress((prev) => ({ ...prev, city: e.target.value }))
+                }
+                className="p-3 border border-gray-300 rounded-lg focus:border-black"
               />
-            </div>
-
-            <div className="flex space-x-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City *
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter city"
-                  value={newAddress.city}
-                  onChange={(e) => setNewAddress((prev) => ({ ...prev, city: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  State *
-                </label>
-                <select
-                  value={newAddress.state}
-                  onChange={(e) => setNewAddress((prev) => ({ ...prev, state: e.target.value }))}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                >
-                  <option value="">--Select State--</option>
-                  <option value="Andhra Pradesh">Andhra Pradesh</option>
-                  <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                  <option value="Assam">Assam</option>
-                  <option value="Bihar">Bihar</option>
-                  <option value="Chhattisgarh">Chhattisgarh</option>
-                  <option value="Goa">Goa</option>
-                  <option value="Gujarat">Gujarat</option>
-                  <option value="Haryana">Haryana</option>
-                  <option value="Himachal Pradesh">Himachal Pradesh</option>
-                  <option value="Jharkhand">Jharkhand</option>
-                  <option value="Karnataka">Karnataka</option>
-                  <option value="Kerala">Kerala</option>
-                  <option value="Madhya Pradesh">Madhya Pradesh</option>
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Manipur">Manipur</option>
-                  <option value="Meghalaya">Meghalaya</option>
-                  <option value="Mizoram">Mizoram</option>
-                  <option value="Nagaland">Nagaland</option>
-                  <option value="Odisha">Odisha</option>
-                  <option value="Punjab">Punjab</option>
-                  <option value="Rajasthan">Rajasthan</option>
-                  <option value="Sikkim">Sikkim</option>
-                  <option value="Tamil Nadu">Tamil Nadu</option>
-                  <option value="Telangana">Telangana</option>
-                  <option value="Tripura">Tripura</option>
-                  <option value="Uttar Pradesh">Uttar Pradesh</option>
-                  <option value="Uttarakhand">Uttarakhand</option>
-                  <option value="West Bengal">West Bengal</option>
-                  <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-                  <option value="Chandigarh">Chandigarh</option>
-                  <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                  <option value="Ladakh">Ladakh</option>
-                  <option value="Lakshadweep">Lakshadweep</option>
-                  <option value="Puducherry">Puducherry</option>
-                </select>
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  PIN Code *
-                </label>
-                <input
-                  type="text"
-                  placeholder="6-digit PIN"
-                  value={newAddress.pincode}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
-                    setNewAddress((prev) => ({ ...prev, pincode: value }));
-                  }}
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  maxLength={6}
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number *
-              </label>
+              <select
+                value={newAddress.state}
+                onChange={(e) =>
+                  setNewAddress((prev) => ({ ...prev, state: e.target.value }))
+                }
+                className="p-3 border border-gray-300 rounded-lg focus:border-black"
+              >
+                <option value="">Select State</option>
+                {/* State options */}
+                {[
+                  "Andhra Pradesh",
+                  "Arunachal Pradesh",
+                  "Assam",
+                  "Bihar",
+                  "Chhattisgarh",
+                  "Goa",
+                  "Gujarat",
+                  "Haryana",
+                  "Himachal Pradesh",
+                  "Jharkhand",
+                  "Karnataka",
+                  "Kerala",
+                  "Madhya Pradesh",
+                  "Maharashtra",
+                  "Manipur",
+                  "Meghalaya",
+                  "Mizoram",
+                  "Nagaland",
+                  "Odisha",
+                  "Punjab",
+                  "Rajasthan",
+                  "Sikkim",
+                  "Tamil Nadu",
+                  "Telangana",
+                  "Tripura",
+                  "Uttar Pradesh",
+                  "Uttarakhand",
+                  "West Bengal",
+                  "Delhi",
+                ].map((state) => (
+                  <option key={state} value={state}>
+                    {state}
+                  </option>
+                ))}
+              </select>
               <input
-                type="tel"
-                placeholder="10-digit phone number"
-                value={newAddress.phone}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                  setNewAddress((prev) => ({ ...prev, phone: value }));
-                }}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                maxLength={10}
-                required
+                type="text"
+                placeholder="PIN Code"
+                value={newAddress.pincode}
+                onChange={(e) =>
+                  setNewAddress((prev) => ({
+                    ...prev,
+                    pincode: e.target.value.replace(/\D/g, "").slice(0, 6),
+                  }))
+                }
+                className="p-3 border border-gray-300 rounded-lg focus:border-black"
               />
             </div>
-
-            <div className="p-3 bg-blue-50 text-sm text-blue-700 rounded-md">
-              <p>📍 Please ensure all details are correct for smooth delivery.</p>
-            </div>
+            {/* Phone */}
+            <input
+              type="tel"
+              placeholder="Phone number"
+              value={newAddress.phone}
+              onChange={(e) =>
+                setNewAddress((prev) => ({
+                  ...prev,
+                  phone: e.target.value.replace(/\D/g, "").slice(0, 10),
+                }))
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:border-black"
+            />
           </div>
-
           <div className="mt-6 flex justify-end gap-3">
             <button
               onClick={handleCancel}
-              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="px-6 py-2 border border-gray-300 rounded-xl hover:border-black"
               disabled={loading}
             >
               Cancel
@@ -451,9 +347,9 @@ export default function AddressPage() {
             <button
               onClick={handleSave}
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-2 bg-black text-white rounded-xl hover:bg-gray-800 disabled:opacity-50"
             >
-              {loading ? "Saving..." : editingId ? "Update Address" : "Add Address"}
+              {loading ? "Saving..." : editingId ? "Update" : "Add"}
             </button>
           </div>
         </div>
@@ -462,57 +358,73 @@ export default function AddressPage() {
       {addresses.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-600 text-lg">No addresses saved yet.</p>
-          <p className="text-gray-500 text-sm mt-2">Click &quot;Add Address&quot; to get started.</p>
         </div>
       ) : (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Saved Addresses ({addresses.length})</h3>
-          <ul className="space-y-4">
-            {addresses.map((addr, idx) => (
-              <li key={addr._id || idx} className="p-6 border border-gray-300 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
-                {/* Debug info */}
-                <div className="text-xs text-gray-400 mb-2 font-mono">
-                  Debug - ID: {addr._id || 'NO_ID'} | Type: {typeof addr._id}
-                </div>
-                
-                <div className="flex justify-between items-start">
+        <ul className="space-y-4">
+          {/* Address list */}
+          {addresses.length > 0 && (
+            <div className="space-y-3">
+              {addresses.map((addr) => (
+                <div
+                  key={addr._id}
+                  onClick={() => setNewAddress(addr)}
+                  className={`border rounded-xl p-4 cursor-pointer transition-colors flex justify-between items-start gap-4 ${newAddress._id === addr._id
+                    ? "border-black bg-gray-50"
+                    : "border-gray-200 hover:border-gray-300"
+                    }`}
+                >
+                  {/* Left: Address Info */}
                   <div className="flex-1">
-                    <p className="font-semibold text-lg mb-2">{addr.fullName}</p>
-                    <p className="text-gray-700 mb-1">{addr.street}</p>
-                    <p className="text-gray-700 mb-1">
+                    <div className="flex items-center gap-2">
+                      <MapPin
+                        size={17}
+                        className={`${newAddress._id === addr._id
+                          ? "text-black"
+                          : "text-gray-400"
+                          } transition-colors`}
+                      />
+
+                      <p className="font-medium">{addr.fullName}</p>
+                      {addr.isDefault && (
+                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 ml-6">{addr.phone}</p>
+                    <p className="text-sm text-gray-600 ml-6">{addr.street}</p>
+                    <p className="text-sm text-gray-600 ml-6">
                       {addr.city}, {addr.state} - {addr.pincode}
                     </p>
-                    <p className="text-gray-700 mb-1">{addr.country}</p>
-                    <p className="text-gray-600">📞 {addr.phone}</p>
-                    {addr.isDefault && (
-                      <span className="inline-block mt-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                        Default Address
-                      </span>
-                    )}
                   </div>
-                  
-                  <div className="flex gap-2 ml-4">
+
+                  {/* Right: Actions */}
+                  <div className="flex flex-col items-end gap-2">
                     <button
-                      className="px-4 py-2 text-blue-600 border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-                      onClick={() => handleEdit(addr)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(addr);
+                      }}
+                      className="text-gray-600 hover:text-black p-2 rounded border border-gray-200" aria-label="Edit address"
                     >
-                      Edit
+                      <Edit3 size={16} />
                     </button>
                     <button
-                      className="px-4 py-2 text-red-600 border border-red-600 rounded-md hover:bg-red-50 transition-colors"
-                      onClick={() => {
-                        console.log("Delete clicked for:", { id: addr._id, address: addr });
+                      onClick={(e) => {
+                        e.stopPropagation();
                         handleDelete(addr._id);
                       }}
+                      className="text-gray-600 border border-gray-200 p-2 rounded text-sm hover:bg-red-50"
                     >
-                      Delete
+                      <Trash2 size={16} className="text-gray-600 hover:text-red-500" />
                     </button>
                   </div>
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+              ))}
+            </div>
+          )}
+
+        </ul>
       )}
     </div>
   );

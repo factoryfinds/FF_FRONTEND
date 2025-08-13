@@ -21,27 +21,13 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Alternative: Wait for all components to be ready
-  // useEffect(() => {
-  //   const handleLoad = () => {
-  //     setIsLoading(false);
-  //   };
-
-  //   if (document.readyState === 'complete') {
-  //     handleLoad();
-  //   } else {
-  //     window.addEventListener('load', handleLoad);
-  //     return () => window.removeEventListener('load', handleLoad);
-  //   }
-  // }, []);
-
   if (isLoading) {
     return <LoadingOverlay />;
   }
 
   return (
     <>
-      <HeroBanner />
+      {/* <HeroBanner /> */}
       <MainScreen />
       <MiddleBanner />
       <MostSoldProduct />

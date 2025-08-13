@@ -1,52 +1,39 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import ProductCard from "../../../components/RelatedProductsCard"; // Import your ProductCard component
-import { addProductToCart } from '../../../../utlis/api';
+import ProductCard from "../../../components/RelatedProductsCard";
+import { addProductToCart, getAllProducts, Product, getProductsFromUserCart } from '../../../../utlis/api';
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { toast } from 'react-hot-toast';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+
 export default function ProductDetails() {
   const { id } = useParams();
-  const [product, setProduct] = useState<{
-    _id: string;
-    title: string;
-    description: string;
-    category: string;
-    gender: string;
-    originalPrice: number;
-    discountedPrice: number;
-    images: string[];
-    sizes: string[];
-    colors: { name: string; hex: string; _id: string }[];
-    inventory: number;
-    inStock: boolean;
-    clickCount: number;
-    addedToCartCount: number;
-    purchaseCount: number;
-    lastPurchasedAt: string | null;
-    createdBy: string;
-    isDeleted: boolean;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-  } | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [addingToCart, setAddingToCart] = useState(false); // New loading state for add to cart
+  const [loadingRelated, setLoadingRelated] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState({ x: 50, y: 50, active: false });
   const [showSizes, setShowSizes] = useState(false);
 
+  // Use ref to track if click has been tracked to prevent duplicates
+  const clickTrackedRef = useRef(false);
+
+  // Fetch main product
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
 
       try {
         setLoadingProducts(true);
+        clickTrackedRef.current = false; // Reset click tracking flag
 
-        const res = await fetch(`https://ff-backend-00ri.onrender.com/api/products/${id}`);
+        const res = await fetch(`http://192.168.29.110:5000/api/products/${id}`);
 
         if (!res.ok) {
           throw new Error(`Failed to fetch product: ${res.status} ${res.statusText}`);
@@ -75,73 +62,113 @@ export default function ProductDetails() {
 
     fetchProduct();
   }, [id]);
-  
+
+  // Separate effect for click tracking - runs only once per product load
+  useEffect(() => {
+    const trackProductClick = async (productId: string): Promise<void> => {
+      // Prevent duplicate tracking
+      if (clickTrackedRef.current) return;
+      
+      try {
+        clickTrackedRef.current = true; // Mark as tracked immediately
+
+        const response = await fetch(`http://192.168.29.110:5000/api/products/${productId}/track-click`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`✅ Click tracked! Total clicks: ${data.clickCount}`);
+        }
+      } catch (error) {
+        console.error('Click tracking failed:', error);
+        clickTrackedRef.current = false; // Reset on error to allow retry
+      }
+    };
+
+    // Only track click when we have both id and product loaded
+    if (id && product && !clickTrackedRef.current) {
+      trackProductClick(id as string);
+    }
+  }, [id, product]); // Dependencies: id and product
+
+  // Fetch related products based on category and gender
+  useEffect(() => {
+    const fetchRelatedProducts = async () => {
+      if (!product) return;
+
+      try {
+        setLoadingRelated(true);
+        
+        // Get all products from API
+        const allProducts = await getAllProducts();
+        
+        // Filter products by same category and gender, exclude current product
+        const filtered = allProducts
+          .filter(p => 
+            p._id !== product._id && // Exclude current product
+            p.category === product.category && // Same category
+            p.gender === product.gender && // Same gender
+            p.inStock && // Only in-stock products
+            !p.isDeleted // Only non-deleted products
+          )
+          .slice(0, 6); // Limit to 6 related products
+
+        setRelatedProducts(filtered);
+        
+      } catch (error) {
+        console.error('Error fetching related products:', error);
+        toast.error('Failed to load related products');
+      } finally {
+        setLoadingRelated(false);
+      }
+    };
+
+    fetchRelatedProducts();
+  }, [product]);
+
   // Show loading overlay when fetching product data OR adding to cart
-  if(loadingProducts || addingToCart) return <LoadingOverlay/>
+  if (loadingProducts || addingToCart) return <LoadingOverlay />
   if (!product) return <LoadingOverlay />;
 
   const handleQuantityChange = (change: number) => {
     setQuantity((prev) => Math.max(1, Math.min(prev + change, product.inventory)));
   };
 
-  // const handleNextImage = () => {
-  //   setCurrentImageIndex((prev) => (prev + 1) % product.images.length);
-  // };
-
-  // const handlePrevImage = () => {
-  //   setCurrentImageIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
-  // };
-
   const handleAddToCart = async () => {
-    // Validation check
     if (!selectedSize) {
       return toast.error("Please select both size and color before adding to cart.");
     }
 
     try {
-      setAddingToCart(true); // Start loading
+      setAddingToCart(true);
 
       const response = await addProductToCart({
         productId: product._id,
-        quantity: quantity, // Use the actual quantity state
+        quantity: quantity,
         size: selectedSize
       });
 
       console.log("Cart updated:", response.cart);
       toast.success("Added to cart!");
+     
+      // Trigger cart update event for other components
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
       
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+      // Also set a localStorage flag for cross-tab updates
+      localStorage.setItem('cart-updated', Date.now().toString());
+
+    } catch (error: any) {
       console.error('Add to cart error:', error);
       toast.error(error.message || 'Failed to add item to cart');
     } finally {
-      setAddingToCart(false); // Stop loading
+      setAddingToCart(false);
     }
   };
-
-  // Mock related products data (replace with actual API call) -> logic will be to filter the products with same category and gender
-  const relatedProducts = [
-    {
-      _id: "1",
-      title: "Title-Category (Example: t shirt, t-shirt, jacket)",
-      originalPrice: 109000,
-      discountedPrice: 89000,
-      images: ["https://images.unsplash.com/photo-1551028719-00167b16eac5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"]
-    },
-    {
-      _id: "2",
-      title: "Title-Category (Example: t shirt, t-shirt, jacket)",
-      originalPrice: 109000,
-      discountedPrice: 89000,
-      images: ["https://images.unsplash.com/photo-1544966503-7cc5ac882d5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"]
-    },
-    {
-      _id: "3",
-      title: "Title-Category (Example: t shirt, t-shirt, jacket)",
-      originalPrice: 109000,
-      discountedPrice: 89000,
-      images: ["https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"]
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -192,7 +219,6 @@ export default function ProductDetails() {
                 </div>
               ))}
             </div>
-
           </div>
 
           {/* Right Side: Product Details */}
@@ -270,7 +296,7 @@ export default function ProductDetails() {
                         ? "border-black bg-black text-white"
                         : "border-gray-300 text-black hover:border-black"
                         }`}
-                      disabled={addingToCart} // Disable during loading
+                      disabled={addingToCart}
                     >
                       {size}
                     </button>
@@ -311,9 +337,8 @@ export default function ProductDetails() {
 
             {/* Action Section */}
             {product.inventory > 0 ? (
-              // ✅ Show buttons only if product is in stock
               <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-2 mb-12 sm:mb-18">
-                <button 
+                <button
                   className="flex-1 bg-black text-white py-3 px-6 text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
                   disabled={addingToCart}
                 >
@@ -335,7 +360,6 @@ export default function ProductDetails() {
                 </button>
               </div>
             ) : (
-              // ❌ Show out-of-stock notice if product.inventory === 0
               <div className="mt-4 mb-10 text-red-600 text-sm font-medium">
                 This product is currently out of stock.
               </div>
@@ -376,18 +400,56 @@ export default function ProductDetails() {
         {/* Related Products Section */}
         <div className="mt-12 mb-12 px-4 sm:px-6 lg:px-30">
           <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6">Related Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {relatedProducts.map((relatedProduct) => (
-              <ProductCard
-                key={relatedProduct._id}
-                _id={relatedProduct._id}
-                title={relatedProduct.title}
-                images={relatedProduct.images}
-                originalPrice={relatedProduct.originalPrice}
-                discountedPrice={relatedProduct.discountedPrice}
-              />
-            ))}
-          </div>
+          
+          {loadingRelated ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+              <span className="ml-2 text-gray-600">Loading related products...</span>
+            </div>
+          ) : relatedProducts.length > 0 ? (
+            <div className="relative">
+              {/* Horizontal Scrollable Container */}
+              <div 
+                className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
+                style={{
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
+                }}
+              >
+                <style jsx>{`
+                  div::-webkit-scrollbar {
+                    display: none;
+                  }
+                `}</style>
+                
+                {relatedProducts.map((relatedProduct) => (
+                  <div key={relatedProduct._id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
+                    <ProductCard
+                      _id={relatedProduct._id}
+                      title={relatedProduct.title}
+                      images={relatedProduct.images}
+                      originalPrice={relatedProduct.originalPrice}
+                      discountedPrice={relatedProduct.discountedPrice}
+                    />
+                  </div>
+                ))}
+              </div>
+              
+              {/* Scroll indicators (optional) */}
+              <div className="flex justify-center mt-4 gap-2">
+                {relatedProducts.map((_, index) => (
+                  <div
+                    key={index}
+                    className="w-2 h-2 rounded-full bg-gray-300"
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-gray-600">
+              <p>No related products found in the same category.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

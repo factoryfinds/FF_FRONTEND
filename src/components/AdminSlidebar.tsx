@@ -1,88 +1,96 @@
-"use client";
+// components/AdminSlidebar.tsx
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import {
-  Home,
-  Package,
-  List,
-  LayoutGrid,
-  CreditCard,
-  Megaphone,
-  BarChart2,
-  Users,
-  Settings,
-} from "lucide-react";
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { 
+  LayoutDashboard, 
+  Package, 
+  BarChart3, 
+  Ticket, 
+  Users, 
+  Menu, 
+  X 
+} from 'lucide-react';
 
-const sections = [
-  {
-    title: "",
-    items: [
-      { name: "Dashboard", route: "/admin", icon: <Home size={18} /> },
-    ],
-  },
-  {
-    title: "Products",
-    items: [
-      { name: "Orders", route: "/admin/orders", icon: <Package size={18} /> },
-      { name: "Product List", route: "/admin/add-products", icon: <List size={18} /> },
-      { name: "Category List", route: "/admin/categories", icon: <LayoutGrid size={18} /> },
-    ],
-  },
-  {
-    title: "Sales",
-    items: [
-      { name: "Payments", route: "/admin/payments", icon: <CreditCard size={18} /> },
-      { name: "Campaigns", route: "/admin/campaigns", icon: <Megaphone size={18} /> },
-      { name: "Analytics", route: "/admin/analytics", icon: <BarChart2 size={18} /> },
-      { name: "Customers", route: "/admin/users", icon: <Users size={18} /> },
-    ],
-  },
-  {
-    title: "Settings",
-    items: [
-      { name: "General", route: "/admin/settings", icon: <Settings size={18} /> },
-    ],
-  },
+const menuItems = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/add-products', label: 'Add Products', icon: Package },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
+  { href: '/admin/users', label: 'Users', icon: Users },
 ];
 
 export default function AdminSidebar() {
+  const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
+  const toggleSidebar = () => setIsOpen(!isOpen);
+
   return (
-    <aside className="w-64 h-screen bg-[#F9FAFB] p-6 border-r text-sm text-gray-800">
-      <h2 className="text-xl font-extrabold mb-8">Admin Panel</h2>
-      <nav className="space-y-6">
-        {sections.map((section, index) => (
-          <div key={index}>
-            {section.title && (
-              <div className="text-xs font-semibold uppercase text-gray-500 mb-2 px-1">
-                {section.title}
-              </div>
-            )}
-            <ul className="space-y-1">
-              {section.items.map((item) => {
-                const isActive = pathname === item.route;
-                return (
-                  <li key={item.route}>
-                    <Link
-                      href={item.route}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md hover:bg-gray-200 transition ${
-                        isActive
-                          ? "bg-white font-semibold shadow text-black"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {item.icon}
-                      <span>{item.name}</span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
-      </nav>
-    </aside>
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={toggleSidebar}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-md shadow-md border border-gray-200"
+      >
+        {isOpen ? <X size={20} className="text-black" /> : <Menu size={20} className="text-black" />}
+      </button>
+
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`
+          fixed top-0 left-0 h-screen z-40
+          w-64 bg-white border-r border-gray-200
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0
+        `}
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-black">Admin Panel</h1>
+        </div>
+
+        {/* Navigation */}
+        <nav className="mt-6">
+          <ul className="space-y-2 px-4">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`
+                      flex items-center space-x-3 px-4 py-3 rounded-lg
+                      transition-colors duration-200
+                      ${isActive 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-black hover:bg-gray-100'
+                      }
+                    `}
+                  >
+                    <Icon size={20} />
+                    <span className="font-medium">{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </aside>
+    </>
   );
 }

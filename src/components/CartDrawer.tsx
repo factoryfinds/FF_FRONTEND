@@ -16,15 +16,15 @@ const CartDrawer = ({ isOpen, onClose, children }: CartDrawerProps) => {
         w-full md:w-1/2`}
     >
       {/* Header */}
-      <div className="flex justify-between items-center p-8 text-black border-b">
-        <h2 className="text-lg font-semibold">Cart</h2>
+      <div className="flex justify-between items-center py-10 px-5 text-black border-b">
+        <h2 className="text-lg font-semibold">CART</h2>
         <button onClick={onClose}>
           <FiX size={24} />
         </button>
       </div>
 
       {/* Body */}
-      <div className="overflow-y-auto h-[calc(100%-60px)] p-4">
+      <div className="overflow-y-auto h-[calc(100%-60px)] p-1 mb-10 pb-10">
         {children}
       </div>
     </div>
