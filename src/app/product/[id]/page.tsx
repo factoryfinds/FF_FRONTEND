@@ -33,7 +33,7 @@ export default function ProductDetails() {
         setLoadingProducts(true);
         clickTrackedRef.current = false; // Reset click tracking flag
 
-        const res = await fetch(`http://192.168.29.110:5000/api/products/${id}`);
+        const res = await fetch(`https://ff-backend-00ri.onrender.com/api/products/${id}`);
 
         if (!res.ok) {
           throw new Error(`Failed to fetch product: ${res.status} ${res.statusText}`);
@@ -72,7 +72,7 @@ export default function ProductDetails() {
       try {
         clickTrackedRef.current = true; // Mark as tracked immediately
 
-        const response = await fetch(`http://192.168.29.110:5000/api/products/${productId}/track-click`, {
+        const response = await fetch(`https://ff-backend-00ri.onrender.com/api/products/${productId}/track-click`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
