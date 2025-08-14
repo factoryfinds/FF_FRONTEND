@@ -2,6 +2,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CheckOutTray from '@/components/CheckoutTray'
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // app/layout.tsx (Next.js 13+)
 import { Montserrat } from 'next/font/google';
@@ -33,6 +34,7 @@ export default function RootLayout({
           <CheckOutTray/>
           </main>
         <Footer />
+        <SpeedInsights />
       </body>
     </html>
   )
