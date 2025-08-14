@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import HeroBanner from '@/components/HeroBanner';
+import Head from 'next/head';
 import MainScreen from '@/components/MainScreen';
 import MostSoldProduct from '@/components/MostSoldProduct';
 // import PackageService from '@/components/PackagingService';
@@ -27,6 +27,13 @@ export default function HomePage() {
 
   return (
     <>
+      <Head>
+        <title>Factory Finds | Buy Premium Clothing Online in India</title>
+        <meta
+          name="description"
+          content="Factory Finds — your destination for premium clothing, unbeatable style, and fast nationwide delivery."
+        />
+      </Head>
       {/* <HeroBanner /> */}
       <MainScreen />
       <MiddleBanner />

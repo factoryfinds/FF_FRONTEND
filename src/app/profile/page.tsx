@@ -22,10 +22,8 @@ export default function ProfilePage() {
       <h2 className="text-2xl text-black font-bold">My details</h2>
 
       <div className="grid grid-cols-2 gap-4">
-        <input placeholder="Phone" value={user.phone || ""} className="border p-2 rounded" />
+        <input placeholder="your Phone" value={user.phone || ""} className="border p-2 rounded" />
       </div>
-
-      <button className="bg-black text-white px-4 py-2 rounded">Save my details</button>
     </div>
   );
 }

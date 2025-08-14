@@ -2,11 +2,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import ProductCard from "../../../components/RelatedProductsCard";
-import { addProductToCart, getAllProducts, Product, getProductsFromUserCart } from '../../../../utlis/api';
+import { addProductToCart, getAllProducts, Product } from '../../../../utlis/api';
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { toast } from 'react-hot-toast';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+// const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -68,7 +68,7 @@ export default function ProductDetails() {
     const trackProductClick = async (productId: string): Promise<void> => {
       // Prevent duplicate tracking
       if (clickTrackedRef.current) return;
-      
+
       try {
         clickTrackedRef.current = true; // Mark as tracked immediately
 
@@ -103,13 +103,13 @@ export default function ProductDetails() {
 
       try {
         setLoadingRelated(true);
-        
+
         // Get all products from API
         const allProducts = await getAllProducts();
-        
+
         // Filter products by same category and gender, exclude current product
         const filtered = allProducts
-          .filter(p => 
+          .filter(p =>
             p._id !== product._id && // Exclude current product
             p.category === product.category && // Same category
             p.gender === product.gender && // Same gender
@@ -119,7 +119,7 @@ export default function ProductDetails() {
           .slice(0, 6); // Limit to 6 related products
 
         setRelatedProducts(filtered);
-        
+
       } catch (error) {
         console.error('Error fetching related products:', error);
         toast.error('Failed to load related products');
@@ -155,16 +155,23 @@ export default function ProductDetails() {
 
       console.log("Cart updated:", response.cart);
       toast.success("Added to cart!");
-     
+
       // Trigger cart update event for other components
       window.dispatchEvent(new CustomEvent('cartUpdated'));
-      
+
       // Also set a localStorage flag for cross-tab updates
       localStorage.setItem('cart-updated', Date.now().toString());
 
-    } catch (error: any) {
+    }
+
+    catch (error: unknown) {
       console.error('Add to cart error:', error);
-      toast.error(error.message || 'Failed to add item to cart');
+
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to add item to cart');
+      }
     } finally {
       setAddingToCart(false);
     }
@@ -400,7 +407,7 @@ export default function ProductDetails() {
         {/* Related Products Section */}
         <div className="mt-12 mb-12 px-4 sm:px-6 lg:px-30">
           <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6">Related Products</h2>
-          
+
           {loadingRelated ? (
             <div className="flex items-center justify-center py-8">
               <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
@@ -409,7 +416,7 @@ export default function ProductDetails() {
           ) : relatedProducts.length > 0 ? (
             <div className="relative">
               {/* Horizontal Scrollable Container */}
-              <div 
+              <div
                 className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
                 style={{
                   scrollbarWidth: 'none',
@@ -421,7 +428,7 @@ export default function ProductDetails() {
                     display: none;
                   }
                 `}</style>
-                
+
                 {relatedProducts.map((relatedProduct) => (
                   <div key={relatedProduct._id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
                     <ProductCard
@@ -434,7 +441,7 @@ export default function ProductDetails() {
                   </div>
                 ))}
               </div>
-              
+
               {/* Scroll indicators (optional) */}
               <div className="flex justify-center mt-4 gap-2">
                 {relatedProducts.map((_, index) => (

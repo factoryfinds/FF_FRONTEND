@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   LineChart,
   Line,
@@ -15,12 +15,11 @@ import {
   Pie,
   Cell
 } from 'recharts';
-import { 
-  Eye, 
-  ShoppingCart, 
-  TrendingUp, 
-  Users, 
-  Filter,
+import {
+  Eye,
+  ShoppingCart,
+  TrendingUp,
+  Users,
   Package,
   DollarSign,
   Activity,
@@ -41,12 +40,12 @@ export default function AnalyticsPage() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const [productData, userData] = await Promise.all([
           getProductStats(),
           getUserAnalytics()
         ]);
-        
+
         setProductStats(productData);
         setUserAnalytics(userData);
       } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -202,11 +201,10 @@ export default function AnalyticsPage() {
                 <button
                   key={tab.id}
                   onClick={() => setSelectedTab(tab.id)}
-                  className={`flex items-center space-x-2 py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
-                    selectedTab === tab.id
+                  className={`flex items-center space-x-2 py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${selectedTab === tab.id
                       ? 'border-blue-500 text-blue-400'
                       : 'border-transparent text-gray-500 hover:text-gray-300'
-                  }`}
+                    }`}
                 >
                   <Icon size={16} />
                   <span>{tab.label}</span>
@@ -312,13 +310,13 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="category" stroke="#9CA3AF" />
                     <YAxis stroke="#9CA3AF" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1F2937', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1F2937',
                         border: '1px solid #374151',
                         borderRadius: '8px',
                         color: '#fff'
-                      }} 
+                      }}
                     />
                     <Bar dataKey="clicks" fill="#3B82F6" name="Clicks" />
                     <Bar dataKey="cartAdds" fill="#10B981" name="Cart Adds" />
@@ -344,7 +342,7 @@ export default function AnalyticsPage() {
                   </div>
                   <Users className="h-8 w-8 text-blue-500" />
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg border border-gray-700">
                   <div>
                     <p className="text-sm text-gray-400">Active Users (30d)</p>
@@ -352,7 +350,7 @@ export default function AnalyticsPage() {
                   </div>
                   <Activity className="h-8 w-8 text-green-500" />
                 </div>
-                
+
                 <div className="flex items-center justify-between p-4 bg-gray-800/30 rounded-lg border border-gray-700">
                   <div>
                     <p className="text-sm text-gray-400">New This Month</p>
@@ -380,13 +378,13 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="month" stroke="#9CA3AF" />
                     <YAxis stroke="#9CA3AF" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1F2937', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1F2937',
                         border: '1px solid #374151',
                         borderRadius: '8px',
                         color: '#fff'
-                      }} 
+                      }}
                     />
                     <Line type="monotone" dataKey="users" stroke="#3B82F6" strokeWidth={3} />
                   </LineChart>
@@ -406,7 +404,11 @@ export default function AnalyticsPage() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ _id, percent }) => `${_id || 'Unknown'} ${(percent * 100).toFixed(0)}%`}
+                        label={(props: { _id?: string; percent?: number }) => {
+                          const { _id, percent } = props;
+                          return `${_id ?? 'Unknown'} ${((percent ?? 0) * 100).toFixed(0)}%`;
+                        }}
+
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="count"
@@ -415,24 +417,24 @@ export default function AnalyticsPage() {
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1F2937', 
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#1F2937',
                           border: '1px solid #374151',
                           borderRadius: '8px',
                           color: '#fff'
-                        }} 
+                        }}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                
+
                 <div className="space-y-3">
                   {userAnalytics.data.signupSources.map((source, index) => (
                     <div key={source._id} className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg border border-gray-700">
                       <div className="flex items-center space-x-3">
-                        <div 
-                          className="w-4 h-4 rounded-full" 
+                        <div
+                          className="w-4 h-4 rounded-full"
                           style={{ backgroundColor: COLORS[index % COLORS.length] }}
                         ></div>
                         <span className="text-white font-medium">{source._id || 'Unknown'}</span>
@@ -488,13 +490,13 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="gender" stroke="#9CA3AF" />
                     <YAxis stroke="#9CA3AF" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1F2937', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1F2937',
                         border: '1px solid #374151',
                         borderRadius: '8px',
                         color: '#fff'
-                      }} 
+                      }}
                     />
                     <Bar dataKey="clicks" fill="#3B82F6" name="Clicks" />
                     <Bar dataKey="cartAdds" fill="#10B981" name="Cart Adds" />
@@ -513,13 +515,13 @@ export default function AnalyticsPage() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                     <XAxis dataKey="month" stroke="#9CA3AF" />
                     <YAxis stroke="#9CA3AF" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1F2937', 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#1F2937',
                         border: '1px solid #374151',
                         borderRadius: '8px',
                         color: '#fff'
-                      }} 
+                      }}
                     />
                     <Line type="monotone" dataKey="products" stroke="#10B981" strokeWidth={3} />
                   </LineChart>
@@ -605,7 +607,7 @@ export default function AnalyticsPage() {
                           <td className="py-3 text-green-400">{product.addedToCartCount}</td>
                           <td className="py-3 text-purple-400">{product.purchaseCount}</td>
                           <td className="py-3 text-gray-400 text-sm">
-                            {product.lastPurchasedAt 
+                            {product.lastPurchasedAt
                               ? new Date(product.lastPurchasedAt).toLocaleDateString()
                               : new Date(product.updatedAt).toLocaleDateString()
                             }
@@ -630,23 +632,23 @@ export default function AnalyticsPage() {
                 <DollarSign className="h-5 w-5 text-yellow-500 mr-2" />
                 <h3 className="text-lg font-semibold text-white">Pricing Insights</h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700 text-center">
                   <p className="text-sm text-gray-400 mb-1">Average Price</p>
                   <p className="text-xl font-bold text-white">₹{productStats.data.pricing.avgDiscountedPrice}</p>
                 </div>
-                
+
                 <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700 text-center">
                   <p className="text-sm text-gray-400 mb-1">Highest Price</p>
                   <p className="text-xl font-bold text-green-400">₹{productStats.data.pricing.maxPrice}</p>
                 </div>
-                
+
                 <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700 text-center">
                   <p className="text-sm text-gray-400 mb-1">Lowest Price</p>
                   <p className="text-xl font-bold text-blue-400">₹{productStats.data.pricing.minPrice}</p>
                 </div>
-                
+
                 <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700 text-center">
                   <p className="text-sm text-gray-400 mb-1">Avg Discount</p>
                   <p className="text-xl font-bold text-purple-400">{productStats.data.pricing.avgDiscountPercent}%</p>
@@ -676,8 +678,8 @@ export default function AnalyticsPage() {
                   <div className="flex justify-between items-center p-3 bg-gray-800/30 rounded-lg border border-gray-700">
                     <span className="text-gray-300">Total Analytics Events</span>
                     <span className="text-white font-semibold">
-                      {(productStats.data.analytics.totalClicks + 
-                        productStats.data.analytics.totalCartAdds + 
+                      {(productStats.data.analytics.totalClicks +
+                        productStats.data.analytics.totalCartAdds +
                         productStats.data.analytics.totalPurchases).toLocaleString()}
                     </span>
                   </div>

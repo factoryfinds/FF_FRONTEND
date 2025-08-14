@@ -276,7 +276,7 @@ const Navbar = () => {
                                                     onClick={() => handleSearch(query)}
                                                     className="w-full mb-3 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors text-sm font-medium"
                                                 >
-                                                    Search for "{query}"
+                                                    Search for &quot;{query}&quot;
                                                 </button>
                                             )}
 

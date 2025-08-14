@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { FiSearch, FiFilter, FiGrid, FiList, FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiGrid, FiList, FiX} from 'react-icons/fi';
 import { getAllProducts } from '../../../../utlis/api';
 import ProductCard from '@/components/ProductCard';
 import LoadingOverlay from '@/components/LoadingOverlay';

@@ -5,6 +5,7 @@ import { getAllProducts } from "../../../../utlis/api";
 import ProductCard from "@/components/ProductCard";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { Product } from '../../../../utlis/api';
+import Head from 'next/head';
 
 // Extended Product interface for trending data
 interface TrendingProduct extends Product {
@@ -92,7 +93,7 @@ const EmptyState = () => (
     </div>
 );
 
-const TrendingBadge = ({ rank, type }: { rank: number; type: string }) => {
+const TrendingBadge = ({ rank}: { rank: number; type: string }) => {
     const badgeColors = {
         1: "bg-gradient-to-r from-yellow-400 to-yellow-600 text-white",
         2: "bg-gradient-to-r from-gray-300 to-gray-500 text-white",
@@ -164,7 +165,7 @@ const PageHeader = ({
                 <div className="flex justify-center items-center gap-2 mb-2">
                     <span className="text-2xl">🔥</span>
                     <p className="uppercase text-xs sm:text-xs tracking-wider font-light text-gray-500">
-                        What's hot right now
+                        What&apos;s hot right now
                     </p>
                 </div>
                 <h2 className="text-3xl font-light mt-2">
@@ -395,21 +396,30 @@ export default function TrendingProductsPage() {
 
     // Main render
     return (
-        <div className="bg-white min-h-screen w-full">
-            <PageHeader
-                filteredProductsCount={trendingProducts.length}
-                filters={filters}
-                onFilterChange={{
-                    sortBy: updateFilter.sortBy,
-                    timeRange: updateFilter.timeRange,
-                }}
-            />
+        <>
+            <Head>
+                <meta
+                    name="description"
+                    content="Shop trending premium fashion at Factory Finds — discover the latest styles, premium quality, and quick delivery across India."
+                />
+            </Head>
+            <div className="bg-white min-h-screen w-full">
+                <PageHeader
+                    filteredProductsCount={trendingProducts.length}
+                    filters={filters}
+                    onFilterChange={{
+                        sortBy: updateFilter.sortBy,
+                        timeRange: updateFilter.timeRange,
+                    }}
+                />
 
-            {trendingProducts.length === 0 ? (
-                <EmptyState />
-            ) : (
-                <ProductsGrid products={trendingProducts} loading={false} />
-            )}
-        </div>
+                {trendingProducts.length === 0 ? (
+                    <EmptyState />
+                ) : (
+                    <ProductsGrid products={trendingProducts} loading={false} />
+                )}
+            </div>
+        </>
+
     );
 }

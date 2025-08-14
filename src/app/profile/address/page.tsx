@@ -144,7 +144,7 @@ export default function AddressPage() {
         await updateAddress(editingId, newAddress);
         toast.success("Address updated successfully!");
       } else {
-        const { _id, ...addressData } = newAddress;
+        const {...addressData } = newAddress; 
         await addAddress(addressData);
         toast.success("Address added successfully!");
       }

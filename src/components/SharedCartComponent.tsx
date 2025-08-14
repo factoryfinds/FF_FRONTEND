@@ -29,9 +29,11 @@ interface SharedCartComponentProps {
 }
 
 // Utility: Loading Spinner
-const LoadingSpinner = memo(({ size = "w-4 h-4" }: { size?: string }) => (
-  <div className={`${size} border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin`} />
-));
+const LoadingSpinner = memo(function LoadingSpinnerComponent({ size = "w-4 h-4" }: { size?: string }) {
+  return (
+    <div className={`${size} border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin`} />
+  );
+});
 
 export default function SharedCartComponent({
   isDrawer = false,

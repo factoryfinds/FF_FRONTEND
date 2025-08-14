@@ -8,7 +8,6 @@ import {
   updateAddress,
   deleteAddress,
   getProductsFromUserCart,
-  Address as APIAddress,
   APIError,
 } from "../../../utlis/api";
 import LoadingOverlay from "@/components/LoadingOverlay";
@@ -62,9 +61,9 @@ interface AddressResponse {
 
 /* ----- Type helpers ----- */
 // Only keys of Address which are string | undefined
-type StringKeys<T> = {
-  [K in keyof T]: T[K] extends string | undefined ? K : never;
-}[keyof T];
+// type StringKeys<T> = {
+//   [K in keyof T]: T[K] extends string | undefined ? K : never;
+// }[keyof T];
 
 /* ----- Helpers ----- */
 const extractAddresses = (response: AddressResponse | Address[]): Address[] => {
@@ -85,17 +84,16 @@ const extractAddresses = (response: AddressResponse | Address[]): Address[] => {
 
 const isValidPhone = (s: string) => /^\d{10}$/.test(s);
 const isValidPincode = (s: string) => /^\d{6}$/.test(s);
-const nonEmpty = (s?: string) => typeof s === "string" && s.trim().length > 0;
-
+// const nonEmpty = (s?: string) => typeof s === "string" && s.trim().length > 0;
 const validateAddressFields = (addr: Address): { ok: boolean; message: string } => {
-  const required: StringKeys<Address>[] = [
-    "fullName",
-    "phone",
-    "street",
-    "city",
-    "state",
-    "pincode",
-  ];
+  // const required: StringKeys<Address>[] = [
+  //   "fullName",
+  //   "phone",
+  //   "street",
+  //   "city",
+  //   "state",
+  //   "pincode",
+  // ];
 
   if (!isValidPhone(addr.phone)) {
     return { ok: false, message: "Phone must be 10 digits" };
@@ -260,7 +258,7 @@ export default function CheckoutPage() {
         await updateAddress(editingId, form);
         toast.success("Address updated");
       } else {
-        const { _id: _skip, ...payload } = form;
+        const {...payload } = form;
         await addAddress(payload);
         toast.success("Address added");
       }
@@ -308,43 +306,43 @@ export default function CheckoutPage() {
   };
 
   /* ----- Step navigation ----- */
-  const nextStep = () => {
-    if (step === 1) {
-      if (!selectedAddress) {
-        toast.error("Please select or add an address to continue");
-        return;
-      }
-      setStep(2);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    if (step === 2) {
-      setStep(3);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    if (step === 3) {
-      if (!selectedAddress) {
-        toast.error("Please select delivery address first");
-        return;
-      }
-      setLoading(true);
-      setTimeout(() => {
-        setLoading(false);
-        const id = `ORD-${Date.now().toString().slice(-6)}`;
-        setOrderId(id);
-        setStep(4);
-      }, 1400);
-      return;
-    }
-  };
+  // const nextStep = () => {
+  //   if (step === 1) {
+  //     if (!selectedAddress) {
+  //       toast.error("Please select or add an address to continue");
+  //       return;
+  //     }
+  //     setStep(2);
+  //     window.scrollTo({ top: 0, behavior: "smooth" });
+  //     return;
+  //   }
+  //   if (step === 2) {
+  //     setStep(3);
+  //     window.scrollTo({ top: 0, behavior: "smooth" });
+  //     return;
+  //   }
+  //   if (step === 3) {
+  //     if (!selectedAddress) {
+  //       toast.error("Please select delivery address first");
+  //       return;
+  //     }
+  //     setLoading(true);
+  //     setTimeout(() => {
+  //       setLoading(false);
+  //       const id = `ORD-${Date.now().toString().slice(-6)}`;
+  //       setOrderId(id);
+  //       setStep(4);
+  //     }, 1400);
+  //     return;
+  //   }
+  // };
 
-  const prevStep = () => {
-    if (step > 1) {
-      setStep((s) => (s - 1) as 1 | 2 | 3 | 4);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
+  // const prevStep = () => {
+  //   if (step > 1) {
+  //     setStep((s) => (s - 1) as 1 | 2 | 3 | 4);
+  //     window.scrollTo({ top: 0, behavior: "smooth" });
+  //   }
+  // };
 
   /* ----- UI helpers ----- */
   const StepBubble = ({ n, label }: { n: number; label: string }) => (

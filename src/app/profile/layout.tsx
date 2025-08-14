@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect, useCallback } from "react";
+// import { useState, useEffect, useCallback } from "react"; 
 import { ShoppingCart, Heart, Package, MapPin } from "lucide-react";
-import { toast } from "react-hot-toast";
+// import { toast } from "react-hot-toast";
+import type { LucideIcon } from "lucide-react";
+
 
 interface ProfileLayoutProps {
   children: React.ReactNode;
@@ -39,18 +41,8 @@ const menuItems = [
 
 export default function ProfileLayout({ children }: ProfileLayoutProps) {
   const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  // const [setIsMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
-
-  const handleLogout = useCallback(() => {
-    toast.success("Logged out successfully!");
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
-  }, []);
 
   const NavBox = ({
     href,
@@ -61,7 +53,7 @@ export default function ProfileLayout({ children }: ProfileLayoutProps) {
   }: {
     href: string;
     label: string;
-    icon: any;
+    icon: LucideIcon;
     description: string;
     active: boolean;
   }) => (

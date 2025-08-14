@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { getAllProducts, Product } from "../../../../utlis/api";
 import ProductCard from "@/components/ProductCard";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import Head from 'next/head';
 
 /* ---------------- Types ---------------- */
 interface ErrorState {
@@ -129,6 +130,14 @@ const FilterDrawer = React.memo(({
 }) => {
   return (
     <>
+      <Head>
+        <title>All Products</title>
+        <meta
+          name="description"
+          content="Discover trending premium clothing at Factory Finds — luxury-inspired styles, unbeatable prices, and fast delivery across India."
+        />
+
+      </Head>
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-40"
