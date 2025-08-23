@@ -1,3 +1,5 @@
+import { Link } from "lucide-react";
+
 const Footer = () => {
   return (
     <footer className="bg-white border-t border-gray-200 text-gray-700 text-sm px-6 sm:px-8 py-10">
@@ -37,7 +39,7 @@ const Footer = () => {
           {/* Legal Links */}
           <div className="flex flex-col items-start md:items-end gap-2 text-sm">
             <a href="#" className="hover:underline">Sitemap</a>
-            <link href="aboutUs" className="hover:underline">Legal & Privacy</link>
+            <Link href="/aboutUs" className="hover:underline">Legal & Privacy</Link>
           </div>
         </div>
 
