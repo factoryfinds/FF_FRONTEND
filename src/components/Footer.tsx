@@ -37,7 +37,7 @@ const Footer = () => {
           {/* Legal Links */}
           <div className="flex flex-col items-start md:items-end gap-2 text-sm">
             <a href="#" className="hover:underline">Sitemap</a>
-            <a href="aboutUs" className="hover:underline">Legal & Privacy</a>
+            <link href="aboutUs" className="hover:underline">Legal & Privacy</link>
           </div>
         </div>
 
