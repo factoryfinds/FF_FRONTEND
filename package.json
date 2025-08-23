@@ -26,6 +26,8 @@
     "react-icons": "^5.5.0",
     "react-image-crop": "^11.0.10",
     "react-multiple-image-input": "^2.0.0",
+    "react-swipeable": "^7.0.2",
+    "react-zoom-pan-pinch": "^3.7.0",
     "recharts": "^3.1.2"
   },
   "devDependencies": {

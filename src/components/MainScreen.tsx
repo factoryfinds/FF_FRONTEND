@@ -19,7 +19,7 @@ const MainScreen = () => {
   ];
 
   return (
-    <section className="w-full py-2 px-2 mb-14  sm:px-6 bg-white text-black">
+    <section className="w-full py-2 px-2 mb-25  sm:px-6 bg-white text-black">
       <div className="max-w-7xl mx-auto">
 
         <div className="text-center px-4 mt-12 mb-16">
@@ -39,8 +39,11 @@ const MainScreen = () => {
                 alt={item.title}
                 fill
                 style={{ objectFit: "cover" }}
-                className="transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                loading={idx < 3 ? "eager" : "lazy"} // Load first 3 immediately
+                sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                quality={80}
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..." // Add blur
               />
 
               {/* Dark overlay on hover */}

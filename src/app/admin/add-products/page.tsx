@@ -11,7 +11,7 @@ const MultiImageInput = require("react-multiple-image-input").default;
 
 
 import { getAllProducts, Product } from '../../../../utlis/api';
-import ProductCard from "@/components/ProductCard";
+import ProductCard from "@/components/adminProductCard";
 import { useRouter } from "next/navigation";
 
 // ✅ Helper function to convert data URL to File
@@ -37,6 +37,14 @@ interface ImageInputType {
     [key: string]: ImageFile | string;
 }
 
+
+// Update the SizeOption interface
+interface SizeOption {
+    size: string;
+    stock: number;  // ✅ Changed from 'quantity' to 'stock'
+}
+
+
 interface ColorType {
     name: string;
     hex: string;
@@ -54,6 +62,7 @@ interface ErrorResponse {
 export default function AddProductPage() {
     const router = useRouter();
     const [showForm, setShowForm] = useState(false);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [images, setImages] = useState<ImageInputType>({});
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -61,7 +70,7 @@ export default function AddProductPage() {
     const [gender, setGender] = useState<"men" | "women" | "unisex">("unisex");
     const [originalPrice, setOriginalPrice] = useState("");
     const [discountedPrice, setDiscountedPrice] = useState("");
-    const [sizes, setSizes] = useState<string[]>([]);
+    const [sizes, setSizes] = useState<SizeOption[]>([]);
     const [colors, setColors] = useState<ColorType[]>([{ name: "", hex: "#000000" }]);
     const [inventory, setInventory] = useState("");
 
@@ -107,10 +116,26 @@ export default function AddProductPage() {
         );
     }
 
-    // ✅ Handle size selection
-    const handleSizeChange = (size: string) => {
+    // ✅ Handle size selection with quantity
+    // Update handleSizeChange function
+    const handleSizeChange = (size: string, stock: number = 0) => {
+        setSizes((prev) => {
+            const exists = prev.find((s) => s.size === size);
+
+            if (exists) {
+                return prev.filter((s) => s.size !== size);
+            } else {
+                return [...prev, { size, stock }]; // ✅ Changed to 'stock'
+            }
+        });
+    };
+
+    // ✅ Update quantity for a size
+    const handleStockChange = (size: string, stock: number) => {
         setSizes((prev) =>
-            prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+            prev.map((s) =>
+                s.size === size ? { ...s, stock: stock > 0 ? stock : 1 } : s // ✅ Changed to 'stock'
+            )
         );
     };
 
@@ -145,6 +170,84 @@ export default function AddProductPage() {
         setSizes([]);
         setColors([{ name: '', hex: '#000000' }]);
         setInventory('');
+        setEditingProduct(null);
+    };
+
+    // ✅ Convert image URLs to ImageInputType format for editing
+    const convertUrlsToImageInput = (imageUrls: string[]): ImageInputType => {
+        const imageInput: ImageInputType = {};
+        imageUrls.forEach((url, index) => {
+            imageInput[index] = url;
+        });
+        return imageInput;
+    };
+
+    // ✅ Start editing a product
+    // ✅ Start editing a product
+    // Update startEdit function
+    const startEdit = (product: Product) => {
+        setEditingProduct(product);
+        setTitle(product.title);
+        setDescription(product.description || '');
+        setCategory(product.category);
+        setGender(product.gender);
+        setOriginalPrice(product.originalPrice.toString());
+        setDiscountedPrice(product.discountedPrice.toString());
+        setImages(convertUrlsToImageInput(product.images));
+
+        // ✅ Update sizes with stock mapping
+        setSizes(
+            Array.isArray(product.sizes) && product.sizes.length > 0
+                ? product.sizes.map((s: string | SizeOption) =>
+                    typeof s === "string"
+                        ? { size: s, stock: 0 }
+                        : { size: s.size, stock: s.stock ?? 0 }
+                )
+                : []
+        );
+
+
+        setColors(
+            product.colors && product.colors.length > 0
+                ? product.colors
+                : [{ name: '', hex: '#000000' }]
+        );
+
+        setShowForm(true);
+    };
+
+    // ✅ Cancel editing
+    const cancelEdit = () => {
+        resetForm();
+        setShowForm(false);
+    };
+
+    // ✅ Delete product
+    const deleteProduct = async (productId: string) => {
+        if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${productId}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+            });
+
+            if (res.ok) {
+                alert("✅ Product deleted successfully!");
+                await fetchProducts(); // Refresh product list
+            } else {
+                const errData: ErrorResponse = await res.json();
+                throw new Error(errData.message || "Product deletion failed");
+            }
+        } catch (err) {
+            console.error("Product deletion error:", err);
+            const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+            alert("❌ Failed to delete product: " + errorMessage);
+        }
     };
 
     // ✅ Form submission with proper typing
@@ -170,32 +273,45 @@ export default function AddProductPage() {
         setSubmitting(true);
 
         try {
-            // 1. Upload images with proper typing
-            const formData = new FormData();
-            Object.values(images).forEach((img: ImageFile | string, index: number) => {
-                if (typeof img === 'object' && img.file) {
-                    formData.append("images", img.file);
-                } else if (typeof img === "string" && img.startsWith("data:image")) {
-                    const file = dataURLtoFile(img, `image${index}.jpg`);
-                    formData.append("images", file);
+            let uploadedImageUrls: string[] = [];
+
+            // Check if we need to upload new images
+            const hasNewImages = Object.values(images).some(img =>
+                typeof img === 'object' && img.file ||
+                (typeof img === 'string' && img.startsWith('data:image'))
+            );
+
+            if (hasNewImages) {
+                // 1. Upload images with proper typing
+                const formData = new FormData();
+                Object.values(images).forEach((img: ImageFile | string, index: number) => {
+                    if (typeof img === 'object' && img.file) {
+                        formData.append("images", img.file);
+                    } else if (typeof img === "string" && img.startsWith("data:image")) {
+                        const file = dataURLtoFile(img, `image${index}.jpg`);
+                        formData.append("images", file);
+                    }
+                });
+
+                const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                    },
+                    body: formData,
+                });
+
+                if (!uploadRes.ok) {
+                    const errorData: ErrorResponse = await uploadRes.json().catch(() => ({ message: 'Upload failed' }));
+                    throw new Error(errorData.message || "Image upload failed");
                 }
-            });
 
-            const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-                },
-                body: formData,
-            });
-
-            if (!uploadRes.ok) {
-                const errorData: ErrorResponse = await uploadRes.json().catch(() => ({ message: 'Upload failed' }));
-                throw new Error(errorData.message || "Image upload failed");
+                const uploadData: UploadResponse = await uploadRes.json();
+                uploadedImageUrls = uploadData.imageUrls;
+            } else {
+                // Use existing image URLs
+                uploadedImageUrls = Object.values(images).filter(img => typeof img === 'string' && !img.startsWith('data:')) as string[];
             }
-
-            const uploadData: UploadResponse = await uploadRes.json();
-            const uploadedImageUrls = uploadData.imageUrls;
 
             // 2. Filter out empty colors
             const validColors = colors.filter(color => color.name.trim() !== "");
@@ -214,9 +330,15 @@ export default function AddProductPage() {
                 inventory: Number(inventory) || 0,
             };
 
-            // 4. Create product
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products`, {
-                method: "POST",
+            // 4. Create or update product
+            const url = editingProduct
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${editingProduct._id}`
+                : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products`;
+
+            const method = editingProduct ? "PUT" : "POST";
+
+            const res = await fetch(url, {
+                method,
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
@@ -225,13 +347,13 @@ export default function AddProductPage() {
             });
 
             if (res.ok) {
-                alert("✅ Product added successfully!");
+                alert(editingProduct ? "✅ Product updated successfully!" : "✅ Product added successfully!");
                 resetForm();
                 await fetchProducts(); // Refresh product list
                 setShowForm(false); // Hide form after successful submission
             } else {
                 const errData: ErrorResponse = await res.json();
-                throw new Error(errData.message || "Product creation failed");
+                throw new Error(errData.message || `Product ${editingProduct ? 'update' : 'creation'} failed`);
             }
         } catch (err) {
             console.error("Product submission error:", err);
@@ -250,17 +372,26 @@ export default function AddProductPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Product Management</h1>
                     <button
                         className="bg-black text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
-                        onClick={() => setShowForm(!showForm)}
+                        onClick={() => {
+                            if (showForm && !editingProduct) {
+                                setShowForm(false);
+                            } else {
+                                resetForm();
+                                setShowForm(true);
+                            }
+                        }}
                         disabled={submitting}
                     >
-                        {showForm ? "Hide Form" : "Add Product"}
+                        {showForm ? (editingProduct ? "Cancel Edit" : "Hide Form") : "Add Product"}
                     </button>
                 </div>
 
-                {/* Add Product Form */}
+                {/* Add/Edit Product Form */}
                 {showForm && (
                     <div className="bg-white p-8 rounded-lg shadow-sm border mb-8">
-                        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Add New Product</h2>
+                        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+                            {editingProduct ? "Edit Product" : "Add New Product"}
+                        </h2>
 
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             {/* Product Images */}
@@ -411,22 +542,44 @@ export default function AddProductPage() {
                             </div>
 
                             {/* Sizes */}
+                            {/* // Update the sizes UI section in the form */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-3">
                                     Available Sizes
                                 </label>
-                                <div className="flex gap-4 flex-wrap">
-                                    {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
-                                        <label key={size} className="flex items-center space-x-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={sizes.includes(size)}
-                                                onChange={() => handleSizeChange(size)}
-                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <span className="text-sm font-medium text-gray-700">{size}</span>
-                                        </label>
-                                    ))}
+                                <div className="flex flex-col gap-3">
+                                    {["XS", "S", "M", "L", "XL", "XXL"].map((size) => {
+                                        const isSelected = sizes.some((s) => s.size === size);
+                                        const selectedSize = sizes.find((s) => s.size === size);
+
+                                        return (
+                                            <div key={size} className="flex items-center gap-4">
+                                                <label className="flex items-center space-x-2 cursor-pointer">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={isSelected}
+                                                        onChange={() => handleSizeChange(size)}
+                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-700">{size}</span>
+                                                </label>
+
+                                                {isSelected && (
+                                                    <div className="flex items-center gap-2">
+                                                        <label className="text-sm text-gray-600">Stock:</label>
+                                                        <input
+                                                            type="number"
+                                                            min={1}
+                                                            value={selectedSize?.stock || 1} // ✅ Changed to 'stock'
+                                                            onChange={(e) => handleStockChange(size, parseInt(e.target.value))} // ✅ Changed function name
+                                                            className="w-20 border rounded p-1 text-sm"
+                                                            placeholder="0"
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -478,7 +631,7 @@ export default function AddProductPage() {
                             <div className="flex gap-4 pt-6">
                                 <button
                                     type="button"
-                                    onClick={() => setShowForm(false)}
+                                    onClick={cancelEdit}
                                     className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                                     disabled={submitting}
                                 >
@@ -489,7 +642,7 @@ export default function AddProductPage() {
                                     disabled={submitting}
                                     className="px-8 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    {submitting ? "Adding Product..." : "Add Product"}
+                                    {submitting ? (editingProduct ? "Updating Product..." : "Adding Product...") : (editingProduct ? "Update Product" : "Add Product")}
                                 </button>
                             </div>
                         </form>
@@ -515,14 +668,37 @@ export default function AddProductPage() {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
                             {products.map((product) => (
-                                <ProductCard
-                                    key={product._id}
-                                    _id={product._id}
-                                    title={product.title}
-                                    images={product.images}
-                                    originalPrice={product.originalPrice}
-                                    discountedPrice={product.discountedPrice}
-                                />
+                                <div key={product._id} className="relative group">
+                                    <ProductCard
+                                        _id={product._id}
+                                        title={product.title}
+                                        images={product.images}
+                                        originalPrice={product.originalPrice}
+                                        discountedPrice={product.discountedPrice}
+                                    />
+
+                                    {/* Action Buttons Overlay */}
+                                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
+                                        <button
+                                            onClick={() => startEdit(product)}
+                                            className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+                                            title="Edit Product"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            onClick={() => deleteProduct(product._id)}
+                                            className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition-colors shadow-lg"
+                                            title="Delete Product"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     )}

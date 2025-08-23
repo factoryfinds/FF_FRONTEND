@@ -521,7 +521,7 @@ const SearchResultsContent = () => {
   );
 
   // Render loading state
-  if (loading) return <LoadingOverlay />;
+  if (loading) return <LoadingOverlay isVisible={loading} />;
 
   // Render error state
   if (error.hasError) {
@@ -572,7 +572,7 @@ const SearchResultsContent = () => {
 // Main Search Page Component with Suspense
 const SearchPage = () => {
   return (
-    <Suspense fallback={<LoadingOverlay />}>
+    <Suspense fallback={<LoadingOverlay isVisible={false} />}>
       <SearchResultsContent />
     </Suspense>
   );

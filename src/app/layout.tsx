@@ -7,13 +7,11 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 // app/layout.tsx (Next.js 13+)
 import { Montserrat } from 'next/font/google';
 
-
 const inter = Montserrat({
   subsets: ["latin"],
-  weight: ["200", "300", "400", "500", "600", "700", "800"], 
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
   display: "swap",
 });
-
 
 export const metadata = {
   title: 'Factory Find',
@@ -26,13 +24,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={inter.className}> 
-      <body>
+    <html lang="en" className={inter.className}>
+      <body className="flex flex-col min-h-screen overflow-x-hidden">
         <Navbar />
-        <main>
+        <main className="flex-1 w-full relative">
           {children}
-          <CheckOutTray/>
-          </main>
+          <CheckOutTray />
+        </main>
         <Footer />
         <SpeedInsights />
       </body>

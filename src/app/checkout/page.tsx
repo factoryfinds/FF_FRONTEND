@@ -357,7 +357,7 @@ export default function CheckoutPage() {
     </div>
   );
 
-  if (loading) return <LoadingOverlay />;
+  if (loading) return <LoadingOverlay isVisible={loading} />;
 
   if (authError) {
     return (

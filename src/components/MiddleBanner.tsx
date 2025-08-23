@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import backgroundImg1 from "@/photos/middleBanner.png";
+import backgroundImg1 from "@/photos/middleBanner1.webp";
 
 export default function HeroBanner() {
   return (
@@ -9,10 +9,12 @@ export default function HeroBanner() {
         src={backgroundImg1}
         alt="Background"
         fill
-        style={{ objectFit: "cover" }}
+        className="object-cover object-center md:object-[center_top] scale-110 md:scale-100"
         priority
+        placeholder="blur"
+        quality={75}
       />
-    
     </section>
+
   );
 }

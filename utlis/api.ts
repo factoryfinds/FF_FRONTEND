@@ -1,7 +1,7 @@
 import { toast } from 'react-hot-toast';
 
 // Base configuration
-const BASE_URL = 'https://ff-backend-00ri.onrender.com/api';
+const BASE_URL = 'http://192.168.29.110:5000/api';
 
 // Types
 export interface User {
@@ -519,6 +519,41 @@ export const addProductToCart = async ({
   return apiRequest('/products/addToCart', {
     method: 'PUT',
     body: JSON.stringify({ productId, quantity, size }),
+  });
+};
+
+// Add these functions to your existing api.ts file
+
+// 🔄 Product Management APIs for Admin
+export const updateProduct = async (
+  productId: string,
+  productData: Partial<{
+    title: string;
+    description: string;
+    category: string;
+    gender: 'men' | 'women' | 'unisex';
+    originalPrice: number;
+    discountedPrice: number;
+    images: string[];
+    sizes: string[];
+    colors: { name: string; hex: string }[];
+    inventory: number;
+    inStock: boolean;
+  }>
+): Promise<{ message: string; product: Product }> => {
+  return apiRequest(`/products/${productId}`, {
+    method: 'PUT',
+    body: JSON.stringify(productData),
+  });
+};
+
+export const getProductForEdit = async (productId: string): Promise<Product> => {
+  return apiRequest(`/products/edit/${productId}`);
+};
+
+export const deleteProduct = async (productId: string): Promise<{ message: string }> => {
+  return apiRequest(`/products/${productId}`, {
+    method: 'DELETE',
   });
 };
 

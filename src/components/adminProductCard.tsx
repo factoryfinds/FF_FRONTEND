@@ -2,8 +2,6 @@
 import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import Image from "next/image";
-
 // Dynamically import LoadingOverlay so it doesn't bloat initial JS
 const LoadingOverlay = dynamic(() => import("./LoadingOverlay"), { ssr: false });
 
@@ -13,6 +11,8 @@ interface ProductCardProps {
   images: string[];
   originalPrice: number;
   discountedPrice: number;
+  onEdit?: (productId: string) => void; // Optional edit callback for admin
+  showAdminControls?: boolean; // Optional prop to show admin controls
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -21,6 +21,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   images,
   originalPrice,
   discountedPrice,
+  onEdit,
+  showAdminControls = false
 }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -29,6 +31,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
     originalPrice > discountedPrice
       ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
       : 0;
+
+  // Check if user is admin from localStorage
+  const isAdmin = () => {
+    if (typeof window === 'undefined') return false;
+    try {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      return user.role === "admin";
+    } catch {
+      return false;
+    }
+  };
 
   const handleClick = useCallback(() => {
     if (loading) return; // Prevent multiple navigations
@@ -39,6 +52,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
     }, 50);
   }, [loading, router, _id]);
 
+  const handleEditClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onEdit) {
+      onEdit(_id);
+    }
+  }, [onEdit, _id]);
+
   return (
     <>
       {loading && <LoadingOverlay isVisible={loading} />}
@@ -46,18 +67,35 @@ const ProductCard: React.FC<ProductCardProps> = ({
         role="button"
         aria-label={`View details for ${title}`}
         onClick={handleClick}
-        className="group bg-white cursor-pointer transition-all duration-300 ease-out hover:shadow-xs hover:shadow-black/5 hover:-translate-y-1 w-full max-w-full overflow-hidden hover:border-gray-200/70"
+        className="group bg-white cursor-pointer transition-all duration-300 ease-out hover:shadow-xs hover:shadow-black/5 hover:-translate-y-1 w-full max-w-full overflow-hidden hover:border-gray-200/70 relative"
       >
+        {/* Admin Edit Button - Only show for admins */}
+        {isAdmin() && showAdminControls && onEdit && (
+          <button
+            onClick={handleEditClick}
+            className="absolute top-3 left-3 z-20 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-200 transform hover:scale-110"
+            title="Edit Product"
+            aria-label={`Edit ${title}`}
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" 
+              />
+            </svg>
+          </button>
+        )}
 
         {/* Product Image */}
         <div className="relative w-full aspect-[4/5] rounded-sm overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
-          <Image
+          <img
             src={images?.[0]}
             alt={title}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            priority={false}
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
 
           {discountPercentage > 0 && (
@@ -70,7 +108,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300"></div>
         </div>
-
 
         {/* Content */}
         <div className="p-3 sm:p-4 space-y-2">

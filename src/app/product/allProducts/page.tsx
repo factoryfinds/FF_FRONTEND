@@ -384,7 +384,7 @@ export default function AllProductsPage() {
   }, []);
 
   // Loading / Error UI
-  if (isLoading) return <LoadingOverlay />;
+  if (isLoading) return <LoadingOverlay isVisible={isLoading} />;
 
   if (error.hasError) {
     return <ErrorFallback error={error.message ?? "Failed to load products."} onRetry={() => fetchProducts()} />;

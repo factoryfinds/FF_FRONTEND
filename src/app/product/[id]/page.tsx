@@ -5,12 +5,26 @@ import ProductCard from "../../../components/RelatedProductsCard";
 import { addProductToCart, getAllProducts, Product } from '../../../../utlis/api';
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { toast } from 'react-hot-toast';
+import { useSwipeable } from "react-swipeable";
+import { FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
-// const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "";
+// Define size types to fix TypeScript errors
+interface SizeObject {
+  size: string;
+  stock: number;
+}
+
+type SizeItem = string | SizeObject;
+
+// Extend the Product type to include proper size typing
+interface ProductWithSizes extends Omit<Product, 'sizes'> {
+  sizes: SizeItem[];
+}
 
 export default function ProductDetails() {
   const { id } = useParams();
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<ProductWithSizes | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingRelated, setLoadingRelated] = useState(true);
@@ -20,209 +34,294 @@ export default function ProductDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState({ x: 50, y: 50, active: false });
   const [showSizes, setShowSizes] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [isMobileFullScreen, setIsMobileFullScreen] = useState(false);
 
-  // Use ref to track if click has been tracked to prevent duplicates
   const clickTrackedRef = useRef(false);
 
-  // Fetch main product
+  // Helper function to get size value from size item
+  const getSizeValue = (sizeItem: SizeItem): string => {
+    return typeof sizeItem === 'string' ? sizeItem : sizeItem.size;
+  };
+
+  // Helper function to get stock for a size item
+  const getSizeStock = (sizeItem: SizeItem, fallbackInventory: number): number => {
+    return typeof sizeItem === 'string' ? fallbackInventory : sizeItem.stock;
+  };
+
+  // Helper function to find size object
+  const findSizeObject = (sizes: SizeItem[], targetSize: string): SizeItem | undefined => {
+    return sizes.find(s => getSizeValue(s) === targetSize);
+  };
+
+  // Dummy size guide data
+  const sizeGuideData = {
+    men: [
+      { size: 'XS', chest: '36', waist: '30', length: '26' },
+      { size: 'S', chest: '38', waist: '32', length: '27' },
+      { size: 'M', chest: '40', waist: '34', length: '28' },
+      { size: 'L', chest: '42', waist: '36', length: '29' },
+      { size: 'XL', chest: '44', waist: '38', length: '30' },
+      { size: 'XXL', chest: '46', waist: '40', length: '31' },
+    ],
+  };
+
+  // Scroll to top when component mounts or ID changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
+
+  // Fetch product
   useEffect(() => {
     const fetchProduct = async () => {
       if (!id) return;
-
       try {
         setLoadingProducts(true);
-        clickTrackedRef.current = false; // Reset click tracking flag
-
-        const res = await fetch(`https://ff-backend-00ri.onrender.com/api/products/${id}`);
-
-        if (!res.ok) {
-          throw new Error(`Failed to fetch product: ${res.status} ${res.statusText}`);
-        }
-
+        clickTrackedRef.current = false;
+        const res = await fetch(`http://192.168.29.110:5000/api/products/${id}`);
+        if (!res.ok) throw new Error(`Failed to fetch product`);
         const data = await res.json();
+        if (!data) throw new Error('Product not found');
+        setProduct(data as ProductWithSizes);
 
-        if (!data) {
-          throw new Error('Product not found');
+        // Set default size
+        if (data.sizes?.length > 0) {
+          const firstSize = getSizeValue(data.sizes[0]);
+          setSelectedSize(firstSize);
         }
-
-        setProduct(data);
-
-        // Set default size if available
-        if (data.sizes && data.sizes.length > 0) {
-          setSelectedSize(data.sizes[0]);
-        }
-
       } catch (err) {
-        console.error('Error fetching product:', err);
-        toast.error('Failed to load product details');
+        toast.error(`Failed to load product details ${err}`);
       } finally {
         setLoadingProducts(false);
       }
     };
-
     fetchProduct();
   }, [id]);
 
-  // Separate effect for click tracking - runs only once per product load
+  // Track click
   useEffect(() => {
-    const trackProductClick = async (productId: string): Promise<void> => {
-      // Prevent duplicate tracking
+    const trackProductClick = async (productId: string) => {
       if (clickTrackedRef.current) return;
-
       try {
-        clickTrackedRef.current = true; // Mark as tracked immediately
-
-        const response = await fetch(`https://ff-backend-00ri.onrender.com/api/products/${productId}/track-click`, {
+        clickTrackedRef.current = true;
+        await fetch(`http://192.168.29.110:5000/api/products/${productId}/track-click`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-cache'
+          headers: { 'Content-Type': 'application/json' }
         });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`✅ Click tracked! Total clicks: ${data.clickCount}`);
-        }
-      } catch (error) {
-        console.error('Click tracking failed:', error);
-        clickTrackedRef.current = false; // Reset on error to allow retry
+      } catch {
+        clickTrackedRef.current = false;
       }
     };
-
-    // Only track click when we have both id and product loaded
     if (id && product && !clickTrackedRef.current) {
       trackProductClick(id as string);
     }
-  }, [id, product]); // Dependencies: id and product
+  }, [id, product]);
 
-  // Fetch related products based on category and gender
+  // Related products
   useEffect(() => {
     const fetchRelatedProducts = async () => {
       if (!product) return;
-
       try {
         setLoadingRelated(true);
-
-        // Get all products from API
         const allProducts = await getAllProducts();
-
-        // Filter products by same category and gender, exclude current product
         const filtered = allProducts
-          .filter(p =>
-            p._id !== product._id && // Exclude current product
-            p.category === product.category && // Same category
-            p.gender === product.gender && // Same gender
-            p.inStock && // Only in-stock products
-            !p.isDeleted // Only non-deleted products
-          )
-          .slice(0, 6); // Limit to 6 related products
-
+          .filter(p => p._id !== product._id && p.category === product.category && p.gender === product.gender && p.inStock && !p.isDeleted)
+          .slice(0, 6);
         setRelatedProducts(filtered);
-
-      } catch (error) {
-        console.error('Error fetching related products:', error);
+      } catch {
         toast.error('Failed to load related products');
       } finally {
         setLoadingRelated(false);
       }
     };
-
     fetchRelatedProducts();
   }, [product]);
 
-  // Show loading overlay when fetching product data OR adding to cart
-  if (loadingProducts || addingToCart) return <LoadingOverlay />
-  if (!product) return <LoadingOverlay />;
+  // Fixed swipe handlers
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (product && product.images) {
+        setCurrentImageIndex((prev) =>
+          prev < product.images.length - 1 ? prev + 1 : 0
+        );
+      }
+    },
+    onSwipedRight: () => {
+      if (product && product.images) {
+        setCurrentImageIndex((prev) =>
+          prev > 0 ? prev - 1 : product.images.length - 1
+        );
+      }
+    },
+    preventScrollOnSwipe: true,
+    trackMouse: true,
+  });
 
+  if (loadingProducts || addingToCart) return <LoadingOverlay isVisible={loadingProducts} />;
+  if (!product) return <LoadingOverlay isVisible={loadingProducts} />;
+
+  // Fixed handleQuantityChange with proper typing
   const handleQuantityChange = (change: number) => {
-    setQuantity((prev) => Math.max(1, Math.min(prev + change, product.inventory)));
+    if (!selectedSize) return;
+
+    // Find the selected size object to get its stock
+    const selectedSizeObj = findSizeObject(product.sizes, selectedSize);
+
+    const maxQuantity = selectedSizeObj
+      ? getSizeStock(selectedSizeObj, product.inventory)
+      : product.inventory;
+
+    setQuantity(prev => Math.max(1, Math.min(prev + change, maxQuantity)));
   };
 
+  // Fixed handleAddToCart function
   const handleAddToCart = async () => {
     if (!selectedSize) {
-      return toast.error("Please select both size and color before adding to cart.");
+      return toast.error("Please select size before adding to cart.");
     }
-
     try {
       setAddingToCart(true);
-
-      const response = await addProductToCart({
-        productId: product._id,
-        quantity: quantity,
-        size: selectedSize
-      });
-
-      console.log("Cart updated:", response.cart);
+      await addProductToCart({ productId: product._id, quantity, size: selectedSize });
       toast.success("Added to cart!");
-
-      // Trigger cart update event for other components
       window.dispatchEvent(new CustomEvent('cartUpdated'));
-
-      // Also set a localStorage flag for cross-tab updates
       localStorage.setItem('cart-updated', Date.now().toString());
-
-    }
-
-    catch (error: unknown) {
-      console.error('Add to cart error:', error);
-
+    } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error(error.message);
       } else {
         toast.error('Failed to add item to cart');
       }
-    } finally {
+    }
+    finally {
       setAddingToCart(false);
     }
   };
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+
   return (
     <div className="min-h-screen bg-white">
+      {/* MOBILE FULL SCREEN VIEWER */}
+      {isMobileFullScreen && (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
+          <button
+            className="absolute top-6 right-6 text-black text-4xl z-50"
+            onClick={() => setIsMobileFullScreen(false)}
+          >
+            <FiX size={18} className="text-black" />
+          </button>
+
+          <div
+            {...swipeHandlers}
+            className="relative flex items-center justify-center w-full h-full"
+          >
+            <TransformWrapper
+              initialScale={1}
+              minScale={1}
+              maxScale={4}
+              centerOnInit={true}
+              wheel={{ step: 0.1 }}
+              pinch={{ step: 5 }}
+              doubleClick={{ disabled: false }}
+              limitToBounds={false}
+              centerZoomedOut={true}
+              panning={{ disabled: false }}
+            >
+              <TransformComponent
+                wrapperClass="w-full h-full"
+                contentClass="w-full h-full flex items-center justify-center"
+                wrapperStyle={{
+                  width: "100vw",
+                  height: "100vh",
+                  overflow: "visible"
+                }}
+              >
+                <img
+                  src={product.images[currentImageIndex]}
+                  alt={product.title}
+                  className="max-w-[100vw] max-h-[100vh] object-contain"
+                  style={{
+                    width: "auto",
+                    height: "auto"
+                  }}
+                />
+              </TransformComponent>
+            </TransformWrapper>
+
+            <button
+              className="absolute left-6 text-white text-5xl "
+              onClick={() =>
+                setCurrentImageIndex((prev) =>
+                  prev > 0 ? prev - 1 : product.images.length - 1
+                )
+              }
+            >
+              <FiChevronLeft size={24} className="text-black" />
+            </button>
+
+            <button
+              className="absolute right-6  text-white text-5xl"
+              onClick={() =>
+                setCurrentImageIndex((prev) =>
+                  prev < product.images.length - 1 ? prev + 1 : 0
+                )
+              }
+            >
+              <FiChevronRight size={24} className="text-black" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-0">
-        {/* Main Product Section */}
         <div className="flex flex-col lg:flex-row">
-          {/* Left Side: Product Images */}
+          {/* LEFT SIDE */}
           <div className="w-full lg:w-6/10">
-            {/* Main Image */}
             <div
-              className="w-full aspect-square bg-gray-100 mb-3 overflow-hidden rounded-xl cursor-crosshair"
+              {...swipeHandlers}
+              className="w-full aspect-square bg-gray-100 mb-3 overflow-hidden rounded-xl cursor-crosshair relative"
               onMouseMove={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const x = ((e.clientX - rect.left) / rect.width) * 100;
-                const y = ((e.clientY - rect.top) / rect.height) * 100;
-                setIsZoomed({ x, y, active: true });
+                if (!isMobile) {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const x = ((e.clientX - rect.left) / rect.width) * 100;
+                  const y = ((e.clientY - rect.top) / rect.height) * 100;
+                  setIsZoomed({ x, y, active: true });
+                }
               }}
-              onMouseEnter={() => setIsZoomed({ x: 50, y: 50, active: true })}
-              onMouseLeave={() => setIsZoomed({ x: 50, y: 50, active: false })}
+              onMouseEnter={() => !isMobile && setIsZoomed({ x: 50, y: 50, active: true })}
+              onMouseLeave={() => !isMobile && setIsZoomed({ x: 50, y: 50, active: false })}
+              onClick={() => {
+                if (isMobile) setIsMobileFullScreen(true);
+              }}
             >
               <img
                 src={product.images[currentImageIndex]}
                 alt={product.title}
-                className={`w-full h-full object-cover transition-transform duration-200 ${isZoomed.active && window.innerWidth >= 1024 ? "scale-200" : "scale-100"
-                  }`}
+                className={`w-full h-full object-cover transition-transform duration-200 ${isZoomed.active && !isMobile ? "scale-200" : "scale-100"}`}
                 style={{ transformOrigin: `${isZoomed.x}% ${isZoomed.y}%` }}
               />
+
+              {isMobile && product.images.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                  {product.images.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full ${index === currentImageIndex ? "bg-white" : "bg-gray-400"}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Thumbnail Images */}
+            {/* Thumbnails */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3">
-              {product.images.slice(0, 4).map((img: string, index: number) => (
+              {product.images.slice(0, 4).map((img, index) => (
                 <div
                   key={index}
-                  className={`aspect-square overflow-hidden rounded-lg border-2 cursor-pointer ${index === currentImageIndex
-                    ? "border-white"
-                    : "border-transparent hover:border-gray-400"
-                    }`}
-                  onClick={() => {
-                    setCurrentImageIndex(index);
-                  }}
+                  className={`aspect-square overflow-hidden rounded-lg border-2 cursor-pointer ${index === currentImageIndex ? "border-white" : "border-transparent hover:border-gray-400"}`}
+                  onClick={() => setCurrentImageIndex(index)}
                 >
-                  <img
-                    src={img}
-                    alt={`${product.title} thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={img} alt={`${product.title} ${index}`} className="w-full h-full object-cover" />
                 </div>
               ))}
             </div>
@@ -268,46 +367,52 @@ export default function ProductDetails() {
               <p className="text-xs text-gray-800">(M.R.P. incl of all taxes)</p>
             </div>
 
-            {/* Select Your Size */}
+            {/* Select Your Size with Size Guide */}
             <div className="mb-6">
-              <div
-                onClick={() => setShowSizes(!showSizes)}
-                className="cursor-pointer flex items-center justify-between"
-              >
-                <p className="text-base sm:text-lg font-bold text-black mt-4 sm:mt-8">Select Your Size</p>
-                <svg
-                  className={`w-5 h-5 mt-6 sm:mt-10 ml-2 transform transition-transform duration-300 ${showSizes ? "rotate-180" : "rotate-0"
-                    }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              <div className="flex items-center justify-between">
+                <div
+                  onClick={() => setShowSizes(!showSizes)}
+                  className="cursor-pointer flex items-center justify-between flex-1"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
+                  <p className="text-base sm:text-lg font-bold text-black mt-4 sm:mt-8">Select Your Size</p>
+                  <svg
+                    className={`w-5 h-5 mt-6 sm:mt-10 ml-2 transform transition-transform duration-300 ${showSizes ? "rotate-180" : "rotate-0"}`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
               </div>
 
               <hr className="mt-2 border-black mb-4 border-t-[3px]" />
 
               {showSizes && (
                 <div className="flex flex-wrap gap-2 transition-all duration-300 ease-in-out">
-                  {product.sizes.map((size: string) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 border text-sm ${selectedSize === size
-                        ? "border-black bg-black text-white"
-                        : "border-gray-300 text-black hover:border-black"
-                        }`}
-                      disabled={addingToCart}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {product.sizes.map((sizeItem, index) => {
+                    const sizeValue = getSizeValue(sizeItem);
+                    const sizeStock = getSizeStock(sizeItem, product.inventory);
+
+                    return (
+                      <button
+                        key={`${sizeValue}-${index}`}
+                        onClick={() => setSelectedSize(sizeValue)}
+                        className={`px-4 py-2 border text-sm ${selectedSize === sizeValue
+                          ? "border-black bg-black text-white"
+                          : "border-gray-300 text-black hover:border-black"
+                          } ${sizeStock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                        disabled={addingToCart || sizeStock === 0}
+                      >
+                        {sizeValue}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -327,50 +432,128 @@ export default function ProductDetails() {
                 <button
                   onClick={() => handleQuantityChange(1)}
                   className="w-8 h-8 border border-gray-300 rounded flex items-center justify-center hover:border-black disabled:opacity-50"
-                  disabled={quantity >= product.inventory || addingToCart}
+                  disabled={(() => {
+                    if (!selectedSize) return true;
+                    const selectedSizeObj = findSizeObject(product.sizes, selectedSize);
+                    const maxQuantity = selectedSizeObj
+                      ? getSizeStock(selectedSizeObj, product.inventory)
+                      : product.inventory;
+                    return quantity >= maxQuantity || addingToCart;
+                  })()}
                 >
                   +
                 </button>
               </div>
-            </div>
 
+            </div>
+            {/* Size Guide Button */}
+            <button
+              onClick={() => setShowSizeGuide(!showSizeGuide)}
+              className="text-sm text-black underline hover:no-underline mt-4 mb-4 sm:mt-8"
+            >
+              Size Guide
+            </button>
+            {/* Size Guide Table */}
+            {showSizeGuide && (
+              <div className="mb-6 p-4 border border-gray-100 rounded-lg bg-white z-40 shadow-lg">
+                <h3 className="text-lg font-medium text-black mb-4">Size Guide (in inches)</h3>
+
+                {/* Size Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-300">
+                        <th className="text-left py-2 px-3 font-medium">Size</th>
+                        <th className="text-left py-2 px-3 font-medium">Chest</th>
+                        <th className="text-left py-2 px-3 font-medium">Waist</th>
+                        <th className="text-left py-2 px-3 font-medium">Length</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sizeGuideData.men.map((item, index) => (
+                        <tr key={index} className="border-b border-gray-200 hover:bg-white">
+                          <td className="py-2 px-3 font-medium">{item.size}</td>
+                          <td className="py-2 px-3">{item.chest}&quot;</td>
+                          <td className="py-2 px-3">{item.waist}&quot;</td>
+                          <td className="py-2 px-3">{item.length}&quot;</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mt-4 text-xs text-gray-600">
+                  <p className="mb-1">• Measurements are in inches</p>
+                  <p className="mb-1">• For best fit, compare with a similar garment you own</p>
+                  <p>• Contact us if you need help choosing the right size</p>
+                </div>
+              </div>
+            )}
+
+            {/* Inventory display */}
             <div className="text-sm text-gray-600 mt-8 sm:mt-15">
-              {product.inventory > 0 ? (
-                <span>{product.inventory} items available</span>
-              ) : (
-                <span className="text-red-500">Out of stock</span>
-              )}
+              {(() => {
+                if (!selectedSize) {
+                  return <span>Please select a size</span>;
+                }
+
+                const selectedSizeObj = findSizeObject(product.sizes, selectedSize);
+                const availableStock = selectedSizeObj
+                  ? getSizeStock(selectedSizeObj, product.inventory)
+                  : product.inventory;
+
+                if (availableStock > 0) {
+                  return <span>{availableStock} items available in size {selectedSize}</span>;
+                } else {
+                  return <span className="text-red-500">Size {selectedSize} is out of stock</span>;
+                }
+              })()}
             </div>
 
             {/* Action Section */}
-            {product.inventory > 0 ? (
-              <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-2 mb-12 sm:mb-18">
-                <button
-                  className="flex-1 bg-black text-white py-3 px-6 text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
-                  disabled={addingToCart}
-                >
-                  Buy Now
-                </button>
-                <button
-                  className="flex-1 border border-black text-black py-3 px-6 text-sm font-medium rounded-xl cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                  onClick={handleAddToCart}
-                  disabled={addingToCart || !selectedSize}
-                >
-                  {addingToCart ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                      Adding...
-                    </div>
-                  ) : (
-                    "Add To Cart"
-                  )}
-                </button>
-              </div>
-            ) : (
-              <div className="mt-4 mb-10 text-red-600 text-sm font-medium">
-                This product is currently out of stock.
-              </div>
-            )}
+            {(() => {
+              if (!selectedSize) {
+                return (
+                  <div className="mt-4 mb-10 text-red-600 text-sm font-medium">
+                    Please select a size.
+                  </div>
+                );
+              }
+
+              const selectedSizeObj = findSizeObject(product.sizes, selectedSize);
+              const availableStock = selectedSizeObj
+                ? getSizeStock(selectedSizeObj, product.inventory)
+                : product.inventory;
+
+              return availableStock > 0 ? (
+                <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-2 mb-12 sm:mb-18">
+                  <button
+                    className="flex-1 bg-black text-white py-3 px-6 text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
+                    disabled={addingToCart || !selectedSize}
+                  >
+                    Buy Now
+                  </button>
+                  <button
+                    className="flex-1 border border-black text-black py-3 px-6 text-sm font-medium rounded-xl cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                    onClick={handleAddToCart}
+                    disabled={addingToCart || !selectedSize}
+                  >
+                    {addingToCart ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                        Adding...
+                      </div>
+                    ) : (
+                      "Add To Cart"
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4 mb-10 text-red-600 text-sm font-medium">
+                  Size {selectedSize} is currently out of stock.
+                </div>
+              );
+            })()}
 
             {/* Questions Section */}
             <div className="mb-6">
@@ -415,7 +598,6 @@ export default function ProductDetails() {
             </div>
           ) : relatedProducts.length > 0 ? (
             <div className="relative">
-              {/* Horizontal Scrollable Container */}
               <div
                 className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
                 style={{
@@ -442,7 +624,6 @@ export default function ProductDetails() {
                 ))}
               </div>
 
-              {/* Scroll indicators (optional) */}
               <div className="flex justify-center mt-4 gap-2">
                 {relatedProducts.map((_, index) => (
                   <div

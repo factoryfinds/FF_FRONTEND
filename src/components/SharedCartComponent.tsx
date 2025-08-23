@@ -155,7 +155,7 @@ export default function SharedCartComponent({
   const grandTotal = bagTotal - couponDiscount;
 
   // Loading state
-  if (loadingProducts) return <LoadingOverlay />;
+  if (loadingProducts) return <LoadingOverlay isVisible={loadingProducts} />;
 
   // Auth error
   if (authError)

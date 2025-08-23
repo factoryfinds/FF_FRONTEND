@@ -387,7 +387,7 @@ export default function TrendingProductsPage() {
     }, [fetchProducts]);
 
     // Render loading state
-    if (loading) return <LoadingOverlay />;
+    if (loading) return <LoadingOverlay isVisible={loading} />;
 
     // Render error state
     if (error.hasError) {
