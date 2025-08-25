@@ -109,7 +109,7 @@ const useRazorpay = () => {
        const { user, token } = getAuthToken();
 
        const response = await axios.post<CreateOrderResponse>(
-      `http://192.168.29.110:5000/api/payment/create-order`,
+      `https://ff-backend-00ri.onrender.com/api/payment/create-order`,
       {
         ...orderData,        // 👈 flatten orderData
         userId: user._id,    // 👈 sirf userId bhejna hai
@@ -148,7 +148,7 @@ const useRazorpay = () => {
       const { user, token } = getAuthToken();
 
       const response = await axios.post<PaymentVerificationResponse>(
-        `http://192.168.29.110:5000/api/payment/verify-payment`,
+        `https://ff-backend-00ri.onrender.com/api/payment/verify-payment`,
         {
         ...paymentData,
         userId: user._id,
@@ -187,7 +187,7 @@ const useRazorpay = () => {
       const token = getAuthToken();
 
       const response = await axios.get<PaymentDetailsResponse>(
-        `http://192.168.29.110:5000/api/payment/payment-details/${paymentId}`,
+        `https://ff-backend-00ri.onrender.com/api/payment/payment-details/${paymentId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
