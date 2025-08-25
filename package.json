@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@vercel/speed-insights": "^1.2.0",
-    "axios": "^1.10.0",
+    "axios": "^1.11.0",
     "cloudinary": "^1.41.3",
     "framer-motion": "^12.23.12",
     "lodash": "^4.17.21",
@@ -20,6 +20,7 @@
     "multer-storage-cloudinary": "^4.0.0",
     "next": "15.3.5",
     "next-sitemap": "^4.2.3",
+    "razorpay": "^2.9.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",

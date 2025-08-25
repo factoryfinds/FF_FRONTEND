@@ -11,7 +11,8 @@ import {
   Ticket, 
   Users, 
   Menu, 
-  X 
+  X, 
+  BoxIcon
 } from 'lucide-react';
 
 const menuItems = [
@@ -20,6 +21,7 @@ const menuItems = [
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/admin/coupons', label: 'Coupons', icon: Ticket },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/orders', label: 'Orders', icon: BoxIcon},
 ];
 
 export default function AdminSidebar() {

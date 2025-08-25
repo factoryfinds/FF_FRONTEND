@@ -1,7 +1,9 @@
-import { Link } from "lucide-react";
-
+"use client"; 
+import { useRouter } from "next/navigation";
 const Footer = () => {
+  const router = useRouter();
   return (
+
     <footer className="bg-white border-t border-gray-200 text-gray-700 text-sm px-6 sm:px-8 py-10">
       <div className="max-w-7xl mx-auto">
 
@@ -39,7 +41,12 @@ const Footer = () => {
           {/* Legal Links */}
           <div className="flex flex-col items-start md:items-end gap-2 text-sm">
             <a href="#" className="hover:underline">Sitemap</a>
-            <Link href="/aboutUs" className="hover:underline">Legal & Privacy</Link>
+            <button
+              onClick={() => router.push("/aboutUs")}
+              className="hover:underline text-gray-700 cursor-pointer bg-transparent border-none"
+            >
+              Legal & Privacy
+            </button>
           </div>
         </div>
 

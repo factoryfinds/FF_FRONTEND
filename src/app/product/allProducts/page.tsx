@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { getAllProducts, Product } from "../../../../utlis/api";
 import ProductCard from "@/components/ProductCard";
-import LoadingOverlay from "@/components/LoadingOverlay";
+import LoadingOverlay from "@/components/productLoadingOverlay";
 import Head from 'next/head';
 
 /* ---------------- Types ---------------- */
@@ -384,7 +384,7 @@ export default function AllProductsPage() {
   }, []);
 
   // Loading / Error UI
-  if (isLoading) return <LoadingOverlay isVisible={isLoading} />;
+  if (isLoading) return <LoadingOverlay/>;
 
   if (error.hasError) {
     return <ErrorFallback error={error.message ?? "Failed to load products."} onRetry={() => fetchProducts()} />;

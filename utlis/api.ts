@@ -1,7 +1,83 @@
 import { toast } from 'react-hot-toast';
+import { GetOrdersResponse} from "../types/razorpay";
 
 // Base configuration
-const BASE_URL = 'https://ff-backend-00ri.onrender.com/api';
+const BASE_URL = 'http://192.168.29.110:5000/api';
+
+// 🔹 Shared Order Type (match backend `Order` model populate response)
+export interface Order {
+  _id: string;
+  orderNumber?: string;
+  user?: {
+    _id: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+  };
+  items: {
+    productId: {
+      _id: string;
+      title: string;
+      images?: string[];
+      originalPrice?: number;
+      discountedPrice?: number;
+      category?: string;
+    };
+    quantity: number;
+    size?: string;
+    priceAtPurchase: number;
+  }[];
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  totalAmount: number;
+  trackingNumber?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 🔹 Response Types
+export interface AdminOrdersResponse {
+  success: boolean;
+  count: number;
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  orders: Order[];
+}
+
+export interface OrderStatistics {
+  orders: {
+    total: number;
+    pending: number;
+    processing: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
+    recentOrders: number;
+  };
+  revenue: {
+    total: number;
+    average: number;
+  };
+  trends: {
+    monthly: Array<{
+      _id: { year: number; month: number };
+      count: number;
+      revenue: number;
+    }>;
+  };
+}
+
+export interface AdminOrdersFilter {
+  page?: number;
+  limit?: number;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  userSearch?: string;
+}
 
 // Types
 export interface User {
@@ -263,6 +339,54 @@ export interface UserDetailsResponse {
     addresses: Address[];
   };
 }
+
+
+// Add these functions to your existing api.ts file
+
+// // Admin Order Types
+// export interface AdminOrdersResponse {
+//   success: boolean;
+//   count: number;
+//   totalCount: number;
+//   totalPages: number;
+//   currentPage: number;
+//   hasNextPage: boolean;
+//   hasPrevPage: boolean;
+//   orders: Order[];
+// }
+
+export interface OrderStatistics {
+  orders: {
+    total: number;
+    pending: number;
+    processing: number;
+    shipped: number;
+    delivered: number;
+    cancelled: number;
+    recentOrders: number;
+  };
+  revenue: {
+    total: number;
+    average: number;
+  };
+  trends: {
+    monthly: Array<{
+      _id: { year: number; month: number };
+      count: number;
+      revenue: number;
+    }>;
+  };
+}
+
+export interface AdminOrdersFilter {
+  page?: number;
+  limit?: number;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  userSearch?: string;
+}
+
 
 // Token management
 const getToken = (): string | null => {
@@ -617,10 +741,15 @@ export const createOrder = async (orderData: {
   });
 };
 
-export const getUserOrders = async (): Promise<any[]> => { // eslint-disable-line @typescript-eslint/no-explicit-any
-  return apiRequest('/user/orders');
+// ✅ Fetch logged-in user's orders
+export const getUserOrders = async (): Promise<GetOrdersResponse> => {
+  return apiRequest("/orders/my-orders");
 };
 
+// ✅ Fetch single order by ID (optional, for order details page)
+export const getOrderById = async (orderId: string): Promise<Order> => {
+  return apiRequest(`/orders/${orderId}`);
+};
 // 👤 User profile APIs
 export const getUserProfile = async (): Promise<User> => {
   return apiRequest('/user/profile');
@@ -656,4 +785,174 @@ export const getCurrentUserRole = (): string | null => {
   } catch {
     return null;
   }
+};
+
+
+// 📌 Admin: Get all orders with filtering + pagination
+export const getAdminOrders = async (
+  filters: AdminOrdersFilter = {}
+): Promise<AdminOrdersResponse> => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new APIError("No authentication token found", 401); // ✅ fixed
+  }
+
+  const queryParams = new URLSearchParams();
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== "") {
+      queryParams.append(key, value.toString());
+    }
+  });
+
+  const response = await fetch(
+    `${BASE_URL}/orders/admin/all-orders${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new APIError(
+      data.message || "Failed to fetch admin orders",
+      response.status // ✅ fixed
+    );
+  }
+
+  return data;
+};
+
+// 📌 Admin: Get order statistics
+export const getAdminOrderStatistics = async (): Promise<{
+  success: boolean;
+  statistics: OrderStatistics;
+}> => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new APIError("No authentication token found", 401); // ✅ fixed
+  }
+
+  const response = await fetch(`${BASE_URL}/orders/admin/statistics`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new APIError(
+      data.message || "Failed to fetch order statistics",
+      response.status // ✅ fixed
+    );
+  }
+
+  return data;
+};
+
+// 📌 Admin: Get specific order details
+export const getAdminOrderById = async (
+  orderId: string
+): Promise<{ success: boolean; order: Order }> => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new APIError("No authentication token found", 401); // ✅ fixed
+  }
+
+  const response = await fetch(`${BASE_URL}/orders/admin/order/${orderId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new APIError(
+      data.message || "Failed to fetch order details",
+      response.status // ✅ fixed
+    );
+  }
+
+  return data;
+};
+
+// 📌 Admin: Update order status
+export const updateOrderStatus = async (
+  orderId: string,
+  status: string,
+  trackingNumber?: string
+): Promise<{ success: boolean; message: string; order: Order }> => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new APIError("No authentication token found", 401); // ✅ fixed
+  }
+
+  const requestBody: { status: string; trackingNumber?: string } = { status };
+  if (trackingNumber) {
+    requestBody.trackingNumber = trackingNumber;
+  }
+
+  const response = await fetch(
+    `${BASE_URL}/orders/admin/order/${orderId}/status`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(requestBody),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new APIError(
+      data.message || "Failed to update order status",
+      response.status // ✅ fixed
+    );
+  }
+
+  return data;
+};
+
+// 📌 Admin: Delete order
+export const deleteAdminOrder = async (
+  orderId: string
+): Promise<{ success: boolean; message: string }> => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new APIError("No authentication token found", 401); // ✅ fixed
+  }
+
+  const response = await fetch(`${BASE_URL}/orders/admin/order/${orderId}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new APIError(
+      data.message || "Failed to delete order",
+      response.status // ✅ fixed
+    );
+  }
+
+  return data;
 };

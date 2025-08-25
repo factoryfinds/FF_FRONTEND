@@ -443,20 +443,20 @@ export default function PolicyPages() {
                 <div className="space-y-4">
                     <div>
                         <h4 className="font-medium mb-2">Email Support</h4>
-                        <p className="text-sm mb-2">support@factoryfinds.com</p>
-                        <p className="text-sm text-gray-600">Response time: Within 6 hours</p>
+                        <p className="text-sm mb-2">factoryfinds.business@gmail.com</p>
+                        <p className="text-sm text-gray-600">Response time: Within 24 hours</p>
                     </div>
 
                     <div>
                         <h4 className="font-medium mb-2">Phone Support</h4>
-                        <p className="text-sm mb-2">+91 9876543210</p>
-                        <p className="text-sm text-gray-600">Mon-Sat: 9:00 AM - 7:00 PM IST</p>
+                        <p className="text-sm mb-2">+91 9027661442</p>
+                        <p className="text-sm text-gray-600">Mon-Sat: 10:00 AM - 6:00 PM IST</p>
                     </div>
 
                     <div>
                         <h4 className="font-medium mb-2">WhatsApp</h4>
-                        <p className="text-sm mb-2">+91 9876543210</p>
-                        <p className="text-sm text-gray-600">24/7 automated responses, live chat during business hours</p>
+                        <p className="text-sm mb-2">+91 9027661442</p>
+                        <p className="text-sm text-gray-600">live chat during business hours</p>
                     </div>
 
                     <div>
@@ -469,38 +469,35 @@ export default function PolicyPages() {
             <div>
                 <h3 className="text-lg font-medium text-black mb-3">Office Address</h3>
                 <div className="text-sm">
-                    <p className="font-medium">FactoryFinds Private Limited</p>
-                    <p>123 Fashion Street, Connaught Place</p>
-                    <p>New Delhi - 110001, India</p>
-                    <p className="mt-2">GST No: 07AAACF1234A1Z5</p>
+                    <p className="font-medium">Factory Finds</p>
+                    <p>Friends Colony</p>
+                    <p>Rudrapur - 263153, India</p>
                 </div>
             </div>
 
             <div>
                 <h3 className="text-lg font-medium text-black mb-3">Business Inquiries</h3>
                 <div className="space-y-2 text-sm">
-                    <p><strong>Wholesale:</strong> wholesale@factoryfinds.com</p>
-                    <p><strong>Partnerships:</strong> partnerships@factoryfinds.com</p>
-                    <p><strong>Media:</strong> media@factoryfinds.com</p>
-                    <p><strong>Careers:</strong> careers@factoryfinds.com</p>
+                    <p><strong>Partnerships:</strong> factoryfinds.business@gmail.com</p>
+                    <p><strong>Media:</strong> factoryfinds.business@gmail.com</p>
+                    <p><strong>Careers:</strong> factoryfinds.business@gmail.com</p>
                 </div>
             </div>
 
             <div>
                 <h3 className="text-lg font-medium text-black mb-3">Specialized Support</h3>
                 <div className="space-y-2 text-sm">
-                    <p><strong>Returns & Exchanges:</strong> returns@factoryfinds.com</p>
-                    <p><strong>Shipping Issues:</strong> shipping@factoryfinds.com</p>
-                    <p><strong>Technical Issues:</strong> tech@factoryfinds.com</p>
-                    <p><strong>Privacy Concerns:</strong> privacy@factoryfinds.com</p>
+                    <p><strong>Returns & Exchanges:</strong> factoryfinds.business@gmail.com</p>
+                    <p><strong>Shipping Issues:</strong> factoryfinds.business@gmail.com</p>
+                    <p><strong>Technical Issues:</strong> factoryfinds.business@gmail.com</p>
                 </div>
             </div>
 
             <div>
                 <h3 className="text-lg font-medium text-black mb-3">Social Media</h3>
                 <div className="space-y-1 text-sm">
-                    <p>Instagram: @factoryfinds.official</p>
-                    <p>Facebook: FactoryFinds India</p>
+                    <p>Instagram: @factoryfinds.store</p>
+                    <p>Facebook: FactoryFinds</p>
                     <p>Twitter: @factoryfinds_in</p>
                     <p>LinkedIn: FactoryFinds</p>
                 </div>

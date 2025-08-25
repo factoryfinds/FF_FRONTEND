@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { getAllProducts } from "../../../../utlis/api";
 import ProductCard from "@/components/ProductCard";
-import LoadingOverlay from "@/components/LoadingOverlay";
+import LoadingOverlay from "@/components/productLoadingOverlay";
 import { Product } from '../../../../utlis/api';
 import Head from 'next/head';
 
@@ -137,12 +137,6 @@ const TrendingProductCard = ({
             originalPrice={product.originalPrice}
             discountedPrice={product.discountedPrice}
         />
-        <div className="mt-2 px-2 py-1 bg-gray-50 rounded text-xs text-gray-600">
-            <div className="flex justify-between">
-                <span>👁️ {product.clickCount || 0} views</span>
-                <span>🛒 {product.cartAddCount || 0} added</span>
-            </div>
-        </div>
     </div>
 );
 
@@ -387,7 +381,7 @@ export default function TrendingProductsPage() {
     }, [fetchProducts]);
 
     // Render loading state
-    if (loading) return <LoadingOverlay isVisible={loading} />;
+    if (loading) return <LoadingOverlay />;
 
     // Render error state
     if (error.hasError) {
