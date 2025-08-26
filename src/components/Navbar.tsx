@@ -8,12 +8,12 @@ import {
     FiUser,
     FiHeart,
     FiX,
-    FiUsers,
+    // FiUsers,
     FiClock,
     FiTrendingUp,
     FiBox,
-    FiChevronDown,
-    FiChevronUp,
+    // FiChevronDown,
+    // FiChevronUp,
     FiPower,
 } from "react-icons/fi";
 import { FiSettings } from "react-icons/fi";
@@ -40,15 +40,16 @@ const AnimatedBrandText = ({ onClick }: { onClick: () => void }) => {
         { text: "FACTORY FINDS", lang: "English" },
         { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
         { text: "فیکٹری فائنڈز", lang: "Urdu" },
-        { text: "ਫੈਕਟਰੀ ਫਾਇਂਡਸ", lang: "Punjabi" },
+        { text: "FACTORY FINDS", lang: "English" },
+        { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
         { text: "ફેક્ટરી ફાઇન્ડ્સ", lang: "Gujarati" },
         { text: "फैक्टरी फाइंड्स", lang: "Marathi" },
+        { text: "FACTORY FINDS", lang: "English" },
+        { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
         { text: "ఫ్యాక్టరీ ఫైండ్స్", lang: "Telugu" },
         { text: "ಫ್ಯಾಕ್ಟರಿ ಫೈಂಡ್ಸ್", lang: "Kannada" },
-        { text: "ഫാക്ടറി ഫൈൻഡ്സ്", lang: "Malayalam" },
-        { text: "ஃபேக்டரி ஃபைண்ட்ஸ்", lang: "Tamil" },
-        { text: "ଫ୍ୟାକ୍ଟରୀ ଫାଇଣ୍ଡସ୍", lang: "Odia" },
-        { text: "ফ্যাক্টরি ফাইন্ডস", lang: "Bengali" },
+        { text: "FACTORY FINDS", lang: "English" },
+        { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
         { text: "ফেক্টরি ফাইন্ডস", lang: "Assamese" },
     ];
 
@@ -97,8 +98,8 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoginDrawerOpen, setIsLoginDrawerOpen] = useState(false);
     const [role, setRole] = useState<string | null>(null);
-    const [showMen, setShowMen] = useState(false);
-    const [showWomen, setShowWomen] = useState(false);
+    // const [showMen, setShowMen] = useState(false);
+    // const [showWomen, setShowWomen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -576,7 +577,7 @@ const Navbar = () => {
                 <div className="overflow-y-auto h-full pb-20">
                     <ul className="flex flex-col gap-1 px-4 md:px-6 py-4 text-gray-900 text-sm">
                         {/* Men Category */}
-                        <li>
+                        {/* <li>
                             <div
                                 className="flex items-center justify-between p-3 rounded cursor-pointer hover:bg-gray-100 transition-colors"
                                 onClick={() => setShowMen(!showMen)}
@@ -596,10 +597,10 @@ const Navbar = () => {
                                     <li className="cursor-pointer hover:text-black py-1 transition-colors">Jacket</li>
                                 </ul>
                             )}
-                        </li>
+                        </li> */}
 
                         {/* Women Category */}
-                        <li>
+                        {/* <li>
                             <div
                                 className="flex items-center justify-between p-3 rounded cursor-pointer hover:bg-gray-100 transition-colors"
                                 onClick={() => setShowWomen(!showWomen)}
@@ -619,7 +620,7 @@ const Navbar = () => {
                                     <li className="cursor-pointer hover:text-black py-1 transition-colors">Dresses</li>
                                 </ul>
                             )}
-                        </li>
+                        </li> */}
 
                         {/* Other Menu Items */}
                         <li className="flex items-center gap-3 p-3 rounded cursor-pointer hover:bg-gray-100 transition-colors">

@@ -81,7 +81,7 @@ export default function HomePage() {
           transition={{ duration: 0.3 }}
         >
           {/* Hero */}
-          <div className="relative z-10">
+          <div className="relative z-10 ">
             <MainScreen />
           </div>
 

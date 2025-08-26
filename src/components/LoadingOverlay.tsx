@@ -54,9 +54,9 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ isVisible }) => {
           />
         </div>
 
-        {/* Simple text */}
+        {/* Simple text - Fixed typo */}
         <p className="text-gray-600 text-sm font-light">
-          Loading your experiance...
+          Loading your experience...
         </p>
       </div>
 

@@ -1,5 +1,7 @@
-import { use, useState } from 'react';
+import { useState } from 'react';
 import axios, { AxiosError } from 'axios';
+
+const BASE_URL = 'https://ff-backend-00ri.onrender.com';
 
 // Backend API Response Types
 interface CreateOrderResponse {
@@ -109,7 +111,7 @@ const useRazorpay = () => {
        const { user, token } = getAuthToken();
 
        const response = await axios.post<CreateOrderResponse>(
-      `https://ff-backend-00ri.onrender.com/api/payment/create-order`,
+      `${BASE_URL}/api/payment/create-order`,
       {
         ...orderData,        // 👈 flatten orderData
         userId: user._id,    // 👈 sirf userId bhejna hai
@@ -148,7 +150,7 @@ const useRazorpay = () => {
       const { user, token } = getAuthToken();
 
       const response = await axios.post<PaymentVerificationResponse>(
-        `https://ff-backend-00ri.onrender.com/api/payment/verify-payment`,
+        `${BASE_URL}/api/payment/verify-payment`,
         {
         ...paymentData,
         userId: user._id,
@@ -187,7 +189,7 @@ const useRazorpay = () => {
       const token = getAuthToken();
 
       const response = await axios.get<PaymentDetailsResponse>(
-        `https://ff-backend-00ri.onrender.com/api/payment/payment-details/${paymentId}`,
+        `${BASE_URL}/api/payment/payment-details/${paymentId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
