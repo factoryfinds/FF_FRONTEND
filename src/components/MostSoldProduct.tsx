@@ -65,7 +65,7 @@ export default function PopularProductsSection() {
     <>
       <section className="px-4 md:px-20 py-16 bg-white text-black">
         <div className="text-center mb-10">
-          <p className="uppercase text-xs tracking-widest font-light text-gray-500">Editor's Picks</p>
+          <p className="uppercase text-xs tracking-widest font-light text-gray-500">Editor&apos;s Picks</p>
           <h2 className="text-3xl font-light mt-2">Most Popular Products</h2>
         </div>
 
