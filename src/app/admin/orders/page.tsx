@@ -21,8 +21,6 @@ import {
   Trash2,
   Clock,
   CheckCircle,
-  XCircle,
-  Truck,
   ShoppingBag,
   ChevronLeft,
   ChevronRight,
