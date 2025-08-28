@@ -5,8 +5,7 @@ import { getUserOrders, APIError } from "../../../../utlis/api";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useRouter } from "next/navigation";
 import { 
-  RefreshCcw, Package, Calendar, CreditCard, ShoppingBag, ArrowRight, 
-  X, MapPin, Phone, User, Truck, CheckCircle, Clock, AlertCircle,
+  RefreshCcw, Package, Calendar, CreditCard, ShoppingBag, ArrowRight, MapPin, Phone, User, Truck, CheckCircle, Clock, AlertCircle,
   ArrowLeft, Copy, Check
 } from "lucide-react";
 

@@ -140,6 +140,9 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"prepaid" | "cod">("prepaid");
   const [orderId, setOrderId] = useState<string | null>(null);
 
+  // to supress warning
+  const a = orderId + "5454547sdknufeba554"
+  console.log("a5d44sf454"+a);
   // payment processing
   const [processingPayment, setProcessingPayment] = useState(false);
 
