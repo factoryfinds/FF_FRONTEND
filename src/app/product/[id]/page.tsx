@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation"; // Add useRouter
 import ProductCard from "../../../components/RelatedProductsCard";
 import { addProductToCart, getAllProducts, Product } from '../../../../utlis/api';
 import LoadingOverlay from "@/components/LoadingOverlay";
@@ -24,16 +24,18 @@ interface ProductWithSizes extends Omit<Product, 'sizes'> {
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const router = useRouter(); // Add router
   const [product, setProduct] = useState<ProductWithSizes | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingRelated, setLoadingRelated] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false); // Add buying now state
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState({ x: 50, y: 50, active: false });
-  const [showSizes, setShowSizes] = useState(false);
+  const [showSizes, setShowSizes] = useState(true);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isMobileFullScreen, setIsMobileFullScreen] = useState(false);
 
@@ -157,7 +159,7 @@ export default function ProductDetails() {
     trackMouse: true,
   });
 
-  if (loadingProducts || addingToCart) return <LoadingOverlay isVisible={loadingProducts} />;
+  if (loadingProducts || addingToCart) return <LoadingOverlay isVisible={loadingProducts || addingToCart} />;
   if (!product) return <LoadingOverlay isVisible={loadingProducts} />;
 
   // Fixed handleQuantityChange with proper typing
@@ -194,6 +196,33 @@ export default function ProductDetails() {
     }
     finally {
       setAddingToCart(false);
+    }
+  };
+
+  // New handleBuyNow function
+  const handleBuyNow = async () => {
+    if (!selectedSize) {
+      return toast.error("Please select size before proceeding to checkout.");
+    }
+    try {
+      setBuyingNow(true);
+      // Add product to cart first
+      await addProductToCart({ productId: product._id, quantity, size: selectedSize });
+
+      // Update cart events
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+      localStorage.setItem('cart-updated', Date.now().toString());
+
+      // Navigate to checkout page
+      router.push('/checkout');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to proceed to checkout');
+      }
+    } finally {
+      setBuyingNow(false);
     }
   };
 
@@ -314,17 +343,51 @@ export default function ProductDetails() {
             </div>
 
             {/* Thumbnails */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3">
+            {/* Thumbnails */}
+            <div
+              className="
+    hidden sm:grid sm:grid-cols-4 lg:grid-cols-2 gap-3 
+    sm:mt-3
+  "
+            >
               {product.images.slice(0, 4).map((img, index) => (
                 <div
                   key={index}
-                  className={`aspect-square overflow-hidden rounded-lg border-2 cursor-pointer ${index === currentImageIndex ? "border-white" : "border-transparent hover:border-gray-400"}`}
+                  className={`aspect-square overflow-hidden rounded-lg border-2 cursor-pointer ${index === currentImageIndex
+                      ? "border-white"
+                      : "border-transparent hover:border-gray-400"
+                    }`}
                   onClick={() => setCurrentImageIndex(index)}
                 >
-                  <img src={img} alt={`${product.title} ${index}`} className="w-full h-full object-cover" />
+                  <img
+                    src={img}
+                    alt={`${product.title} ${index}`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               ))}
             </div>
+
+            {/* Mobile thumbnails - horizontal scroll */}
+            <div className="flex sm:hidden gap-2 mt-3 overflow-x-auto scrollbar-hide">
+              {product.images.map((img, index) => (
+                <div
+                  key={index}
+                  className={`w-20 h-20 flex-shrink-0 overflow-hidden rounded-md border-2 cursor-pointer ${index === currentImageIndex
+                      ? "border-white"
+                      : "border-transparent hover:border-gray-400"
+                    }`}
+                  onClick={() => setCurrentImageIndex(index)}
+                >
+                  <img
+                    src={img}
+                    alt={`${product.title} ${index}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+
           </div>
 
           {/* Right Side: Product Details */}
@@ -348,23 +411,23 @@ export default function ProductDetails() {
             </div>
 
             {/* Product Title */}
-            <h1 className="text-xl sm:text-2xl font-normal text-black mb-5 leading-tight">
+            <h1 className="text-xl sm:text-2xl font-bold text-black mb-5 leading-tight">
               {product.title}
             </h1>
 
             {/* Price */}
             <div className="mb-6">
               <div className="flex items-center gap-3 mb-0">
-                <span className="text-lg sm:text-xl font-light text-black">
-                  ₹{product.discountedPrice.toLocaleString()}.00
+                <span className="text-lg sm:text-xl font-normal text-black">
+                  ₹ {product.discountedPrice.toLocaleString()}.00
                 </span>
                 {product.originalPrice !== product.discountedPrice && (
-                  <span className="text-base sm:text-lg font-extralight text-gray-500 line-through">
-                    ₹{product.originalPrice.toLocaleString()}.00
+                  <span className="text-base sm:text-lg font-light text-gray-500 line-through">
+                    ₹ {product.originalPrice.toLocaleString()}.00
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-800">(M.R.P. incl of all taxes)</p>
+              <p className="text-xs font-normal text-gray-800">(M.R.P. incl of all taxes)</p>
             </div>
 
             {/* Select Your Size with Size Guide */}
@@ -407,7 +470,7 @@ export default function ProductDetails() {
                           ? "border-black bg-black text-white"
                           : "border-gray-300 text-black hover:border-black"
                           } ${sizeStock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
-                        disabled={addingToCart || sizeStock === 0}
+                        disabled={addingToCart || buyingNow || sizeStock === 0}
                       >
                         {sizeValue}
                       </button>
@@ -424,7 +487,7 @@ export default function ProductDetails() {
                 <button
                   onClick={() => handleQuantityChange(-1)}
                   className="w-8 h-8 border border-gray-300 rounded flex items-center justify-center hover:border-black disabled:opacity-50"
-                  disabled={quantity <= 1 || addingToCart}
+                  disabled={quantity <= 1 || addingToCart || buyingNow}
                 >
                   -
                 </button>
@@ -438,7 +501,7 @@ export default function ProductDetails() {
                     const maxQuantity = selectedSizeObj
                       ? getSizeStock(selectedSizeObj, product.inventory)
                       : product.inventory;
-                    return quantity >= maxQuantity || addingToCart;
+                    return quantity >= maxQuantity || addingToCart || buyingNow;
                   })()}
                 >
                   +
@@ -528,15 +591,20 @@ export default function ProductDetails() {
               return availableStock > 0 ? (
                 <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-2 mb-12 sm:mb-18">
                   <button
-                    className="flex-1 bg-black text-white py-3 px-6 text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50"
-                    disabled={addingToCart || !selectedSize}
+                    className="flex-1 bg-black text-white py-3 px-6 text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center"
+                    disabled={addingToCart || buyingNow || !selectedSize}
+                    onClick={handleBuyNow}
                   >
-                    Buy Now
+                    {buyingNow ? (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      "Buy Now"
+                    )}
                   </button>
                   <button
                     className="flex-1 border border-black text-black py-3 px-6 text-sm font-medium rounded-xl cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                     onClick={handleAddToCart}
-                    disabled={addingToCart || !selectedSize}
+                    disabled={addingToCart || buyingNow || !selectedSize}
                   >
                     {addingToCart ? (
                       <div className="flex items-center gap-2">

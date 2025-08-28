@@ -1,7 +1,7 @@
 // utils/tokenManager.ts
 import { toast } from 'react-hot-toast';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com/api';
 
 interface TokenData {
   accessToken: string;

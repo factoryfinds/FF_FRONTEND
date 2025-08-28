@@ -279,7 +279,8 @@ const LoginDrawer: React.FC<LoginDrawerProps> = ({ isOpen, onClose, onLoginSucce
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="fixed inset-0 bg-white/10 backdrop-blur-md z-40"
+
           onClick={onClose}
         />
       )}
@@ -289,139 +290,139 @@ const LoginDrawer: React.FC<LoginDrawerProps> = ({ isOpen, onClose, onLoginSucce
         className={`fixed top-0 right-0 h-full w-full sm:w-4/5 md:w-3/5 lg:w-2/5 bg-white shadow-lg z-50 transition-transform duration-300 ease-in-out font-sans ${isOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 sm:px-10 py-6 sm:py-12 border-b border-gray-200">
-          <h2 className="text-xl sm:text-2xl font-light text-black">My Account</h2>
-          <button
-            onClick={onClose}
-            className="text-black cursor-pointer p-1 hover:bg-gray-100 rounded transition-colors"
-            disabled={isLoading}
-          >
-            <FiX size={24} />
-          </button>
-        </div>
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 sm:px-10 py-6 sm:py-12 border-b border-gray-200">
+        <h2 className="text-xl sm:text-2xl font-light text-black">My Account</h2>
+        <button
+          onClick={onClose}
+          className="text-black cursor-pointer p-1 hover:bg-gray-100 rounded transition-colors"
+          disabled={isLoading}
+        >
+          <FiX size={24} />
+        </button>
+      </div>
 
-        <div className="px-6 sm:px-10 pb-10 overflow-y-auto h-full">
-          <form className="space-y-6 mt-6" onSubmit={handleSendOtp}>
-            <div className="flex justify-between text-sm mt-6 sm:mt-10 text-black font-medium">
-              <label>Login*</label>
-              <span>Required Fields*</span>
+      <div className="px-6 sm:px-10 pb-10 overflow-y-auto h-full">
+        <form className="space-y-6 mt-6" onSubmit={handleSendOtp}>
+          <div className="flex justify-between text-sm mt-6 sm:mt-10 text-black font-medium">
+            <label>Login*</label>
+            <span>Required Fields*</span>
+          </div>
+
+          {/* Phone Input */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <div className="flex items-center border border-gray-300 rounded-2xl focus-within:ring-2 focus-within:ring-black focus-within:border-transparent">
+                  <span className="px-3 text-gray-600 font-medium">+91</span>
+                  <input
+                    type="tel"
+                    placeholder="Enter mobile number"
+                    value={phone}
+                    onChange={(e) => handlePhoneChange(e.target.value)}
+                    className="flex-1 px-2 py-3 focus:outline-none text-black disabled:bg-gray-100 rounded-r-2xl"
+                    disabled={otpSent || isLoading}
+                    maxLength={10}
+                  />
+                </div>
+              </div>
+              {otpSent && (
+                <button
+                  type="button"
+                  onClick={handleEditPhone}
+                  className="px-3 py-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  disabled={isLoading}
+                >
+                  Edit
+                </button>
+              )}
             </div>
 
-            {/* Phone Input */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="flex-1">
-                  <div className="flex items-center border border-gray-300 rounded-2xl focus-within:ring-2 focus-within:ring-black focus-within:border-transparent">
-                    <span className="px-3 text-gray-600 font-medium">+91</span>
-                    <input
-                      type="tel"
-                      placeholder="Enter mobile number"
-                      value={phone}
-                      onChange={(e) => handlePhoneChange(e.target.value)}
-                      className="flex-1 px-2 py-3 focus:outline-none text-black disabled:bg-gray-100 rounded-r-2xl"
-                      disabled={otpSent || isLoading}
-                      maxLength={10}
-                    />
-                  </div>
-                </div>
-                {otpSent && (
+            {phone && !validatePhoneNumber(phone) && (
+              <p className="text-red-500 text-xs">
+                Please enter a valid 10-digit mobile number starting with 6-9
+              </p>
+            )}
+          </div>
+
+          {/* OTP Section */}
+          {otpSent && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <p className="text-sm text-black font-medium mb-2">
+                  OTP sent to <span className="font-semibold">+91 {maskedPhone}</span>
+                </p>
+                <p className="text-xs text-gray-600">
+                  Enter the 6-digit code sent to your Whatsapp
+                </p>
+              </div>
+
+              <div className="flex gap-2 justify-center max-w-xs mx-auto">
+                {otp.map((digit, idx) => (
+                  <input
+                    key={idx}
+                    ref={(el) => {
+                      otpRefs.current[idx] = el;
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={digit}
+                    onChange={(e) => handleOtpChange(e.target.value, idx)}
+                    onKeyDown={(e) => handleOtpKeyDown(e, idx)}
+                    onPaste={idx === 0 ? handleOtpPaste : undefined}
+                    className="w-10 h-12 border-b-2 border-gray-400 text-center text-lg text-black focus:outline-none focus:border-black transition-colors disabled:bg-gray-100"
+                    disabled={isLoading}
+                  />
+                ))}
+              </div>
+
+              {/* Resend OTP */}
+              <div className="text-center">
+                {resendCooldown > 0 ? (
+                  <p className="text-sm text-gray-600">
+                    Resend OTP in {resendCooldown}s
+                  </p>
+                ) : (
                   <button
                     type="button"
-                    onClick={handleEditPhone}
-                    className="px-3 py-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    onClick={handleResendOtp}
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium disabled:text-gray-400"
                     disabled={isLoading}
                   >
-                    Edit
+                    Resend OTP
                   </button>
                 )}
               </div>
-
-              {phone && !validatePhoneNumber(phone) && (
-                <p className="text-red-500 text-xs">
-                  Please enter a valid 10-digit mobile number starting with 6-9
-                </p>
-              )}
             </div>
+          )}
 
-            {/* OTP Section */}
-            {otpSent && (
-              <div className="space-y-4">
-                <div className="text-center">
-                  <p className="text-sm text-black font-medium mb-2">
-                    OTP sent to <span className="font-semibold">+91 {maskedPhone}</span>
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    Enter the 6-digit code sent to your phone
-                  </p>
-                </div>
-
-                <div className="flex gap-2 justify-center max-w-xs mx-auto">
-                  {otp.map((digit, idx) => (
-                    <input
-                      key={idx}
-                      ref={(el) => {
-                        otpRefs.current[idx] = el;
-                      }}
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleOtpChange(e.target.value, idx)}
-                      onKeyDown={(e) => handleOtpKeyDown(e, idx)}
-                      onPaste={idx === 0 ? handleOtpPaste : undefined}
-                      className="w-10 h-12 border-b-2 border-gray-400 text-center text-lg text-black focus:outline-none focus:border-black transition-colors disabled:bg-gray-100"
-                      disabled={isLoading}
-                    />
-                  ))}
-                </div>
-
-                {/* Resend OTP */}
-                <div className="text-center">
-                  {resendCooldown > 0 ? (
-                    <p className="text-sm text-gray-600">
-                      Resend OTP in {resendCooldown}s
-                    </p>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={handleResendOtp}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium disabled:text-gray-400"
-                      disabled={isLoading}
-                    >
-                      Resend OTP
-                    </button>
-                  )}
-                </div>
+          {/* Submit Button */}
+          <button
+            type={otpSent ? "button" : "submit"}
+            onClick={otpSent ? handleVerifyOtp : undefined}
+            className="w-full bg-black text-white py-3 cursor-pointer rounded-full font-semibold hover:bg-gray-900 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+            disabled={isLoading || (otpSent && otp.join("").length !== 6) || (!otpSent && !validatePhoneNumber(phone))}
+          >
+            {isLoading ? (
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                {otpSent ? "Verifying..." : "Sending..."}
               </div>
+            ) : (
+              otpSent ? "Verify & Login" : "Send OTP"
             )}
+          </button>
+        </form>
 
-            {/* Submit Button */}
-            <button
-              type={otpSent ? "button" : "submit"}
-              onClick={otpSent ? handleVerifyOtp : undefined}
-              className="w-full bg-black text-white py-3 cursor-pointer rounded-full font-semibold hover:bg-gray-900 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
-              disabled={isLoading || (otpSent && otp.join("").length !== 6) || (!otpSent && !validatePhoneNumber(phone))}
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  {otpSent ? "Verifying..." : "Sending..."}
-                </div>
-              ) : (
-                otpSent ? "Verify & Login" : "Send OTP"
-              )}
-            </button>
-          </form>
-
-          {/* Additional Info */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-600">
-              By continuing, you agree to our Terms of Service and Privacy Policy
-            </p>
-          </div>
+        {/* Additional Info */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-gray-600">
+            By continuing, you agree to our Terms of Service and Privacy Policy
+          </p>
         </div>
       </div>
+    </div >
     </>
   );
 };

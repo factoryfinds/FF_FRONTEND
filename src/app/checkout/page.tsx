@@ -213,7 +213,7 @@ export default function CheckoutPage() {
 
   /* ----- Price math ----- */
   const getItemPrice = useCallback((item: CartItem) => {
-    return item.product?.discountedPrice || item.product?.originalPrice || 799;
+    return item.product?.discountedPrice || item.product?.originalPrice || 1999;
   }, []);
 
   const bagTotal = useMemo(
@@ -225,11 +225,12 @@ export default function CheckoutPage() {
     [cartItems, getItemPrice]
   );
 
-  const prepaidDiscount = paymentMethod === "prepaid" ? Math.round(bagTotal * 0.05) : 0;
-  const additionalDiscount = bagTotal >= 10000 ? 100 : 0;
-  const deliveryCharges = bagTotal >= 499 ? 0 : 99;
-  const totalDiscount = prepaidDiscount + additionalDiscount;
-  const grandTotal = bagTotal - totalDiscount + deliveryCharges;
+  // const prepaidDiscount = paymentMethod === "prepaid" ? Math.round(bagTotal * 1) : 0;
+  // const additionalDiscount = bagTotal >= 10000 ? 100 : 0;
+  // const deliveryCharges = bagTotal >= 499 ? 0 : 99;
+  // const totalDiscount = prepaidDiscount + additionalDiscount;
+  const grandTotal = bagTotal //- totalDiscount ; //+ deliveryCharges;
+  console.log(grandTotal);
 
   /* ----- Payment Handler ----- */
   const handlePlaceOrder = async () => {
@@ -290,13 +291,20 @@ export default function CheckoutPage() {
         }
       });
 
+      console.log('Key received from backend:', orderData.key_id);
+      console.log('Key type check:', {
+        isLiveKey: orderData.key_id?.startsWith('rzp_live_'),
+        isTestKey: orderData.key_id?.startsWith('rzp_test_'),
+        keyPrefix: orderData.key_id?.substring(0, 12)
+      });
+
       const options: RazorpayOptions = {
-        key: orderData.key_id,
+        key: orderData.key_id, // This should be your live key
         amount: orderData.cart_summary.totalAmount,
         currency: "INR",
         name: 'Factory Finds',
         description: `Purchase of ${cartItems.length} item(s)`,
-        image: '/logo.png', // Make sure you have a logo.png in your public folder
+        image: '/logo.png',
         order_id: orderData.razorpay_order.id,
         handler: async function (response: RazorpayResponse) {
           try {
@@ -513,7 +521,7 @@ export default function CheckoutPage() {
           <h3 className="text-xl font-medium mb-2">Please log in to checkout</h3>
           <p className="text-gray-600 mb-6">You need an account to complete purchase.</p>
           <div className="flex justify-center gap-3">
-            <button className="px-4 py-2 bg-black text-white rounded border border-black" onClick={() => router.push("/login")}>Login</button>
+            <button className="px-4 py-2 bg-black text-white rounded border border-black" onClick={() => router.push("/")}>Login</button>
             <button className="px-4 py-2 bg-white border border-gray-300 rounded" onClick={() => router.push("/")}>Home</button>
           </div>
         </div>
@@ -528,7 +536,7 @@ export default function CheckoutPage() {
           <div className="text-8xl mb-4">🛒</div>
           <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
           <p className="text-gray-600 mb-6">Add items to continue.</p>
-          <button className="bg-black text-white px-6 py-3 rounded border border-black" onClick={() => router.push("/products")}>Continue shopping</button>
+          <button className="bg-black text-white px-6 py-3 rounded border border-black" onClick={() => router.push("/product/allProducts")}>Continue shopping</button>
         </div>
       </div>
     );
@@ -553,11 +561,11 @@ export default function CheckoutPage() {
       {/* Step indicator */}
       <div className="max-w-6xl mx-auto mb-8 flex items-center justify-between md:justify-center gap-6">
         <div className="flex items-center gap-6">
-          <StepBubble n={1} label="Address" />
+          <StepBubble n={1} label="Order Summary" />
           <div className="w-8 h-[1px] bg-gray-300 hidden md:block" />
-          <StepBubble n={2} label="Payment" />
+          <StepBubble n={2} label="Address" />
           <div className="w-8 h-[1px] bg-gray-300 hidden md:block" />
-          <StepBubble n={3} label="Summary" />
+          <StepBubble n={3} label="Payment" />
           <div className="w-8 h-[1px] bg-gray-300 hidden md:block" />
           <StepBubble n={4} label="Success" />
         </div>
@@ -569,6 +577,37 @@ export default function CheckoutPage() {
           <AnimatePresence mode="wait" initial={false}>
             {step === 1 && (
               <motion.section key="step1" {...stepMotion} className="bg-white border border-gray-300 rounded p-6">
+                <h2 className="text-lg font-medium mb-4">Order Summary</h2>
+
+                <div className="space-y-4">
+                  {cartItems.map((it) => {
+                    const price = getItemPrice(it);
+                    return (
+                      <div key={`${it._id}-${it.size}`} className="flex gap-4 items-start border-b border-gray-100 pb-4 last:border-b-0">
+                        <div className="w-20 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                          <img src={it.product.images?.[0] || "/placeholder.png"} alt={it.product.title} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-medium text-sm">{it.product.title}</h3>
+                          <div className="text-sm text-gray-600 mt-1">Size: {it.size} • Qty: {it.quantity}</div>
+                          <div className="flex items-center justify-between mt-3">
+                            <div className="text-sm text-gray-600">₹{price.toLocaleString()}</div>
+                            <div className="font-semibold">₹{(price * it.quantity).toLocaleString()}</div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="flex justify-end mt-6">
+                  <button onClick={() => { setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="px-4 py-2 bg-black text-white rounded border border-black">Continue</button>
+                </div>
+              </motion.section>
+            )}
+
+            {step === 2 && (
+              <motion.section key="step2" {...stepMotion} className="bg-white border border-gray-300 rounded p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-medium">Delivery Address</h2>
                   <div className="flex items-center gap-3">
@@ -651,14 +690,15 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div className="flex justify-end mt-6">
-                  <button onClick={() => { if (!selectedAddress) { toast.error("Select or add an address first"); return; } setStep(2); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="px-4 py-2 bg-black text-white rounded border border-black disabled:opacity-50">Continue</button>
+                <div className="flex justify-between mt-6">
+                  <button className="px-4 py-2 border border-gray-300 rounded" onClick={() => setStep(1)}>Back</button>
+                  <button onClick={() => { if (!selectedAddress) { toast.error("Select or add an address first"); return; } setStep(3); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="px-4 py-2 bg-black text-white rounded border border-black disabled:opacity-50">Continue</button>
                 </div>
               </motion.section>
             )}
 
-            {step === 2 && (
-              <motion.section key="step2" {...stepMotion} className="bg-white border border-gray-300 rounded p-6">
+            {step === 3 && (
+              <motion.section key="step3" {...stepMotion} className="bg-white border border-gray-300 rounded p-6">
                 <h2 className="text-lg font-medium mb-4">Payment</h2>
                 <div className="space-y-3">
                   <div onClick={() => setPaymentMethod("prepaid")} className={`border rounded p-4 cursor-pointer ${paymentMethod === "prepaid" ? "border-black bg-gray-50" : "border-gray-300 hover:border-black"}`}>
@@ -673,62 +713,36 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div onClick={() => setPaymentMethod("cod")} className={`border rounded p-4 cursor-pointer ${paymentMethod === "cod" ? "border-black bg-gray-50" : "border-gray-300 hover:border-black"}`}>
+                  <div
+                    className={`border rounded p-4 cursor-not-allowed bg-gray-100 opacity-60`}
+                  >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Cash on Delivery</p>
-                        <p className="text-sm text-gray-600">Pay when you receive</p>
+                        <p className="text-sm text-gray-600">Not available at the moment</p>
                       </div>
                       <div>
-                        <input type="radio" name="pay" checked={paymentMethod === "cod"} onChange={() => setPaymentMethod("cod")} className="accent-black" />
+                        <input
+                          type="radio"
+                          name="pay"
+                          disabled
+                          className="accent-black cursor-not-allowed"
+                        />
                       </div>
                     </div>
                   </div>
+
                 </div>
 
                 <div className="flex justify-between mt-6">
-                  <button className="px-4 py-2 border border-gray-300 rounded" onClick={() => setStep(1)}>Back</button>
-                  <button className="px-4 py-2 bg-black text-white rounded border border-black" onClick={() => { setStep(3); window.scrollTo({ top: 0, behavior: "smooth" }); }}>Continue</button>
-                </div>
-              </motion.section>
-            )}
-
-            {step === 3 && (
-              <motion.section key="step3" {...stepMotion} className="bg-white border border-gray-300 rounded p-6">
-                <h2 className="text-lg font-medium mb-4">Review Order</h2>
-
-                <div className="space-y-4">
-                  {cartItems.map((it) => {
-                    const price = getItemPrice(it);
-                    return (
-                      <div key={`${it._id}-${it.size}`} className="flex gap-4 items-start border-b border-gray-100 pb-4 last:border-b-0">
-                        <div className="w-20 h-24 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                          <img src={it.product.images?.[0] || "/placeholder.png"} alt={it.product.title} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium text-sm">{it.product.title}</h3>
-                          <div className="text-sm text-gray-600 mt-1">Size: {it.size} • Qty: {it.quantity}</div>
-                          <div className="flex items-center justify-between mt-3">
-                            <div className="text-sm text-gray-600">₹{price.toLocaleString()}</div>
-                            <div className="font-semibold">₹{(price * it.quantity).toLocaleString()}</div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="flex items-center justify-between mt-6 gap-3">
-                  <button onClick={() => setStep(2)} className="px-4 py-2 border border-gray-300 rounded">Back</button>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => handlePlaceOrder()}
-                      className="px-4 py-2 bg-black text-white rounded border border-black disabled:opacity-50"
-                      disabled={isProcessing}
-                    >
-                      {buttonText}
-                    </button>
-                  </div>
+                  <button className="px-4 py-2 border border-gray-300 rounded" onClick={() => setStep(2)}>Back</button>
+                  <button
+                    onClick={() => handlePlaceOrder()}
+                    className="px-4 py-2 bg-black text-white rounded border border-black disabled:opacity-50"
+                    disabled={isProcessing}
+                  >
+                    {buttonText}
+                  </button>
                 </div>
 
                 {/* Payment Error Display */}
@@ -751,12 +765,12 @@ export default function CheckoutPage() {
                   }
                 </p>
                 <p className="text-gray-600 mb-4">We will send updates via email / SMS.</p>
-                <p className="font-medium mb-6">
+                {/* <p className="font-medium mb-6">
                   {orderId ? `Order ID: ${orderId}` : ""}
-                </p>
+                </p> */}
                 <div className="flex justify-center gap-3">
-                  <button onClick={() => router.push("/products")} className="px-4 py-2 bg-black text-white rounded border border-black">Continue shopping</button>
-                  <button onClick={() => router.push("/orders")} className="px-4 py-2 border border-gray-300 rounded">View orders</button>
+                  <button onClick={() => router.push("/product/allProducts")} className="px-4 py-2 bg-black text-white rounded border border-black">Continue shopping</button>
+                  <button onClick={() => router.push("/profile/orders")} className="px-4 py-2 border border-gray-300 rounded">View orders</button>
                 </div>
               </motion.section>
             )}
@@ -769,10 +783,8 @@ export default function CheckoutPage() {
             <h3 className="text-lg font-medium mb-4">Order Summary</h3>
             <div className="space-y-2 text-sm mb-4">
               <div className="flex justify-between text-gray-600"><span>Bag Total</span><span>₹{bagTotal.toLocaleString()}</span></div>
-              {prepaidDiscount > 0 && (<div className="flex justify-between text-green-600"><span>Prepaid Discount</span><span>-₹{prepaidDiscount.toLocaleString()}</span></div>)}
-              {additionalDiscount > 0 && (<div className="flex justify-between text-green-600"><span>Additional Discount</span><span>-₹{additionalDiscount.toLocaleString()}</span></div>)}
-              <div className="flex justify-between"><span>Delivery</span><span className={deliveryCharges === 0 ? "text-green-600" : ""}>{deliveryCharges === 0 ? "FREE" : `₹${deliveryCharges}`}</span></div>
-              {totalDiscount > 0 && (<div className="flex justify-between text-green-600 font-medium"><span>Total Savings</span><span>₹{totalDiscount.toLocaleString()}</span></div>)}
+              <div className="flex justify-between text-gray-600"><span>Original Price</span><span>₹{bagTotal.toLocaleString()}</span></div>
+              
             </div>
 
             <div className="border-t border-gray-200 pt-3">

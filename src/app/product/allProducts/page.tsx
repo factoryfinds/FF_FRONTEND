@@ -400,8 +400,8 @@ export default function AllProductsPage() {
           role="status"
           aria-live="polite"
         >
-          <span className="inline-block bg-gradient-to-r from-yellow-400 via-orange-400 to-rose-400 px-3 py-2 rounded-md shadow-md animate-pulse-slow text-black">
-            Limited time: Extra 10% OFF on select styles — use code <strong>FIND10</strong>
+          <span className="inline-block bg-White px-3 py-2 rounded-md shadow-md animate-pulse-slow text-black">
+            Limited time: Extra 10% OFF on select styles — use code <strong>FIND10</strong> Auto Applied at checkout
           </span>
         </div>
       </div>

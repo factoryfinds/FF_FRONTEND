@@ -7,34 +7,62 @@ const BASE_URL = 'https://ff-backend-00ri.onrender.com/api';
 // 🔹 Shared Order Type (match backend `Order` model populate response)
 export interface Order {
   _id: string;
-  orderNumber?: string;
-  user?: {
+  orderNumber: string;
+  user: {
     _id: string;
-    name?: string;
-    email?: string;
-    phone?: string;
-    address?: string;
+    phone: string;
   };
   items: {
     productId: {
       _id: string;
       title: string;
-      images?: string[];
-      originalPrice?: number;
-      discountedPrice?: number;
-      category?: string;
+      originalPrice: number;
+      discountedPrice: number;
+      images: string[];
     };
+    title: string;
+    size: string;
     quantity: number;
-    size?: string;
     priceAtPurchase: number;
+    image: string;
   }[];
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+    country: string;
+  };
+  paymentMethod: string;
+  paymentStatus: string;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  isDelivered: boolean;
+  subtotal: number;
+  shippingCharges: number;
   totalAmount: number;
-  trackingNumber?: string;
+  discountAmount: number;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  razorpaySignature?: string;
+  statusHistory: any[]; // You may want to define a more specific type for this
   createdAt: string;
   updatedAt: string;
+  __v: number;
 }
 
+// If you need a response wrapper interface as well
+export interface OrdersResponse {
+  success: boolean;
+  count: number;
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+  orders: Order[];
+}
 // 🔹 Response Types
 export interface AdminOrdersResponse {
   success: boolean;

@@ -123,25 +123,57 @@ declare global {
 }
 
 // types/order.ts (acha rahega alag file me types rakhe)
+export interface Product {
+  _id: string;
+  title: string;
+  images: string[];
+}
+
 export interface OrderItem {
-  productId: {
-    _id: string;
-    title: string;
-    images: string[];
-  };
+  productId: Product;
+  title: string; // extra field in response
   size: string;
   quantity: number;
   priceAtPurchase: number;
   image?: string;
 }
 
+export interface User {
+  _id: string;
+  phone: string;
+}
+
+export interface ShippingAddress {
+  fullName: string;
+  phone: string;
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+}
+
 export interface Order {
   _id: string;
+  user: User;
   orderNumber: string;
   items: OrderItem[];
-  totalAmount: number;
+  shippingAddress: ShippingAddress;
+  paymentMethod: string;
+  paymentStatus: string;
   status: string;
+  isDelivered: boolean;
+  subtotal: number;
+  shippingCharges: number;
+  totalAmount: number;
+  discountAmount: number;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  razorpaySignature?: string;
+  statusHistory: any[]; // if you know shape, replace `any`
   createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 export interface GetOrdersResponse {

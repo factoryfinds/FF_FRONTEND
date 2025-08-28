@@ -4,7 +4,11 @@ import React, { useEffect, useState, useCallback } from "react";
 import { getUserOrders, APIError } from "../../../../utlis/api";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { useRouter } from "next/navigation";
-import { RefreshCcw, Package, Calendar, CreditCard, ShoppingBag, ArrowRight } from "lucide-react";
+import { 
+  RefreshCcw, Package, Calendar, CreditCard, ShoppingBag, ArrowRight, 
+  X, MapPin, Phone, User, Truck, CheckCircle, Clock, AlertCircle,
+  ArrowLeft, Copy, Check
+} from "lucide-react";
 
 type OrderItem = {
   productId: {
@@ -16,6 +20,7 @@ type OrderItem = {
   quantity: number;
   priceAtPurchase: number;
   image?: string;
+  title: string;
 };
 
 type Order = {
@@ -23,8 +28,26 @@ type Order = {
   orderNumber: string;
   items: OrderItem[];
   totalAmount: number;
+  subtotal: number;
+  shippingCharges: number;
+  discountAmount: number;
   status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  razorpayPaymentId?: string;
+  razorpayOrderId?: string;
+  isDelivered: boolean;
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    street: string;
+    city: string;
+    state: string;
+    pincode: string;
+    country: string;
+  };
   createdAt: string;
+  updatedAt: string;
 };
 
 // Status color mapping
@@ -45,11 +68,29 @@ const getStatusStyle = (status: string) => {
   }
 };
 
+const getStatusIcon = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'pending':
+      return Clock;
+    case 'processing':
+      return Package;
+    case 'shipped':
+      return Truck;
+    case 'delivered':
+      return CheckCircle;
+    case 'cancelled':
+      return AlertCircle;
+    default:
+      return Package;
+  }
+};
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const router = useRouter();
 
   const fetchOrders = useCallback(async (isRefresh = false) => {
@@ -103,6 +144,16 @@ export default function OrdersPage() {
       />
     );
 
+  // Show order details modal
+  if (selectedOrder) {
+    return (
+      <OrderDetailView 
+        order={selectedOrder} 
+        onClose={() => setSelectedOrder(null)} 
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
@@ -134,7 +185,11 @@ export default function OrdersPage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
           {orders.map((order) => (
-            <OrderCard key={order._id} order={order} />
+            <OrderCard 
+              key={order._id} 
+              order={order} 
+              onViewDetails={() => setSelectedOrder(order)}
+            />
           ))}
         </div>
       </div>
@@ -143,7 +198,7 @@ export default function OrdersPage() {
 }
 
 // Enhanced Order Card Component
-const OrderCard = ({ order }: { order: Order }) => {
+const OrderCard = ({ order, onViewDetails }: { order: Order; onViewDetails: () => void }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
       {/* Order Header */}
@@ -192,14 +247,14 @@ const OrderCard = ({ order }: { order: Order }) => {
                       item.image ||
                       "/placeholder.png"
                     }
-                    alt={product.title || "Product"}
+                    alt={product.title || item.title || "Product"}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 
                 <div className="flex-1 min-w-0">
                   <h4 className="text-sm font-medium text-gray-900 truncate">
-                    {product.title || "Untitled Product"}
+                    {product.title || item.title || "Untitled Product"}
                   </h4>
                   <div className="flex items-center gap-4 text-xs text-gray-600 mt-1">
                     <span className="bg-white px-2 py-1 rounded border border-gray-200">
@@ -235,10 +290,234 @@ const OrderCard = ({ order }: { order: Order }) => {
               </p>
             </div>
             
-            <button className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200">
+            <button 
+              onClick={onViewDetails}
+              className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 transition-all duration-200"
+            >
               View Details
               <ArrowRight size={14} />
             </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Order Detail View Component
+const OrderDetailView = ({ order, onClose }: { order: Order; onClose: () => void }) => {
+  const [copiedPaymentId, setCopiedPaymentId] = useState(false);
+  const StatusIcon = getStatusIcon(order.status);
+
+  const copyPaymentId = async () => {
+    if (order.razorpayPaymentId) {
+      await navigator.clipboard.writeText(order.razorpayPaymentId);
+      setCopiedPaymentId(true);
+      setTimeout(() => setCopiedPaymentId(false), 2000);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+              >
+                <ArrowLeft size={20} className="text-gray-600" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Order Details</h1>
+                <p className="text-sm text-gray-600 mt-1">
+                  Order #{order.orderNumber}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <StatusIcon size={20} className="text-gray-400" />
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusStyle(order.status)}`}>
+                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Order Items */}
+            <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Items</h2>
+              <div className="space-y-4">
+                {order.items.map((item, idx) => {
+                  const product = item.productId || {};
+                  const price = item.priceAtPurchase || 0;
+
+                  return (
+                    <div key={idx} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="w-20 h-24 bg-white rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                        <img
+                          src={
+                            product.images?.[0] ||
+                            item.image ||
+                            "/placeholder.png"
+                          }
+                          alt={product.title || item.title || "Product"}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-medium text-gray-900 mb-2">
+                          {product.title || item.title || "Untitled Product"}
+                        </h3>
+                        <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                          <span className="bg-white px-3 py-1 rounded-lg border border-gray-200">
+                            Size: {item.size}
+                          </span>
+                          <span className="bg-white px-3 py-1 rounded-lg border border-gray-200">
+                            Quantity: {item.quantity}
+                          </span>
+                          <span className="bg-white px-3 py-1 rounded-lg border border-gray-200">
+                            ₹{price.toLocaleString()} each
+                          </span>
+                        </div>
+                        <p className="text-lg font-bold text-gray-900">
+                          ₹{(price * item.quantity).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Shipping Address */}
+            <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <MapPin size={20} className="text-gray-600" />
+                <h2 className="text-lg font-semibold text-gray-900">Shipping Address</h2>
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                <div className="flex items-center gap-2">
+                  <User size={16} className="text-gray-500" />
+                  <span className="font-medium text-gray-900">{order.shippingAddress.fullName}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone size={16} className="text-gray-500" />
+                  <span className="text-gray-700">{order.shippingAddress.phone}</span>
+                </div>
+                <p className="text-gray-700 ml-6">
+                  {order.shippingAddress.street}<br />
+                  {order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.pincode}<br />
+                  {order.shippingAddress.country}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Order Summary */}
+            <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+              <div className="space-y-3">
+                <div className="flex justify-between text-gray-700">
+                  <span>Subtotal</span>
+                  <span>₹{order.subtotal.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-gray-700">
+                  <span>Shipping</span>
+                  <span>{order.shippingCharges > 0 ? `₹${order.shippingCharges.toLocaleString()}` : 'Free'}</span>
+                </div>
+                {order.discountAmount > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Discount</span>
+                    <span>-₹{order.discountAmount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-200 pt-3 flex justify-between font-bold text-lg text-gray-900">
+                  <span>Total</span>
+                  <span>₹{order.totalAmount.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Order Information */}
+            <div className="bg-white rounded-xl border-2 border-gray-200 p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Information</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Order Date</label>
+                  <p className="text-gray-900 mt-1">
+                    {new Date(order.createdAt).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Payment Method</label>
+                  <p className="text-gray-900 mt-1 capitalize">{order.paymentMethod}</p>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Payment Status</label>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1 ${
+                    order.paymentStatus === 'paid' 
+                      ? 'bg-green-50 text-green-700 border border-green-200' 
+                      : 'bg-yellow-50 text-yellow-700 border border-yellow-200'
+                  }`}>
+                    {order.paymentStatus.charAt(0).toUpperCase() + order.paymentStatus.slice(1)}
+                  </span>
+                </div>
+
+                {order.razorpayPaymentId && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Payment ID</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded flex-1 truncate">
+                        {order.razorpayPaymentId}
+                      </code>
+                      <button
+                        onClick={copyPaymentId}
+                        className="p-1 hover:bg-gray-100 rounded transition-colors duration-200"
+                      >
+                        {copiedPaymentId ? (
+                          <Check size={14} className="text-green-600" />
+                        ) : (
+                          <Copy size={14} className="text-gray-500" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Last Updated</label>
+                  <p className="text-gray-900 mt-1">
+                    {new Date(order.updatedAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -84,45 +84,48 @@ const useRazorpay = () => {
 
   // Get token from localStorage or your auth context
   const getAuthToken = () => {
-  const userStr = localStorage.getItem("user");
-  const token = localStorage.getItem("accessToken");
+    const userStr = localStorage.getItem("user");
+    const token = localStorage.getItem("accessToken");
 
-  let user = null;
-  if (userStr) {
-    try {
-      user = JSON.parse(userStr); // ab object milega
-    } catch (e) {
-      console.error("Invalid user in localStorage", e);
+    let user = null;
+    if (userStr) {
+      try {
+        user = JSON.parse(userStr);
+      } catch (e) {
+        console.error("Invalid user in localStorage", e);
+      }
     }
-  }
 
-  return {
-    user,   // 👈 {_id, phone, role}
-    token,  // 👈 accessToken string
+    return {
+      user,
+      token,
+    };
   };
-};
-
 
   const createOrder = async (orderData: CreateOrderRequest): Promise<CreateOrderResponse> => {
     try {
       setLoading(true);
       setError(null);
 
-       const { user, token } = getAuthToken();
+      const { user, token } = getAuthToken();
 
-       const response = await axios.post<CreateOrderResponse>(
-      `${BASE_URL}/api/payment/create-order`,
-      {
-        ...orderData,        // 👈 flatten orderData
-        userId: user._id,    // 👈 sirf userId bhejna hai
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+      if (!user || !token) {
+        throw new Error('User not authenticated');
       }
-    );
+
+      const response = await axios.post<CreateOrderResponse>(
+        `${BASE_URL}/api/payment/create-order`,
+        {
+          ...orderData,
+          userId: user._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       return response.data;
     } catch (err) {
@@ -149,11 +152,15 @@ const useRazorpay = () => {
 
       const { user, token } = getAuthToken();
 
+      if (!user || !token) {
+        throw new Error('User not authenticated');
+      }
+
       const response = await axios.post<PaymentVerificationResponse>(
         `${BASE_URL}/api/payment/verify-payment`,
         {
-        ...paymentData,
-        userId: user._id,
+          ...paymentData,
+          userId: user._id,
         },
         {
           headers: {
@@ -186,7 +193,11 @@ const useRazorpay = () => {
       setLoading(true);
       setError(null);
 
-      const token = getAuthToken();
+      const { token } = getAuthToken();
+
+      if (!token) {
+        throw new Error('User not authenticated');
+      }
 
       const response = await axios.get<PaymentDetailsResponse>(
         `${BASE_URL}/api/payment/payment-details/${paymentId}`,
