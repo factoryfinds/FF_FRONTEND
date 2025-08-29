@@ -4,7 +4,7 @@ import Footer from '@/components/Footer'
 import CheckOutTray from '@/components/CheckoutTray'
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from 'next/script'
-import Analytics from '@/app/analytics'  // ✅ import tracker
+import Analytics from '@/app/details';  // ✅ import tracker
 
 import { Montserrat } from 'next/font/google';
 

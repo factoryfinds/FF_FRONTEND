@@ -20,5 +20,5 @@ export default function Analytics() {
     });
   }, [pathname, searchParams]);
 
-  return null; // nothing visual
+  return null ;
 }
