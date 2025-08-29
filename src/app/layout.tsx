@@ -5,6 +5,7 @@ import CheckOutTray from '@/components/CheckoutTray'
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from 'next/script'
 import Analytics from '@/app/details';  // ✅ import tracker
+import { Suspense } from 'react';
 
 import { Montserrat } from 'next/font/google';
 
@@ -49,7 +50,10 @@ export default function RootLayout({
         <SpeedInsights />
 
         {/* ✅ Route-change analytics tracker */}
-        <Analytics />
+        {/* ✅ Suspense fixes the CSR bailout issue */}
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
       </body>
     </html>
   )
