@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Head from "next/head";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import MainScreen from "@/components/MainScreen";
 import MostSoldProduct from "@/components/MostSoldProduct";
 import MiddleBanner from "@/components/MiddleBanner";
 import LoadingOverlay from "@/components/LoadingOverlay";
+import Script from "next/script";
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -49,13 +49,27 @@ export default function HomePage() {
 
   return (
     <>
-      <Head>
+      <head>
         <title>Factory Finds | Buy Premium Clothing Online in India</title>
         <meta
           name="description"
           content="Factory Finds — your destination for premium clothing, unbeatable style, and fast nationwide delivery."
         />
-      </Head>
+        {/* ✅ Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-TMGD28RZK5"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-TMGD28RZK5');
+    `}
+        </Script>
+      </head>
+
 
       {/* Loading Animation */}
       <AnimatePresence>

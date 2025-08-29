@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import CheckOutTray from '@/components/CheckoutTray'
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import Script from 'next/script'
 
 // app/layout.tsx (Next.js 13+)
 import { Montserrat } from 'next/font/google';
@@ -25,6 +26,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.className}>
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-TMGD28RZK5"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-TMGD28RZK5');
+          `}
+        </Script>
+      </head>
       <body className="flex flex-col min-h-screen overflow-x-hidden">
         <Navbar />
         <main className="flex-1 w-full relative">
