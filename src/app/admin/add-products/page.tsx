@@ -229,7 +229,7 @@ export default function AddProductPage() {
         }
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${productId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com'}/api/products/${productId}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
