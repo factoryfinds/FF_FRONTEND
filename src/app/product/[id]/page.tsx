@@ -96,7 +96,7 @@ export default function ProductDetails() {
       try {
         setLoadingProducts(true);
         clickTrackedRef.current = false;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com';
         const res = await fetch(`${apiUrl}/api/products/${id}`);
         if (!res.ok) throw new Error(`Failed to fetch product`);
         const data = await res.json();
@@ -125,7 +125,7 @@ export default function ProductDetails() {
       if (clickTrackedRef.current) return;
       try {
         clickTrackedRef.current = true;
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com';
         await fetch(`${apiUrl}/api/products/${productId}/track-click`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }

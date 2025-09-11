@@ -293,7 +293,7 @@ export default function AddProductPage() {
                     }
                 });
 
-                const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/upload`, {
+                const uploadRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com'}/api/upload`, {
                     method: "POST",
                     headers: {
                         "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
@@ -332,8 +332,8 @@ export default function AddProductPage() {
 
             // 4. Create or update product
             const url = editingProduct
-                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products/${editingProduct._id}`
-                : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/products`;
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com'}/api/products/${editingProduct._id}`
+                : `${process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com'}/api/products`;
 
             const method = editingProduct ? "PUT" : "POST";
 
