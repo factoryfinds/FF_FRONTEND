@@ -1,5 +1,6 @@
 "use client"; 
 import { useRouter } from "next/navigation";
+
 const Footer = () => {
   const router = useRouter();
   return (
@@ -30,7 +31,7 @@ const Footer = () => {
           <div className="space-y-4">
             <p className="font-bold">Contact us</p>
             <div className="space-y-1 break-words">
-              <p>factoryfinds.business@gmail.com</p>
+              <p className="break-all">factoryfinds.business@gmail.com</p>
               <p>+91-9027661442</p>
               <p className="mt-2">For a quicker response, DM us on Instagram</p>
               <p>@factoryfinds.store</p>
@@ -40,12 +41,18 @@ const Footer = () => {
 
           {/* Legal Links */}
           <div className="flex flex-col items-start md:items-end gap-2 text-sm">
-            <a href="#" className="hover:underline">Sitemap</a>
+            <a href="https://www.factoryfinds.store/sitemap-0.xml" className="hover:underline">Sitemap</a>
             <button
               onClick={() => router.push("/aboutUs")}
               className="hover:underline text-gray-700 cursor-pointer bg-transparent border-none"
             >
               Legal & Privacy
+            </button>
+            <button
+              onClick={() => router.push("/aboutUs")}
+              className="hover:underline text-gray-700 cursor-pointer bg-transparent border-none"
+            >
+              Return Policy & Size Details
             </button>
           </div>
         </div>

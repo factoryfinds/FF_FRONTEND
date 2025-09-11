@@ -4,10 +4,12 @@ import React, { useEffect, useState } from "react";
 import { getAllProducts } from "../../utlis/api";
 import ProductCard from "@/components/ProductCard";
 import LoadingOverlay from "@/components/LoadingOverlay"; // Adjust path as needed
+import { useRouter } from "next/navigation";
 
 export default function PopularProductsSection() {
   const [popularProducts, setPopularProducts] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [isNavigating, setIsNavigating] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -32,12 +34,12 @@ export default function PopularProductsSection() {
   // Handle product click navigation
   const handleProductClick = (productId: string) => {
     setIsNavigating(true);
-    
+
     // Navigate to product page
     // This will depend on your routing solution (Next.js router, etc.)
     // Example with Next.js:
     // router.push(`/products/${productId}`);
-    
+
     // For demonstration, you can replace this with your actual navigation logic
     window.location.href = `/products/${productId}`;
   };
@@ -60,28 +62,40 @@ export default function PopularProductsSection() {
       window.removeEventListener('popstate', handlePopState);
     };
   }, []);
-
   return (
     <>
-      <section className="px-4 md:px-20 py-16 bg-white text-black">
-        <div className="text-center mb-10">
-          <p className="uppercase text-xs tracking-widest font-light text-gray-500">Editor&apos;s Picks</p>
-          <h2 className="text-3xl font-light mt-2">Most Popular Products</h2>
+      <section className="px-2 md:px-10  bg-white text-black">
+        
+        <div className="relative  z-10 max-w-4xl mx-auto px-8 text-center w-full">
+          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium leading-relaxed text-gray-800 mb-3 sm:mb-4 tracking-wide">
+            The Essentials Collection
+          </h2>
+          <p className="text-xs sm:text-sm tracking-[0.2em] font-light uppercase text-gray-600 max-w-md mx-auto mb-8 sm:mb-12 leading-loose">
+            Curated for You
+          </p>
         </div>
 
-        {/* ✅ Grid layout */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          {popularProducts.map((product) => (
-            <ProductCard 
-              key={product._id} 
-              {...product} 
+        {/* Updated grid layout with wider gaps and a cleaner look */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
+          {popularProducts.slice(0, 8).map((product) => (
+            <ProductCard
+              key={product._id}
+              {...product}
               onProductClick={handleProductClick}
             />
           ))}
         </div>
+
+        {/* You may want to add a "View All" button */}
+        <div className="text-center mt-12">
+          <button
+            onClick={() => router.push('/product/allProducts')}
+            className="border border-gray-300 py-3 px-8 text-sm uppercase tracking-widest hover:bg-gray-100 transition-colors duration-300">
+            View All Products
+          </button>
+        </div>
       </section>
 
-      {/* Loading Overlay */}
       <LoadingOverlay isVisible={isNavigating} />
     </>
   );

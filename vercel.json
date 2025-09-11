@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "factoryfinds.store"
+        }
+      ],
+      "destination": "https://www.factoryfinds.store/:path*",
+      "permanent": true
+    }
+  ]
+}

@@ -74,8 +74,8 @@ const AnimatedBrandText = ({ onClick }: { onClick: () => void }) => {
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div
                 className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl tracking-wide cursor-pointer font-semibold group transition-all duration-300 hover:scale-105 hover:text-black ${isVisible
-                        ? 'opacity-100 transform translate-y-0'
-                        : 'opacity-0 transform -translate-y-2'
+                    ? 'opacity-100 transform translate-y-0'
+                    : 'opacity-0 transform -translate-y-2'
                     }`}
                 onClick={onClick}
                 style={{
@@ -403,7 +403,7 @@ const Navbar = () => {
 
                             {/* Call Us – shown only on desktop now */}
                             <div
-                                className="hidden md:flex items-center gap-1 cursor-pointer font-light hover:scale-105 transition-colors"
+                                className="hidden md:flex items-center gap-1 cursor-pointer font-light group transition-transform duration-300 hover:scale-105 "
                                 onClick={() => setIsCallDrawerOpen(true)}
                             >
                                 <span>Contact Us</span>
@@ -412,7 +412,7 @@ const Navbar = () => {
                             {/* Heart Icon – shown only on desktop */}
                             <FiHeart
                                 size={18}
-                                className="hidden md:block cursor-pointer font-light hover:scale-105 transition-colors"
+                                className="hidden md:block cursor-pointer font-light hover:scale-105 "
                                 onClick={() => {
                                     setIsAccountOpen(false);
                                     router.push("/profile/wishlist");
@@ -463,7 +463,10 @@ const Navbar = () => {
                                                         router.push("/profile/cart");
                                                     }}
                                                 >
-                                                    <FiBox size={16} />
+
+                                                    <div className="w-[18px] h-[18px] flex items-center justify-center">
+                                                        <FiBox size={16} />
+                                                    </div>
                                                     Check-out Bag
                                                 </li>
                                                 {/* ❤️ Wishlist – Mobile only */}
@@ -474,7 +477,10 @@ const Navbar = () => {
                                                         router.push("/profile/wishlist");
                                                     }}
                                                 >
-                                                    <FiHeart size={16} />
+                                                    <div className="w-[18px] h-[18px] flex items-center justify-center">
+                                                        <FiUser size={18} className="cursor-pointer hover:scale-105 transition-colors" />
+                                                    </div>
+
                                                     Wishlist
                                                 </li>
                                                 {/* 📞 Call Us – Mobile only */}

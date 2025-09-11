@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { useParams, useRouter } from "next/navigation"; // Add useRouter
+import { useParams, useRouter } from "next/navigation";
 import ProductCard from "../../../components/RelatedProductsCard";
 import { addProductToCart, getAllProducts, Product } from '../../../../utlis/api';
 import LoadingOverlay from "@/components/LoadingOverlay";
-import { toast } from 'react-hot-toast';
 import { useSwipeable } from "react-swipeable";
 import { FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -22,15 +21,21 @@ interface ProductWithSizes extends Omit<Product, 'sizes'> {
   sizes: SizeItem[];
 }
 
+// Define the custom popup message interface
+interface PopupMessage {
+  type: 'success' | 'error';
+  message: string;
+}
+
 export default function ProductDetails() {
   const { id } = useParams();
-  const router = useRouter(); // Add router
+  const router = useRouter();
   const [product, setProduct] = useState<ProductWithSizes | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [loadingRelated, setLoadingRelated] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
-  const [buyingNow, setBuyingNow] = useState(false); // Add buying now state
+  const [buyingNow, setBuyingNow] = useState(false);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -38,6 +43,7 @@ export default function ProductDetails() {
   const [showSizes, setShowSizes] = useState(true);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isMobileFullScreen, setIsMobileFullScreen] = useState(false);
+  const [popupMessage, setPopupMessage] = useState<PopupMessage | null>(null);
 
   const clickTrackedRef = useRef(false);
 
@@ -73,6 +79,16 @@ export default function ProductDetails() {
     window.scrollTo(0, 0);
   }, [id]);
 
+  // Handle custom popup visibility
+  useEffect(() => {
+    if (popupMessage) {
+      const timer = setTimeout(() => {
+        setPopupMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [popupMessage]);
+
   // Fetch product
   useEffect(() => {
     const fetchProduct = async () => {
@@ -80,7 +96,8 @@ export default function ProductDetails() {
       try {
         setLoadingProducts(true);
         clickTrackedRef.current = false;
-        const res = await fetch(`https://ff-backend-00ri.onrender.com/api/products/${id}`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiUrl}/api/products/${id}`);
         if (!res.ok) throw new Error(`Failed to fetch product`);
         const data = await res.json();
         if (!data) throw new Error('Product not found');
@@ -92,7 +109,9 @@ export default function ProductDetails() {
           setSelectedSize(firstSize);
         }
       } catch (err) {
-        toast.error(`Failed to load product details ${err}`);
+        setPopupMessage({ type: 'error', message: 'Failed to load product details.' });
+        console.log(err);
+
       } finally {
         setLoadingProducts(false);
       }
@@ -106,7 +125,8 @@ export default function ProductDetails() {
       if (clickTrackedRef.current) return;
       try {
         clickTrackedRef.current = true;
-        await fetch(`https://ff-backend-00ri.onrender.com/api/products/${productId}/track-click`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        await fetch(`${apiUrl}/api/products/${productId}/track-click`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
@@ -131,7 +151,7 @@ export default function ProductDetails() {
           .slice(0, 6);
         setRelatedProducts(filtered);
       } catch {
-        toast.error('Failed to load related products');
+        setPopupMessage({ type: 'error', message: 'Failed to load related products.' });
       } finally {
         setLoadingRelated(false);
       }
@@ -142,14 +162,14 @@ export default function ProductDetails() {
   // Fixed swipe handlers
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
-      if (product && product.images) {
+      if (product?.images) {
         setCurrentImageIndex((prev) =>
           prev < product.images.length - 1 ? prev + 1 : 0
         );
       }
     },
     onSwipedRight: () => {
-      if (product && product.images) {
+      if (product?.images) {
         setCurrentImageIndex((prev) =>
           prev > 0 ? prev - 1 : product.images.length - 1
         );
@@ -159,14 +179,12 @@ export default function ProductDetails() {
     trackMouse: true,
   });
 
-  if (loadingProducts || addingToCart) return <LoadingOverlay isVisible={loadingProducts || addingToCart} />;
+  if (loadingProducts || addingToCart || buyingNow) return <LoadingOverlay isVisible={loadingProducts || addingToCart || buyingNow} />;
   if (!product) return <LoadingOverlay isVisible={loadingProducts} />;
 
-  // Fixed handleQuantityChange with proper typing
   const handleQuantityChange = (change: number) => {
     if (!selectedSize) return;
 
-    // Find the selected size object to get its stock
     const selectedSizeObj = findSizeObject(product.sizes, selectedSize);
 
     const maxQuantity = selectedSizeObj
@@ -176,60 +194,60 @@ export default function ProductDetails() {
     setQuantity(prev => Math.max(1, Math.min(prev + change, maxQuantity)));
   };
 
-  // Fixed handleAddToCart function
   const handleAddToCart = async () => {
     if (!selectedSize) {
-      return toast.error("Please select size before adding to cart.");
+      return setPopupMessage({ type: 'error', message: "Please select a size before adding to cart." });
     }
     try {
       setAddingToCart(true);
       await addProductToCart({ productId: product._id, quantity, size: selectedSize });
-      toast.success("Added to cart!");
+      setPopupMessage({ type: 'success', message: "Added to cart!" });
       window.dispatchEvent(new CustomEvent('cartUpdated'));
       localStorage.setItem('cart-updated', Date.now().toString());
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error('Failed to add item to cart');
-      }
-    }
-    finally {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add item to cart';
+      setPopupMessage({ type: 'error', message: errorMessage });
+    } finally {
       setAddingToCart(false);
     }
   };
 
-  // New handleBuyNow function
   const handleBuyNow = async () => {
     if (!selectedSize) {
-      return toast.error("Please select size before proceeding to checkout.");
+      return setPopupMessage({ type: 'error', message: "Please select a size before proceeding to checkout." });
     }
     try {
       setBuyingNow(true);
-      // Add product to cart first
       await addProductToCart({ productId: product._id, quantity, size: selectedSize });
-
-      // Update cart events
       window.dispatchEvent(new CustomEvent('cartUpdated'));
       localStorage.setItem('cart-updated', Date.now().toString());
-
-      // Navigate to checkout page
       router.push('/checkout');
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error('Failed to proceed to checkout');
-      }
+      const errorMessage = error instanceof Error ? error.message : 'Failed to proceed to checkout';
+      setPopupMessage({ type: 'error', message: errorMessage });
     } finally {
       setBuyingNow(false);
     }
   };
 
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const selectedSizeObj = findSizeObject(product.sizes, selectedSize || "");
+  const availableStock = selectedSizeObj ? getSizeStock(selectedSizeObj, product.inventory) : product.inventory;
+  const isSelectedSizeAvailable = availableStock > 0;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
+      {/* Custom Popup */}
+      {popupMessage && (
+        <div
+          className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-white transition-opacity duration-300
+          ${popupMessage.type === 'success' ? 'bg-green-500' : 'bg-red-500'}
+          ${popupMessage ? 'opacity-100' : 'opacity-0'}`}
+        >
+          {popupMessage.message}
+        </div>
+      )}
+
       {/* MOBILE FULL SCREEN VIEWER */}
       {isMobileFullScreen && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
@@ -289,7 +307,7 @@ export default function ProductDetails() {
             </button>
 
             <button
-              className="absolute right-6  text-white text-5xl"
+              className="absolute right-6  text-white text-5xl"
               onClick={() =>
                 setCurrentImageIndex((prev) =>
                   prev < product.images.length - 1 ? prev + 1 : 0
@@ -343,18 +361,17 @@ export default function ProductDetails() {
             </div>
 
             {/* Thumbnails */}
-            {/* Thumbnails */}
             <div
               className="
-    hidden sm:grid sm:grid-cols-4 lg:grid-cols-2 gap-3 
-    sm:mt-3
-  "
+                hidden sm:grid sm:grid-cols-4 lg:grid-cols-2 gap-3 
+                sm:mt-3
+            "
             >
               {product.images.slice(0, 4).map((img, index) => (
                 <div
                   key={index}
                   className={`aspect-square overflow-hidden rounded-lg border-2 cursor-pointer ${index === currentImageIndex
-                      ? "border-white"
+                      ? "border-black"
                       : "border-transparent hover:border-gray-400"
                     }`}
                   onClick={() => setCurrentImageIndex(index)}
@@ -374,7 +391,7 @@ export default function ProductDetails() {
                 <div
                   key={index}
                   className={`w-20 h-20 flex-shrink-0 overflow-hidden rounded-md border-2 cursor-pointer ${index === currentImageIndex
-                      ? "border-white"
+                      ? "border-black"
                       : "border-transparent hover:border-gray-400"
                     }`}
                   onClick={() => setCurrentImageIndex(index)}
@@ -467,8 +484,8 @@ export default function ProductDetails() {
                         key={`${sizeValue}-${index}`}
                         onClick={() => setSelectedSize(sizeValue)}
                         className={`px-4 py-2 border text-sm ${selectedSize === sizeValue
-                          ? "border-black bg-black text-white"
-                          : "border-gray-300 text-black hover:border-black"
+                            ? "border-black bg-black text-white"
+                            : "border-gray-300 text-black hover:border-black"
                           } ${sizeStock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
                         disabled={addingToCart || buyingNow || sizeStock === 0}
                       >
@@ -495,14 +512,7 @@ export default function ProductDetails() {
                 <button
                   onClick={() => handleQuantityChange(1)}
                   className="w-8 h-8 border border-gray-300 rounded flex items-center justify-center hover:border-black disabled:opacity-50"
-                  disabled={(() => {
-                    if (!selectedSize) return true;
-                    const selectedSizeObj = findSizeObject(product.sizes, selectedSize);
-                    const maxQuantity = selectedSizeObj
-                      ? getSizeStock(selectedSizeObj, product.inventory)
-                      : product.inventory;
-                    return quantity >= maxQuantity || addingToCart || buyingNow;
-                  })()}
+                  disabled={quantity >= availableStock || addingToCart || buyingNow}
                 >
                   +
                 </button>
@@ -555,73 +565,43 @@ export default function ProductDetails() {
 
             {/* Inventory display */}
             <div className="text-sm text-gray-600 mt-8 sm:mt-15">
-              {(() => {
-                if (!selectedSize) {
-                  return <span>Please select a size</span>;
-                }
-
-                const selectedSizeObj = findSizeObject(product.sizes, selectedSize);
-                const availableStock = selectedSizeObj
-                  ? getSizeStock(selectedSizeObj, product.inventory)
-                  : product.inventory;
-
-                if (availableStock > 0) {
-                  return <span>{availableStock} items available in size {selectedSize}</span>;
-                } else {
-                  return <span className="text-red-500">Size {selectedSize} is out of stock</span>;
-                }
-              })()}
+              {!selectedSize ? (
+                <span>Please select a size</span>
+              ) : isSelectedSizeAvailable ? (
+                <span>{availableStock} items available in size {selectedSize}</span>
+              ) : (
+                <span className="text-red-500">Size {selectedSize} is out of stock</span>
+              )}
             </div>
 
             {/* Action Section */}
-            {(() => {
-              if (!selectedSize) {
-                return (
-                  <div className="mt-4 mb-10 text-red-600 text-sm font-medium">
-                    Please select a size.
+            <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-2 mb-12 sm:mb-18">
+              <button
+                className="flex-1 bg-black text-white py-3 px-6 text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center"
+                disabled={buyingNow || !selectedSize || !isSelectedSizeAvailable}
+                onClick={handleBuyNow}
+              >
+                {buyingNow ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  "Buy Now"
+                )}
+              </button>
+              <button
+                className="flex-1 border border-black text-black py-3 px-6 text-sm font-medium rounded-xl cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                onClick={handleAddToCart}
+                disabled={addingToCart || !selectedSize || !isSelectedSizeAvailable}
+              >
+                {addingToCart ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    Adding...
                   </div>
-                );
-              }
-
-              const selectedSizeObj = findSizeObject(product.sizes, selectedSize);
-              const availableStock = selectedSizeObj
-                ? getSizeStock(selectedSizeObj, product.inventory)
-                : product.inventory;
-
-              return availableStock > 0 ? (
-                <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-2 mb-12 sm:mb-18">
-                  <button
-                    className="flex-1 bg-black text-white py-3 px-6 text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center"
-                    disabled={addingToCart || buyingNow || !selectedSize}
-                    onClick={handleBuyNow}
-                  >
-                    {buyingNow ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    ) : (
-                      "Buy Now"
-                    )}
-                  </button>
-                  <button
-                    className="flex-1 border border-black text-black py-3 px-6 text-sm font-medium rounded-xl cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                    onClick={handleAddToCart}
-                    disabled={addingToCart || buyingNow || !selectedSize}
-                  >
-                    {addingToCart ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                        Adding...
-                      </div>
-                    ) : (
-                      "Add To Cart"
-                    )}
-                  </button>
-                </div>
-              ) : (
-                <div className="mt-4 mb-10 text-red-600 text-sm font-medium">
-                  Size {selectedSize} is currently out of stock.
-                </div>
-              );
-            })()}
+                ) : (
+                  "Add To Cart"
+                )}
+              </button>
+            </div>
 
             {/* Questions Section */}
             <div className="mb-6">

@@ -85,7 +85,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                   ₹{discountedPrice.toLocaleString()}
                 </span>
                 {originalPrice > discountedPrice && (
-                  <span className="text-xs text-gray-400 line-through font-normal tracking-wide">
+                  <span className="text-xs text-gray-500 line-through font-normal tracking-wide">
                     ₹{originalPrice.toLocaleString()}
                   </span>
                 )}

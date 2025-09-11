@@ -562,14 +562,14 @@ export default function CheckoutPage() {
       </div>
 
       {/* Step indicator */}
-      <div className="max-w-6xl mx-auto mb-8 flex items-center justify-between md:justify-center gap-6">
-        <div className="flex items-center gap-6">
-          <StepBubble n={1} label="Order Summary" />
-          <div className="w-8 h-[1px] bg-gray-300 hidden md:block" />
+      <div className="max-w-6xl mx-auto mb-8 flex items-center justify-center gap-6">
+        <div className="flex items-center gap-4 ">
+          <StepBubble n={1} label="Summary" />
+          <div className="w-4 h-[2px] bg-black" />
           <StepBubble n={2} label="Address" />
-          <div className="w-8 h-[1px] bg-gray-300 hidden md:block" />
+          <div className="w-4 h-[2px] bg-black" />
           <StepBubble n={3} label="Payment" />
-          <div className="w-8 h-[1px] bg-gray-300 hidden md:block" />
+          <div className="w-4 h-[2px] bg-black" />
           <StepBubble n={4} label="Success" />
         </div>
       </div>
