@@ -355,7 +355,7 @@ const MainScreen = () => {
                     </div>
 
                     <h3 className="text-xl sm:text-2xl font-light tracking-[0.15em] uppercase text-black mb-4">
-                      You're In
+                      You&apos;re In
                     </h3>
                     <p className="text-xs sm:text-sm tracking-[0.2em] font-light uppercase text-gray-600 leading-loose mb-6">
                       You will be notified the moment
