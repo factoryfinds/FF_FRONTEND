@@ -1,5 +1,5 @@
 import { toast } from 'react-hot-toast';
-import { GetOrdersResponse} from "../types/razorpay";
+import { GetOrdersResponse } from "../types/razorpay";
 
 // Base configuration
 const BASE_URL = 'https://ff-backend-00ri.onrender.com/api'; // <- url changes required
@@ -202,7 +202,7 @@ export interface ProductStatsResponse {
     inStockProducts: number;
     outOfStockProducts: number;
     newProductsThisMonth: number;
-    
+
     // Analytics totals
     analytics: {
       totalClicks: number;
@@ -256,7 +256,7 @@ export interface ProductStatsResponse {
       totalPurchases: number;
       avgPrice: number;
     }>;
-    
+
     genderStats: Array<{
       _id: string;
       count: number;
@@ -618,7 +618,7 @@ export const getUserList = async (params: {
   sortOrder?: 'asc' | 'desc';
 } = {}): Promise<UserListResponse> => {
   const queryParams = new URLSearchParams();
-  
+
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       queryParams.append(key, value.toString());
@@ -627,7 +627,7 @@ export const getUserList = async (params: {
 
   const queryString = queryParams.toString();
   const endpoint = `/admin/users/list${queryString ? `?${queryString}` : ''}`;
-  
+
   return apiRequest(endpoint);
 };
 
@@ -833,8 +833,7 @@ export const getAdminOrders = async (
   });
 
   const response = await fetch(
-    `${BASE_URL}/orders/admin/all-orders${
-      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    `${BASE_URL}/orders/admin/all-orders${queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`,
     {
       method: "GET",
@@ -983,4 +982,38 @@ export const deleteAdminOrder = async (
   }
 
   return data;
+};
+
+interface NotifyResponse {
+  success: boolean;
+  message: string;
+}
+
+
+
+export const notifyUser = async (email: string): Promise<NotifyResponse> => {
+  try {
+    if (!email) throw new Error("Email is required");
+
+    const response = await fetch(`${BASE_URL}/notifyme`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    return {
+      success: data.success,
+      message: data.message,
+    };
+  } catch (err: any) {
+    console.error("Error subscribing:", err);
+    return {
+      success: false,
+      message: err.message || "Something went wrong",
+    };
+  }
 };
