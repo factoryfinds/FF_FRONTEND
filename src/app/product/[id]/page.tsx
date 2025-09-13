@@ -7,6 +7,7 @@ import LoadingOverlay from "@/components/LoadingOverlay";
 import { useSwipeable } from "react-swipeable";
 import { FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import Image from 'next/image';
 
 // Define size types to fix TypeScript errors
 interface SizeObject {
@@ -26,6 +27,39 @@ interface PopupMessage {
   type: 'success' | 'error';
   message: string;
 }
+// helper - paste above your JSX or in a utils file
+// helper - parse only the 3 required sections
+function parseProductDescription(text: string | undefined) {
+  if (!text) return [];
+
+  const LABELS = ["DESCRIPTION", "MATERIAL", "CARE", "DETAILS", "SHIPPING", "NOTE", "SIZE", "FEATURE", "SPECIFICATION"];
+
+  const pattern = new RegExp(`(^|\\n)(${LABELS.join("|")})\\s*:?`, "ig");
+
+  const matches: { label: string; index: number; matchLen: number }[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = pattern.exec(text)) !== null) {
+    matches.push({
+      label: m[2].toUpperCase(),
+      index: m.index,
+      matchLen: m[0].length,
+    });
+  }
+
+  const sections: { label: string; value: string }[] = [];
+  if (matches.length) {
+    for (let i = 0; i < matches.length; i++) {
+      const start = matches[i].index + matches[i].matchLen;
+      const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+      const value = text.slice(start, end).trim();
+      sections.push({ label: matches[i].label, value });
+    }
+    return sections;
+  }
+
+  return [{ label: "DESCRIPTION", value: text }];
+}
+
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -62,7 +96,7 @@ export default function ProductDetails() {
     return sizes.find(s => getSizeValue(s) === targetSize);
   };
 
-  // Dummy size guide data
+  // Luxury size guide data with refined styling
   const sizeGuideData = {
     men: [
       { size: 'XS', chest: '36', waist: '30', length: '26' },
@@ -109,9 +143,8 @@ export default function ProductDetails() {
           setSelectedSize(firstSize);
         }
       } catch (err) {
-        setPopupMessage({ type: 'error', message: 'Failed to load product details.' });
+        setPopupMessage({ type: 'error', message: 'FAILED TO LOAD PRODUCT DETAILS' });
         console.log(err);
-
       } finally {
         setLoadingProducts(false);
       }
@@ -151,7 +184,7 @@ export default function ProductDetails() {
           .slice(0, 6);
         setRelatedProducts(filtered);
       } catch {
-        setPopupMessage({ type: 'error', message: 'Failed to load related products.' });
+        setPopupMessage({ type: 'error', message: 'FAILED TO LOAD RELATED PRODUCTS' });
       } finally {
         setLoadingRelated(false);
       }
@@ -196,16 +229,16 @@ export default function ProductDetails() {
 
   const handleAddToCart = async () => {
     if (!selectedSize) {
-      return setPopupMessage({ type: 'error', message: "Please select a size before adding to cart." });
+      return setPopupMessage({ type: 'error', message: "PLEASE SELECT A SIZE BEFORE ADDING TO CART" });
     }
     try {
       setAddingToCart(true);
       await addProductToCart({ productId: product._id, quantity, size: selectedSize });
-      setPopupMessage({ type: 'success', message: "Added to cart!" });
+      setPopupMessage({ type: 'success', message: "ADDED TO CART" });
       window.dispatchEvent(new CustomEvent('cartUpdated'));
       localStorage.setItem('cart-updated', Date.now().toString());
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to add item to cart';
+      const errorMessage = error instanceof Error ? error.message.toUpperCase() : 'FAILED TO ADD ITEM TO CART';
       setPopupMessage({ type: 'error', message: errorMessage });
     } finally {
       setAddingToCart(false);
@@ -214,7 +247,7 @@ export default function ProductDetails() {
 
   const handleBuyNow = async () => {
     if (!selectedSize) {
-      return setPopupMessage({ type: 'error', message: "Please select a size before proceeding to checkout." });
+      return setPopupMessage({ type: 'error', message: "PLEASE SELECT A SIZE BEFORE PROCEEDING TO CHECKOUT" });
     }
     try {
       setBuyingNow(true);
@@ -223,7 +256,7 @@ export default function ProductDetails() {
       localStorage.setItem('cart-updated', Date.now().toString());
       router.push('/checkout');
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to proceed to checkout';
+      const errorMessage = error instanceof Error ? error.message.toUpperCase() : 'FAILED TO PROCEED TO CHECKOUT';
       setPopupMessage({ type: 'error', message: errorMessage });
     } finally {
       setBuyingNow(false);
@@ -237,12 +270,12 @@ export default function ProductDetails() {
 
   return (
     <div className="min-h-screen bg-white relative">
-      {/* Custom Popup */}
+      {/* Custom Popup - Luxury styling */}
       {popupMessage && (
         <div
-          className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-xl text-white transition-opacity duration-300
-          ${popupMessage.type === 'success' ? 'bg-green-500' : 'bg-red-500'}
-          ${popupMessage ? 'opacity-100' : 'opacity-0'}`}
+          className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 text-white transition-all duration-500 font-light tracking-widest text-xs uppercase
+          ${popupMessage.type === 'success' ? 'bg-black' : 'bg-red-600'}
+          ${popupMessage ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
         >
           {popupMessage.message}
         </div>
@@ -252,10 +285,10 @@ export default function ProductDetails() {
       {isMobileFullScreen && (
         <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center">
           <button
-            className="absolute top-6 right-6 text-black text-4xl z-50"
+            className="absolute top-8 right-8 text-black hover:text-gray-600 transition-colors z-50"
             onClick={() => setIsMobileFullScreen(false)}
           >
-            <FiX size={18} className="text-black" />
+            <FiX size={20} />
           </button>
 
           <div
@@ -283,38 +316,43 @@ export default function ProductDetails() {
                   overflow: "visible"
                 }}
               >
-                <img
-                  src={product.images[currentImageIndex]}
-                  alt={product.title}
-                  className="max-w-[100vw] max-h-[100vh] object-contain"
-                  style={{
-                    width: "auto",
-                    height: "auto"
-                  }}
-                />
+                <div className="relative w-screen h-screen flex items-center justify-center">
+                  <Image
+                    src={product.images[currentImageIndex]}
+                    alt={product.title}
+                    priority
+                    fill
+                    sizes="100vw"
+                    style={{
+                      objectFit: "contain",
+                      transformOrigin: `${isZoomed.x}% ${isZoomed.y}%`
+                    }}
+                    className={`${isZoomed.active && !isMobile ? "scale-200 transition-transform duration-300" : "scale-100 transition-transform duration-300"}`}
+                  />
+                </div>
               </TransformComponent>
             </TransformWrapper>
 
             <button
-              className="absolute left-6 text-white text-5xl "
+              className="absolute left-8 text-black hover:text-gray-600 transition-colors"
               onClick={() =>
                 setCurrentImageIndex((prev) =>
                   prev > 0 ? prev - 1 : product.images.length - 1
                 )
               }
             >
-              <FiChevronLeft size={24} className="text-black" />
+              <FiChevronLeft size={24} />
             </button>
 
             <button
-              className="absolute right-6  text-white text-5xl"
+              className="absolute right-8 text-black hover:text-gray-600 transition-colors"
               onClick={() =>
                 setCurrentImageIndex((prev) =>
                   prev < product.images.length - 1 ? prev + 1 : 0
                 )
               }
             >
-              <FiChevronRight size={24} className="text-black" />
+              <FiChevronRight size={24} />
             </button>
           </div>
         </div>
@@ -326,7 +364,7 @@ export default function ProductDetails() {
           <div className="w-full lg:w-6/10">
             <div
               {...swipeHandlers}
-              className="w-full aspect-square bg-gray-100 mb-3 overflow-hidden rounded-xl cursor-crosshair relative"
+              className="w-full aspect-square mb-4 overflow-hidden cursor-crosshair relative transition-all duration-300 "
               onMouseMove={(e) => {
                 if (!isMobile) {
                   const rect = e.currentTarget.getBoundingClientRect();
@@ -341,58 +379,63 @@ export default function ProductDetails() {
                 if (isMobile) setIsMobileFullScreen(true);
               }}
             >
-              <img
-                src={product.images[currentImageIndex]}
-                alt={product.title}
-                className={`w-full h-full object-cover transition-transform duration-200 ${isZoomed.active && !isMobile ? "scale-200" : "scale-100"}`}
-                style={{ transformOrigin: `${isZoomed.x}% ${isZoomed.y}%` }}
-              />
+              <div className="aspect-square overflow-hidden cursor-pointer">
+                <div className="relative w-full h-full">
+                  <Image
+                    src={product.images[currentImageIndex]}
+                    alt={`${product.title} ${currentImageIndex}`}
+                    fill
+                    sizes="2048px"
+                    style={{
+                      objectFit: 'cover',
+                      transformOrigin: `${isZoomed.x}% ${isZoomed.y}%`,
+                      transform: isZoomed.active && !isMobile ? 'scale(1.5)' : 'scale(1)'
+                    }}
+                    className="transition-transform duration-300 ease-out"
+                  />
+                </div>
+              </div>
 
               {isMobile && product.images.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2">
                   {product.images.map((_, index) => (
                     <div
                       key={index}
-                      className={`w-2 h-2 rounded-full ${index === currentImageIndex ? "bg-white" : "bg-gray-400"}`}
+                      className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${index === currentImageIndex ? "bg-black" : "bg-gray-400"}`}
                     />
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Thumbnails */}
-            <div
-              className="
-                hidden sm:grid sm:grid-cols-4 lg:grid-cols-2 gap-3 
-                sm:mt-3
-            "
-            >
+            {/* Thumbnails - Luxury styling */}
+            <div className="hidden sm:grid sm:grid-cols-4 lg:grid-cols-2 gap-2 sm:mt-4">
               {product.images.slice(0, 4).map((img, index) => (
                 <div
                   key={index}
-                  className={`aspect-square overflow-hidden rounded-lg border-2 cursor-pointer ${index === currentImageIndex
-                      ? "border-black"
-                      : "border-transparent hover:border-gray-400"
+                  className={`aspect-square overflow-hidden cursor-pointer transition-all duration-300  ${index === currentImageIndex
+                    ? "border-black opacity-100"
+                    : "border-gray-200 hover:border-gray-400 opacity-100 hover:opacity-100"
                     }`}
                   onClick={() => setCurrentImageIndex(index)}
                 >
                   <img
                     src={img}
                     alt={`${product.title} ${index}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                   />
                 </div>
               ))}
             </div>
 
-            {/* Mobile thumbnails - horizontal scroll */}
-            <div className="flex sm:hidden gap-2 mt-3 overflow-x-auto scrollbar-hide">
+            {/* Mobile thumbnails */}
+            <div className="flex sm:hidden gap-2 mt-4 overflow-x-auto scrollbar-hide">
               {product.images.map((img, index) => (
                 <div
                   key={index}
-                  className={`w-20 h-20 flex-shrink-0 overflow-hidden rounded-md border-2 cursor-pointer ${index === currentImageIndex
-                      ? "border-black"
-                      : "border-transparent hover:border-gray-400"
+                  className={`w-16 h-16 flex-shrink-0 overflow-hidden cursor-pointer transition-all duration-300 border ${index === currentImageIndex
+                    ? "border-black opacity-100"
+                    : "border-gray-200 opacity-80"
                     }`}
                   onClick={() => setCurrentImageIndex(index)}
                 >
@@ -404,16 +447,15 @@ export default function ProductDetails() {
                 </div>
               ))}
             </div>
-
           </div>
 
-          {/* Right Side: Product Details */}
-          <div className="w-full lg:w-1/2 mt-6 lg:mt-15 px-4 lg:pl-25 lg:me-20">
-            {/* Brand Name */}
-            <div className="flex items-center mb-2">
-              <p className="text-lg font-extralight text-gray-600">FactoryFinds</p>
+          {/* Right Side: Product Details - Luxury typography */}
+          <div className="w-full lg:w-1/2 mt-8 lg:mt-16 px-4 lg:pl-24 lg:pr-16">
+            {/* Brand Name - Refined */}
+            <div className="flex items-center mb-3">
+              <p className="text-xs font-light uppercase text-gray-800 tracking-[0.2em]">FactoryFinds</p>
               <svg
-                className="w-6 h-6 text-gray-600 ml-auto cursor-pointer hover:text-red-500"
+                className="w-4 h-4 text-gray-400 ml-auto cursor-pointer hover:text-red-500 transition-colors duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -427,36 +469,34 @@ export default function ProductDetails() {
               </svg>
             </div>
 
-            {/* Product Title */}
-            <h1 className="text-xl sm:text-2xl font-bold text-black mb-5 leading-tight">
+            {/* Product Title - More refined */}
+            <h1 className="text-md sm:text-md font-semibold text-black mb-6 leading-tight tracking-tighter">
               {product.title}
             </h1>
 
-            {/* Price */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-0">
-                <span className="text-lg sm:text-xl font-normal text-black">
-                  ₹ {product.discountedPrice.toLocaleString()}.00
+            {/* Price - Luxury styling */}
+            <div className="mb-8">
+              <div className="flex items-baseline gap-4 mb-1">
+                <span className="text-base sm:text-lg font-medium text-gray-800 tracking-wide">
+                  ₹{product.discountedPrice.toLocaleString()}
                 </span>
-                {product.originalPrice !== product.discountedPrice && (
-                  <span className="text-base sm:text-lg font-light text-gray-500 line-through">
-                    ₹ {product.originalPrice.toLocaleString()}.00
-                  </span>
-                )}
+                <span className="text-sm font-light text-gray-400 line-through tracking-wide">
+                  {product.originalPrice !== product.discountedPrice ? `₹${product.originalPrice.toLocaleString()}` : ''}
+                </span>
               </div>
-              <p className="text-xs font-normal text-gray-800">(M.R.P. incl of all taxes)</p>
+              <p className="text-xs font-light text-gray-700 uppercase tracking-widest">incl. all taxes</p>
             </div>
 
-            {/* Select Your Size with Size Guide */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between">
+            {/* Select Your Size - Refined */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
                 <div
                   onClick={() => setShowSizes(!showSizes)}
                   className="cursor-pointer flex items-center justify-between flex-1"
                 >
-                  <p className="text-base sm:text-lg font-bold text-black mt-4 sm:mt-8">Select Your Size</p>
+                  <p className="text-xs font-medium text-black uppercase tracking-[0.15em]">Select Size</p>
                   <svg
-                    className={`w-5 h-5 mt-6 sm:mt-10 ml-2 transform transition-transform duration-300 ${showSizes ? "rotate-180" : "rotate-0"}`}
+                    className={`w-3 h-3 ml-2 transform transition-transform duration-300 ${showSizes ? "rotate-180" : "rotate-0"}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -464,17 +504,17 @@ export default function ProductDetails() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
+                      strokeWidth={1.5}
                       d="M19 9l-7 7-7-7"
                     />
                   </svg>
                 </div>
               </div>
 
-              <hr className="mt-2 border-black mb-4 border-t-[3px]" />
+              <hr className="mb-6 border-black border-t-[1px]" />
 
               {showSizes && (
-                <div className="flex flex-wrap gap-2 transition-all duration-300 ease-in-out">
+                <div className="flex flex-wrap gap-2 transition-all duration-300 ease-in-out mb-4">
                   {product.sizes.map((sizeItem, index) => {
                     const sizeValue = getSizeValue(sizeItem);
                     const sizeStock = getSizeStock(sizeItem, product.inventory);
@@ -483,10 +523,10 @@ export default function ProductDetails() {
                       <button
                         key={`${sizeValue}-${index}`}
                         onClick={() => setSelectedSize(sizeValue)}
-                        className={`px-4 py-2 border text-sm ${selectedSize === sizeValue
-                            ? "border-black bg-black text-white"
-                            : "border-gray-300 text-black hover:border-black"
-                          } ${sizeStock === 0 ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className={`px-4 py-2 border text-xs font-light uppercase tracking-wider transition-all duration-300 ${selectedSize === sizeValue
+                          ? "border-black bg-black text-white"
+                          : "border-gray-400 text-black hover:border-black hover:bg-gray-100"
+                          } ${sizeStock === 0 ? "opacity-30 cursor-not-allowed" : ""}`}
                         disabled={addingToCart || buyingNow || sizeStock === 0}
                       >
                         {sizeValue}
@@ -497,105 +537,105 @@ export default function ProductDetails() {
               )}
             </div>
 
-            {/* Quantity Selector */}
-            <div className="mb-4">
-              <p className="text-base font-medium text-black mb-2">Quantity</p>
-              <div className="flex items-center gap-3">
+            {/* Quantity Selector - Refined */}
+            <div className="mb-6">
+              <p className="text-xs font-medium text-black uppercase tracking-[0.15em] mb-3">Quantity</p>
+              <div className="flex items-center gap-4">
                 <button
                   onClick={() => handleQuantityChange(-1)}
-                  className="w-8 h-8 border border-gray-300 rounded flex items-center justify-center hover:border-black disabled:opacity-50"
+                  className="w-8 h-8 border border-gray-300 flex items-center justify-center hover:border-black transition-colors duration-300 disabled:opacity-30"
                   disabled={quantity <= 1 || addingToCart || buyingNow}
                 >
-                  -
+                  <span className="text-xs font-light">−</span>
                 </button>
-                <span className="text-lg font-medium">{quantity}</span>
+                <span className="text-sm font-light tracking-wide min-w-[20px] text-center">{quantity}</span>
                 <button
                   onClick={() => handleQuantityChange(1)}
-                  className="w-8 h-8 border border-gray-300 rounded flex items-center justify-center hover:border-black disabled:opacity-50"
+                  className="w-8 h-8 border border-gray-300 flex items-center justify-center hover:border-black transition-colors duration-300 disabled:opacity-30"
                   disabled={quantity >= availableStock || addingToCart || buyingNow}
                 >
-                  +
+                  <span className="text-xs font-light">+</span>
                 </button>
               </div>
-
             </div>
-            {/* Size Guide Button */}
+
+            {/* Size Guide Button - Luxury styling */}
             <button
               onClick={() => setShowSizeGuide(!showSizeGuide)}
-              className="text-sm text-black underline hover:no-underline mt-4 mb-4 sm:mt-8"
+              className="text-xs text-black underline hover:no-underline mb-6 font-light uppercase tracking-[0.1em] transition-all duration-300"
             >
               Size Guide
             </button>
-            {/* Size Guide Table */}
-            {showSizeGuide && (
-              <div className="mb-6 p-4 border border-gray-100 rounded-lg bg-white z-40 shadow-lg">
-                <h3 className="text-lg font-medium text-black mb-4">Size Guide (in inches)</h3>
 
-                {/* Size Table */}
+            {/* Size Guide Table - Refined */}
+            {showSizeGuide && (
+              <div className="mb-8 p-6 border border-gray-200 bg-gray-50">
+                <h3 className="text-xs font-medium text-black uppercase mb-6 tracking-[0.15em]">Size Guide</h3>
+
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b border-gray-300">
-                        <th className="text-left py-2 px-3 font-medium">Size</th>
-                        <th className="text-left py-2 px-3 font-medium">Chest</th>
-                        <th className="text-left py-2 px-3 font-medium">Waist</th>
-                        <th className="text-left py-2 px-3 font-medium">Length</th>
+                        <th className="text-left py-3 font-medium uppercase tracking-wider">Size</th>
+                        <th className="text-left py-3 font-medium uppercase tracking-wider">Chest</th>
+                        <th className="text-left py-3 font-medium uppercase tracking-wider">Waist</th>
+                        <th className="text-left py-3 font-medium uppercase tracking-wider">Length</th>
                       </tr>
                     </thead>
                     <tbody>
                       {sizeGuideData.men.map((item, index) => (
-                        <tr key={index} className="border-b border-gray-200 hover:bg-white">
-                          <td className="py-2 px-3 font-medium">{item.size}</td>
-                          <td className="py-2 px-3">{item.chest}&quot;</td>
-                          <td className="py-2 px-3">{item.waist}&quot;</td>
-                          <td className="py-2 px-3">{item.length}&quot;</td>
+                        <tr key={index} className="border-b border-gray-200">
+                          <td className="py-3 font-medium">{item.size}</td>
+                          <td className="py-3 font-light">{item.chest}&quot;</td>
+                          <td className="py-3 font-light">{item.waist}&quot;</td>
+                          <td className="py-3 font-light">{item.length}&quot;</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
 
-                <div className="mt-4 text-xs text-gray-600">
-                  <p className="mb-1">• Measurements are in inches</p>
-                  <p className="mb-1">• For best fit, compare with a similar garment you own</p>
-                  <p>• Contact us if you need help choosing the right size</p>
+                <div className="mt-6 text-xs text-gray-600 font-light space-y-1 uppercase tracking-wide">
+                  <p>• Measurements in inches</p>
+                  <p>• Compare with similar garment</p>
+                  <p>• Contact for sizing assistance</p>
                 </div>
               </div>
             )}
 
-            {/* Inventory display */}
-            <div className="text-sm text-gray-600 mt-8 sm:mt-15">
+            {/* Inventory display - Refined */}
+            <div className="text-xs text-gray-500 mb-8 font-light uppercase tracking-wide">
               {!selectedSize ? (
-                <span>Please select a size</span>
+                <span>Please select size</span>
               ) : isSelectedSizeAvailable ? (
-                <span>{availableStock} items available in size {selectedSize}</span>
+                <span>{availableStock} available in size {selectedSize}</span>
               ) : (
-                <span className="text-red-500">Size {selectedSize} is out of stock</span>
+                <span className="text-red-500">Size {selectedSize} unavailable</span>
               )}
             </div>
 
-            {/* Action Section */}
-            <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-2 mb-12 sm:mb-18">
+            {/* Action Section - Luxury buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-12">
               <button
-                className="flex-1 bg-black text-white py-3 px-6 text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-50 flex items-center justify-center"
+                className="flex-1 bg-black text-white py-4 px-8 text-xs font-light uppercase tracking-[0.2em] hover:bg-gray-800 transition-all duration-300 disabled:opacity-30 flex items-center justify-center"
                 disabled={buyingNow || !selectedSize || !isSelectedSizeAvailable}
                 onClick={handleBuyNow}
               >
                 {buyingNow ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   "Buy Now"
                 )}
               </button>
               <button
-                className="flex-1 border border-black text-black py-3 px-6 text-sm font-medium rounded-xl cursor-pointer hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                className="flex-1 border border-black text-black py-4 px-8 text-xs font-light uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
                 onClick={handleAddToCart}
                 disabled={addingToCart || !selectedSize || !isSelectedSizeAvailable}
               >
                 {addingToCart ? (
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-                    Adding...
+                    <div className="w-4 h-4 border border-black border-t-transparent rounded-full animate-spin"></div>
+                    <span>Adding</span>
                   </div>
                 ) : (
                   "Add To Cart"
@@ -603,89 +643,111 @@ export default function ProductDetails() {
               </button>
             </div>
 
-            {/* Questions Section */}
-            <div className="mb-6">
-              <p className="text-sm text-black mb-2">
-                <strong>Questions?</strong> Our team is available to help you make the right choice.
+            {/* Questions Section - Refined */}
+            {/* Location indicator - Refined */}
+            <div className="mt-8">
+              <p className="text-xs uppercase font-black text-black mb-5 tracking-[0.15em]">made  in India | made for Indians</p>
+            </div>
+
+            <div className="mb-8">
+              <p className="text-xs uppercase text-black font-light tracking-[0.1em] leading-relaxed">
+                Questions? Our team is available to assist with your selection.
               </p>
             </div>
+            
+            {/* Product Description - Luxury typography */}
+            {/* Replace description rendering with this */}
+            <div className="text-sm text-gray-900 font-light leading-relaxed tracking-wide">
+              {product.description && (() => {
+                const sections = parseProductDescription(product.description);
 
-            {/* Product Description */}
-            <div className="text-sm text-gray-700 space-y-3">
-              {product.description && (
-                <div className="mt-6 text-sm text-gray-700 leading-relaxed">
-                  {product.description.split(/(?=[A-Z][a-z]+:)/g).map((line, index) => {
-                    const [label, ...rest] = line.split(':');
-                    const value = rest.join(':').trim();
+                return (
+                  <div className="space-y-8">
+                    {sections.map((sec, idx) => (
+                      <div
+                        key={idx}
+                        className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start"
+                      >
+                        {/* Label column */}
+                        {sec.label && (
+                          <div className="sm:col-span-3 font-bold text-black uppercase tracking-wide text-[13px] pt-1">
+                            {sec.label}
+                          </div>
+                        )}
 
-                    return (
-                      <p key={index} className="mb-1">
-                        <span className="font-medium text-black">{label.trim()}:</span> {value}
-                      </p>
-                    );
-                  })}
-                </div>
-              )}
+                        {/* Value column */}
+                        <div className="sm:col-span-9 text-gray-900 font-normal text-[13px] leading-relaxed">
+                          {sec.value.split(/\n+/).map((line, i) => (
+                            <p key={i} className="mb-0">
+                              {line}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
 
-            {/* Right Now in India */}
-            <div className="mt-6">
-              <p className="text-sm font-medium text-black">Right Now in India</p>
-            </div>
+
+
           </div>
         </div>
 
-        {/* Related Products Section */}
-        <div className="mt-12 mb-12 px-4 sm:px-6 lg:px-30">
-          <h2 className="text-2xl sm:text-3xl font-bold text-black mb-6">Related Products</h2>
+        {/* Related Products Section - Refined */}
+        <div className="mt-16 mb-16 px-4 sm:px-6 lg:px-8">
+          <h2 className="text-xs font-black text-black mb-8 uppercase tracking-[0.15em]">Related Products</h2>
 
-          {loadingRelated ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-              <span className="ml-2 text-gray-600">Loading related products...</span>
-            </div>
-          ) : relatedProducts.length > 0 ? (
-            <div className="relative">
-              <div
-                className="flex gap-4 sm:gap-6 overflow-x-auto scrollbar-hide pb-4"
-                style={{
-                  scrollbarWidth: 'none',
-                  msOverflowStyle: 'none',
-                }}
-              >
-                <style jsx>{`
-                  div::-webkit-scrollbar {
-                    display: none;
-                  }
-                `}</style>
+          <div className="min-h-[360px]">
+            {loadingRelated ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="w-4 h-4 border border-black border-t-transparent rounded-full animate-spin"></div>
+                <span className="ml-3 text-gray-600 text-xs uppercase tracking-wide">Loading</span>
+              </div>
+            ) : relatedProducts.length > 0 ? (
+              <div className="relative">
+                <div
+                  className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+                  style={{
+                    scrollbarWidth: 'none',
+                    msOverflowStyle: 'none',
+                  }}
+                >
+                  <style jsx>{`
+                    div::-webkit-scrollbar {
+                      display: none;
+                    }
+                  `}</style>
 
-                {relatedProducts.map((relatedProduct) => (
-                  <div key={relatedProduct._id} className="flex-shrink-0 w-[280px] sm:w-[320px]">
-                    <ProductCard
-                      _id={relatedProduct._id}
-                      title={relatedProduct.title}
-                      images={relatedProduct.images}
-                      originalPrice={relatedProduct.originalPrice}
-                      discountedPrice={relatedProduct.discountedPrice}
+                  {relatedProducts.map((relatedProduct) => (
+                    <div key={relatedProduct._id} className="flex-shrink-0 w-[240px] sm:w-[280px]">
+                      <ProductCard
+                        _id={relatedProduct._id}
+                        title={relatedProduct.title}
+                        images={relatedProduct.images}
+                        originalPrice={relatedProduct.originalPrice}
+                        discountedPrice={relatedProduct.discountedPrice}
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex justify-center mt-4 gap-2">
+                  {relatedProducts.map((_, index) => (
+                    <div
+                      key={index}
+                      className="w-2 h-2 rounded-full bg-gray-300"
                     />
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-
-              <div className="flex justify-center mt-4 gap-2">
-                {relatedProducts.map((_, index) => (
-                  <div
-                    key={index}
-                    className="w-2 h-2 rounded-full bg-gray-300"
-                  />
-                ))}
+            ) : (
+              <div className="text-center py-8 text-gray-600">
+                <p>No related products found in the same category.</p>
               </div>
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-600">
-              <p>No related products found in the same category.</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

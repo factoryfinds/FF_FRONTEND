@@ -226,6 +226,7 @@ export default function RootLayout({
       </head>
 
       <body className="flex flex-col min-h-screen overflow-x-hidden">
+        
         {/* Skip to main content for accessibility */}
         <a 
           href="#main-content" 

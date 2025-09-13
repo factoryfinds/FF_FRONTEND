@@ -19,16 +19,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
   _id,
   title,
   images,
-  originalPrice,
+  // originalPrice,
   discountedPrice,
 }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const discountPercentage =
-    originalPrice > discountedPrice
-      ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
-      : 0;
+  // const discountPercentage =
+  //   originalPrice > discountedPrice
+  //     ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
+  //     : 0;
 
   const handleClick = useCallback(() => {
     if (loading) return; // Prevent multiple navigations
@@ -50,7 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       >
 
         {/* Product Image */}
-        <div className="relative w-full aspect-[4/5] rounded-sm overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="relative w-full aspect-[4/5] overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <Image
             src={images?.[0]}
             alt={title}
@@ -60,13 +60,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
 
-          {discountPercentage > 0 && (
+          {/* {discountPercentage > 0 && (
             <div className="absolute top-3 right-3 z-10">
               <div className="bg-black/70 text-white text-[11px] tracking-wide font-light px-2 py-1 rounded-sm shadow-sm">
                 -{discountPercentage}%
               </div>
             </div>
-          )}
+          )} */}
 
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300"></div>
         </div>
@@ -74,24 +74,24 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Content */}
         <div className="p-3 sm:p-4 space-y-2">
-          <h3 className="text-xs sm:text-sm text-gray-900 font-medium leading-tight truncate group-hover:text-black transition-colors duration-200">
+          <h3 className="text-xs sm:text-xs text-gray-900 font-bold leading-snug tracking-tight truncate uppercase group-hover:text-black transition-colors duration-200">
             {title}
           </h3>
 
           <div>
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-sm text-black font-semibold tracking-normal">
-                  ₹{discountedPrice.toLocaleString()}
+                <span className="text-xs text-gray-500 font-semibold leading-snug tracking-normal">
+                  RS. {discountedPrice.toLocaleString()}
                 </span>
-                {originalPrice > discountedPrice && (
+                {/* {originalPrice > discountedPrice && (
                   <span className="text-xs text-gray-500 line-through font-normal tracking-wide">
-                    ₹{originalPrice.toLocaleString()}
+                    RS. {originalPrice.toLocaleString()}
                   </span>
-                )}
+                )} */}
               </div>
 
-              {originalPrice > discountedPrice && (
+              {/* {originalPrice > discountedPrice && (
                 <div className="flex flex-col items-end">
                   <span className="text-xs text-green-600 font-medium">
                     You Save
@@ -100,7 +100,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                     ₹{(originalPrice - discountedPrice).toLocaleString()}
                   </span>
                 </div>
-              )}
+              )} */}
             </div>
 
             <div className="pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">

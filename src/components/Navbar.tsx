@@ -39,7 +39,6 @@ const AnimatedBrandText = ({ onClick }: { onClick: () => void }) => {
     const languages = [
         { text: "FACTORY FINDS", lang: "English" },
         { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
-        { text: "فیکٹری فائنڈز", lang: "Urdu" },
         { text: "FACTORY FINDS", lang: "English" },
         { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
         { text: "ફેક્ટરી ફાઇન્ડ્સ", lang: "Gujarati" },
@@ -73,7 +72,7 @@ const AnimatedBrandText = ({ onClick }: { onClick: () => void }) => {
     return (
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div
-                className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl tracking-wide cursor-pointer font-semibold group transition-all duration-300 hover:scale-105 hover:text-black ${isVisible
+                className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl tracking-tighter cursor-pointer font-bold group transition-all duration-300 hover:scale-105 hover:text-black ${isVisible
                     ? 'opacity-100 transform translate-y-0'
                     : 'opacity-0 transform -translate-y-2'
                     }`}
@@ -261,6 +260,7 @@ const Navbar = () => {
     };
 
     return (
+        
         <>
             {/* Fixed Navbar Container with Gradient */}
             <div className="fixed top-0 left-0 right-0 z-50 ">
@@ -288,17 +288,17 @@ const Navbar = () => {
                                 onClick={() => setIsMenuOpen(true)}
                             >
                                 <FiMenu size={18} />
-                                <span className="hidden sm:inline">Menu</span>
+                                <span className="hidden sm:inline tracking-tighter text-sm">MENU</span>
                             </div>
 
                             {/* ✅ Desktop Search with Dropdown */}
-                            <div className="hidden md:block relative" ref={searchRef}>
+                            <div className="hidden md:block relative tracking-tighter text-sm" ref={searchRef}>
                                 <div
                                     className="flex items-center gap-2 cursor-pointer font-light group transition-transform duration-300 hover:scale-105 hover:text-black"
                                     onClick={() => setIsDesktopSearchOpen(!isDesktopSearchOpen)}
                                 >
                                     <FiSearch size={18} />
-                                    <span>Search</span>
+                                    <span>SEARCH</span>
                                 </div>
 
                                 {/* Desktop Search Dropdown */}
@@ -394,19 +394,19 @@ const Navbar = () => {
                             {/* Admin link (desktop only) */}
                             {role === "admin" && (
                                 <div
-                                    className="hidden md:block cursor-pointer font-light hover:scale-105 transition-colors"
+                                    className="hidden md:block cursor-pointer font-light tracking-tighter text-sm hover:scale-105 transition-colors"
                                     onClick={() => router.push("/admin/dashboard")}
                                 >
-                                    Admin
+                                    ADMIN
                                 </div>
                             )}
 
                             {/* Call Us – shown only on desktop now */}
                             <div
-                                className="hidden md:flex items-center gap-1 cursor-pointer font-light group transition-transform duration-300 hover:scale-105 "
+                                className="hidden md:flex items-center gap-1 tracking-tighter text-sm cursor-pointer font-light group transition-transform duration-300 hover:scale-105 "
                                 onClick={() => setIsCallDrawerOpen(true)}
                             >
-                                <span>Contact Us</span>
+                                <span>CONTACT US</span>
                             </div>
 
                             {/* Heart Icon – shown only on desktop */}
@@ -434,26 +434,26 @@ const Navbar = () => {
                                                 {/* Admin Dashboard – Mobile only */}
                                                 {role === "admin" && (
                                                     <li
-                                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer md:hidden flex items-center gap-2"
+                                                        className="px-4 py-2 hover:bg-gray-100 tracking-tighter text-sm cursor-pointer md:hidden flex items-center gap-2"
                                                         onClick={() => {
                                                             setIsAccountOpen(false);
                                                             router.push("/admin/dashboard");
                                                         }}
                                                     >
                                                         <FiSettings size={16} />
-                                                        Admin Dashboard
+                                                        ADMIN
                                                     </li>
                                                 )}
                                                 {/* 👤 Profile */}
                                                 <li
-                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                                                    className="px-4 py-2 hover:bg-gray-100  tracking-tighter text-sm cursor-pointer flex items-center gap-2"
                                                     onClick={() => {
                                                         setIsAccountOpen(false);
                                                         router.push("/profile/cart");
                                                     }}
                                                 >
                                                     <FiUser size={16} />
-                                                    Profile
+                                                    PROFILE
                                                 </li>
                                                 {/* 🛍️ Check-out Bag */}
                                                 <li
@@ -464,10 +464,10 @@ const Navbar = () => {
                                                     }}
                                                 >
 
-                                                    <div className="w-[18px] h-[18px] flex items-center justify-center">
+                                                    <div className="w-[18px] h-[18px] tracking-tighter text-sm flex items-center justify-center">
                                                         <FiBox size={16} />
                                                     </div>
-                                                    Check-out Bag
+                                                    CHECKOUT-BAG
                                                 </li>
                                                 {/* ❤️ Wishlist – Mobile only */}
                                                 <li
@@ -478,37 +478,37 @@ const Navbar = () => {
                                                     }}
                                                 >
                                                     <div className="w-[18px] h-[18px] flex items-center justify-center">
-                                                        <FiUser size={18} className="cursor-pointer hover:scale-105 transition-colors" />
+                                                        <FiUser size={18} className="cursor-pointer tracking-tighter text-sm hover:scale-105 transition-colors" />
                                                     </div>
 
-                                                    Wishlist
+                                                    WISHLIST
                                                 </li>
                                                 {/* 📞 Call Us – Mobile only */}
                                                 <li
-                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer md:hidden flex items-center gap-2"
+                                                    className="px-4 py-2 hover:bg-gray-100 tracking-tighter text-sm cursor-pointer md:hidden flex items-center gap-2"
                                                     onClick={() => {
                                                         setIsCallDrawerOpen(true);
                                                         setIsAccountOpen(false);
                                                     }}
                                                 >
                                                     <FiPhone size={16} />
-                                                    Contact Us
+                                                    CONTACT US
                                                 </li>
 
                                                 {/* 🚪 Logout */}
                                                 <li
-                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                                                    className="px-4 py-2 hover:bg-gray-100 tracking-tighter text-sm cursor-pointer flex items-center gap-2"
                                                     onClick={handleLogout}
                                                 >
                                                     <FiPower size={16} />
-                                                    Logout
+                                                    LOGOUT
                                                 </li>
 
                                             </ul>
 
                                         ) : (
                                             <div className="p-4 text-sm">
-                                                <p className="mb-2 text-center text-gray-800">You&rsquo;re not logged in.</p>
+                                                <p className="mb-2 text-center uppercase tracking-tighter text-sm text-gray-800">You&rsquo;re not logged in.</p>
                                                 <button
                                                     className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-900 transition-colors"
                                                     onClick={() => {
