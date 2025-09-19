@@ -107,7 +107,7 @@ export const metadata = {
     "premium clothing",
     "online shopping India",
     "t-shirts",
-    "shirts", 
+    "shirts",
     "jeans",
     "jackets",
     "fashion",
@@ -175,13 +175,13 @@ export default function RootLayout({
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
+
         {/* Favicon */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
-        
+
         {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-TMGD28RZK5"
@@ -195,7 +195,7 @@ export default function RootLayout({
             gtag('config', 'G-TMGD28RZK5');
           `}
         </Script>
-        
+
         {/* Schema.org structured data */}
         <Script
           id="structured-data"
@@ -223,25 +223,50 @@ export default function RootLayout({
             })
           }}
         />
+        {/* meta pixel code */}
+        {/* ✅ Meta Pixel Code */}
+        <Script id="fb-pixel" strategy="afterInteractive">
+          {`
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '1170618384910953');
+            fbq('track', 'PageView');
+          `}
+        </Script>
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=1170618384910953&ev=PageView&noscript=1"
+          />
+        </noscript>
+        {/* ✅ End Meta Pixel Code */}
       </head>
 
       <body className="flex flex-col min-h-screen overflow-x-hidden">
-        
+
         {/* Skip to main content for accessibility */}
-        <a 
-          href="#main-content" 
+        <a
+          href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-0 focus:left-0 bg-blue-600 text-white p-2 z-50"
         >
           Skip to main content
         </a>
-        
+
         <Navbar />
-        
+
         <main id="main-content" className="flex-1 w-full relative">
           {children}
           <CheckOutTray />
         </main>
-        
+
         <Footer />
         <SpeedInsights />
 
