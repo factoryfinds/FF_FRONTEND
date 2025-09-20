@@ -27,7 +27,6 @@ import { MdEmail } from "react-icons/md";
 import LoginDrawer from "@/components/LoginDrawer";
 import { useRouter } from "next/navigation";
 import { toast } from 'react-hot-toast';
-import { useSidebar } from "@/context/AuthSidebarContext";
 
 // ✅ Define user interface for better type safety
 interface User {
