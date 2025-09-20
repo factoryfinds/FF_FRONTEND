@@ -1,6 +1,6 @@
 // next-sitemap.config.js
 module.exports = {
-  siteUrl: 'https://factoryfinds.store',
+  siteUrl: 'https://www.factoryfinds.store',
   generateRobotsTxt: true,
   exclude: [
     '/unauthorized',
