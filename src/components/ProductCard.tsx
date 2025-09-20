@@ -19,16 +19,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
   _id,
   title,
   images,
-  // originalPrice,
+  originalPrice,
   discountedPrice,
 }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  // const discountPercentage =
-  //   originalPrice > discountedPrice
-  //     ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
-  //     : 0;
+  const discountPercentage =
+    originalPrice > discountedPrice
+      ? Math.round(((originalPrice - discountedPrice) / originalPrice) * 100)
+      : 0;
 
   const handleClick = useCallback(() => {
     if (loading) return; // Prevent multiple navigations
@@ -60,13 +60,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
 
-          {/* {discountPercentage > 0 && (
+          {discountPercentage > 0 && (
             <div className="absolute top-3 right-3 z-10">
               <div className="bg-black/70 text-white text-[11px] tracking-wide font-light px-2 py-1 rounded-sm shadow-sm">
                 -{discountPercentage}%
               </div>
             </div>
-          )} */}
+          )}
 
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300"></div>
         </div>
@@ -84,11 +84,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 <span className="text-xs text-gray-500 font-semibold leading-snug tracking-normal">
                   RS. {discountedPrice.toLocaleString()}
                 </span>
-                {/* {originalPrice > discountedPrice && (
+                {originalPrice > discountedPrice && (
                   <span className="text-xs text-gray-500 line-through font-normal tracking-wide">
                     RS. {originalPrice.toLocaleString()}
                   </span>
-                )} */}
+                )}
               </div>
 
               {/* {originalPrice > discountedPrice && (

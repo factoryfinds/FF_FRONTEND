@@ -52,14 +52,14 @@ function useDebounced<T>(value: T, delay = 300) {
 
 /* ---------------- Presentational components (memoized) ---------------- */
 const ProductCardSkeleton = React.memo(() => (
-  <div className="bg-white rounded-lg shadow-sm border animate-pulse">
-    <div className="aspect-square bg-gray-200 rounded-t-lg" />
-    <div className="p-4 space-y-2">
-      <div className="h-4 bg-gray-200 rounded" />
-      <div className="h-4 bg-gray-200 rounded w-3/4" />
+  <div className="bg-white animate-pulse">
+    <div className="aspect-square bg-gray-200" />
+    <div className="pt-4 space-y-3">
+      <div className="h-3 bg-gray-200 rounded" />
+      <div className="h-3 bg-gray-200 rounded w-3/4" />
       <div className="flex gap-2">
-        <div className="h-4 bg-gray-200 rounded w-16" />
-        <div className="h-4 bg-gray-200 rounded w-20" />
+        <div className="h-3 bg-gray-200 rounded w-16" />
+        <div className="h-3 bg-gray-200 rounded w-20" />
       </div>
     </div>
   </div>
@@ -67,18 +67,18 @@ const ProductCardSkeleton = React.memo(() => (
 ProductCardSkeleton.displayName = "ProductCardSkeleton";
 
 const ErrorFallback = React.memo(({ error, onRetry }: { error: string; onRetry: () => void }) => (
-  <div className="text-center py-12 px-4">
+  <div className="text-center py-16 px-4">
     <div className="max-w-md mx-auto">
-      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      <div className="w-16 h-16 border border-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h3>
-      <p className="text-gray-600 mb-6">{error}</p>
+      <h3 className="text-xs font-black text-black mb-3 uppercase tracking-[0.15em]">Something went wrong</h3>
+      <p className="text-xs text-gray-600 font-light mb-8 tracking-wide">{error}</p>
       <button
         onClick={onRetry}
-        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        className="px-6 py-3 bg-black text-white text-xs font-light uppercase tracking-[0.2em] hover:bg-gray-800 transition-colors"
       >
         Try again
       </button>
@@ -88,18 +88,18 @@ const ErrorFallback = React.memo(({ error, onRetry }: { error: string; onRetry: 
 ErrorFallback.displayName = "ErrorFallback";
 
 const EmptyState = React.memo(({ onClearFilters }: { onClearFilters: () => void }) => (
-  <div className="text-center py-12 px-4">
+  <div className="text-center py-16 px-4">
     <div className="max-w-md mx-auto">
-      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-2.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 009.586 13H7" />
+      <div className="w-16 h-16 border border-gray-300 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2 2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-2.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 009.586 13H7" />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-      <p className="text-gray-600 mb-6">Try adjusting your filters to see more products.</p>
+      <h3 className="text-xs font-black text-black mb-3 uppercase tracking-[0.15em]">No products found</h3>
+      <p className="text-xs text-gray-600 font-light mb-8 tracking-wide">Try adjusting your filters to see more products.</p>
       <button
         onClick={onClearFilters}
-        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+        className="px-6 py-3 bg-black text-white text-xs font-light uppercase tracking-[0.2em] hover:bg-gray-800 transition-colors"
       >
         Clear filters
       </button>
@@ -108,7 +108,7 @@ const EmptyState = React.memo(({ onClearFilters }: { onClearFilters: () => void 
 ));
 EmptyState.displayName = "EmptyState";
 
-/* ---------------- Filter Drawer component (keeps original functionality) ---------------- */
+/* ---------------- Filter Drawer component (luxury styled) ---------------- */
 const FilterDrawer = React.memo(({
   isOpen,
   onClose,
@@ -136,11 +136,10 @@ const FilterDrawer = React.memo(({
           name="description"
           content="Discover trending premium clothing at Factory Finds — luxury-inspired styles, unbeatable prices, and fast delivery across India."
         />
-
       </Head>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
           onClick={onClose}
           aria-hidden
         />
@@ -150,33 +149,33 @@ const FilterDrawer = React.memo(({
         role="dialog"
         aria-modal="true"
         aria-labelledby="filter-title"
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="flex items-center justify-between p-8 lg:p-8 sm:p-6 border-b border-gray-200">
-          <h2 id="filter-title" className="text-lg sm:text-xl font-semibold text-black">Filters</h2>
-          <button onClick={onClose} aria-label="Close filters" className="p-2 rounded-full hover:bg-gray-100">
+        <div className="flex items-center justify-between px-8 lg:px-12 py-4 lg:py-9 border-b border-gray-200">
+          <h2 id="filter-title" className="text-xs sm:text-sm font-black text-black uppercase tracking-[0.15em]">Filters</h2>
+          <button onClick={onClose} aria-label="Close filters" className="p-2 hover:bg-gray-50 transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <div className="p-4 sm:p-6 space-y-6 overflow-y-auto h-full pb-32">
+        <div className="px-8 lg:px-12 py-8 space-y-8 overflow-y-auto h-full pb-32">
           {/* Sort */}
           <div>
-            <h3 className="text-base sm:text-lg font-medium text-black mb-3">SORT BY</h3>
-            <div className="space-y-2 sm:space-y-3">
+            <h3 className="text-xs font-black text-black mb-6 uppercase tracking-[0.15em]">Sort By</h3>
+            <div className="space-y-4">
               {SORT_OPTIONS.map((opt) => (
-                <label key={opt.value} className="flex items-center cursor-pointer">
+                <label key={opt.value} className="flex items-center uppercase cursor-pointer group">
                   <input
                     type="radio"
                     name="sortBy"
                     value={opt.value}
                     checked={filters.sortBy === opt.value}
                     onChange={(e) => onFilterChange.sortBy(e.target.value)}
-                    className="mr-3 accent-black"
+                    className="mr-4 accent-black"
                   />
-                  <span className="text-gray-700 text-sm sm:text-base">{opt.label}</span>
+                  <span className="text-gray-700 text-xs font-light tracking-wide group-hover:text-black transition-colors">{opt.label}</span>
                 </label>
               ))}
             </div>
@@ -184,19 +183,19 @@ const FilterDrawer = React.memo(({
 
           {/* Category */}
           <div>
-            <h3 className="text-base sm:text-lg font-medium text-black mb-3">CATEGORY</h3>
-            <div className="space-y-2 sm:space-y-3">
+            <h3 className="text-xs font-black text-black mb-6 uppercase tracking-[0.15em]">Category</h3>
+            <div className="space-y-4">
               {CATEGORIES.map((c) => (
-                <label key={c.value} className="flex items-center cursor-pointer">
+                <label key={c.value} className="flex items-center uppercase cursor-pointer group">
                   <input
                     type="radio"
                     name="category"
                     value={c.value}
                     checked={filters.category === c.value}
                     onChange={(e) => onFilterChange.category(e.target.value)}
-                    className="mr-3 accent-black"
+                    className="mr-4 accent-black"
                   />
-                  <span className="text-gray-700 text-sm sm:text-base">{c.label}</span>
+                  <span className="text-gray-700 text-xs font-light tracking-wide group-hover:text-black transition-colors">{c.label}</span>
                 </label>
               ))}
             </div>
@@ -204,9 +203,9 @@ const FilterDrawer = React.memo(({
 
           {/* Price range */}
           <div>
-            <h3 className="text-base sm:text-lg font-medium text-black mb-3">PRICE RANGE</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between text-xs sm:text-sm">
+            <h3 className="text-xs font-black text-black mb-6 uppercase tracking-[0.15em]">Price Range</h3>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between text-xs font-light tracking-wide">
                 <span className="text-gray-600">₹0</span>
                 <span className="font-medium text-black">₹{filters.priceRange[1].toLocaleString()}</span>
                 <span className="text-gray-600">₹{MAX_PRICE.toLocaleString()}</span>
@@ -218,25 +217,25 @@ const FilterDrawer = React.memo(({
                 step={500}
                 value={filters.priceRange[1]}
                 onChange={(e) => onFilterChange.priceRange(Number(e.target.value))}
-                className="w-full h-2 accent-black"
+                className="w-full h-1 accent-black bg-gray-200"
                 aria-label={`Price range up to ${filters.priceRange[1].toLocaleString()} rupees`}
               />
-              <div className="text-center text-sm font-medium text-black">Up to ₹{filters.priceRange[1].toLocaleString()}</div>
+              <div className="text-center text-xs font-medium text-black tracking-wide">Up to ₹{filters.priceRange[1].toLocaleString()}</div>
             </div>
           </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 border-t bg-white">
-          <div className="flex gap-3 sm:gap-4">
+        <div className="absolute bottom-0 left-0 right-0 px-8 lg:px-12 py-6 border-t bg-white">
+          <div className="flex gap-4">
             <button
               onClick={onClearFilters}
-              className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm sm:text-base"
+              className="flex-1 px-6 py-4 border border-black text-black text-xs font-light uppercase tracking-[0.15em] hover:bg-black hover:text-white transition-all duration-300"
             >
               Clear all
             </button>
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors font-medium text-sm sm:text-base"
+              className="flex-1 px-6 py-4 bg-black text-white text-xs font-light uppercase tracking-[0.15em] hover:bg-gray-800 transition-colors"
             >
               View {filteredCount} Products
             </button>
@@ -258,7 +257,6 @@ const ProductsGrid = React.memo(({ products, loading }: { products: Product[]; l
     ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-2 sm:gap-2">
         {products.map((product) => (
-          /* Pass the props as your ProductCard expects - unchanged */
           <ProductCard key={product._id} {...product} />
         ))}
       </div>
@@ -393,34 +391,38 @@ export default function AllProductsPage() {
   /* ---------------- Render ---------------- */
   return (
     <div className="bg-white min-h-screen w-full">
-      {/* Urgency ribbon (subtle pulsing animation) */}
-      <div className="w-full">
+      {/* Urgency ribbon - luxury styled */}
+      <div className="w-full bg-black">
         <div
-          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-1 text-center text-sm font-semibold tracking-wide"
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2 text-center"
           role="status"
           aria-live="polite"
         >
-          <span className="inline-block bg-White px-3 py-2 rounded-md shadow-md animate-pulse-slow text-black">
-            Limited time: Extra 10% OFF on select styles — use code <strong>FIND10</strong> Auto Applied at checkout
+          <span className="text-[10px] sm:text-xs font-light text-white uppercase tracking-[0.15em]">
+            Limited time: Extra 10% OFF on select styles — Auto Applied at checkout
           </span>
         </div>
       </div>
 
-      {/* Header */}
-      {/* Page Header */}
-      <div className="w-full border-b border-gray-200 bg-gradient-to-r from-white via-gray-50 to-white">
-        <div className="max-w-8xl mx-auto px-4 sm:px-2 lg:px-8 py-8">
-          <div className="flex flex-row flex-wrap items-center justify-between gap-4">
+      {/* Page Header - luxury styled */}
+      <div className="w-full border-b border-gray-200">
+        <div className="max-w-8xl mx-auto px-4 sm:px-2 lg:px-8 py-16">
+          <div className="flex flex-row flex-wrap items-center justify-between gap-6">
 
             {/* Left: Page Title & Subtitle */}
             <div>
+              {/* Brand indicator */}
+              <div className="mb-4">
+                <p className="text-xs font-light uppercase text-gray-800 tracking-[0.2em]">FactoryFinds</p>
+              </div>
+
               {/* Main heading */}
-              <h1 className="text-3xl sm:text-4xl font-light text-gray-900 tracking-tight">
+              <h1 className="text-md sm:text-md font-semibold text-black mb-2 tracking-tighter">
                 All Products
               </h1>
 
               {/* Product count */}
-              <p className="mt-1 text-sm text-gray-600">
+              <p className="text-xs font-light text-gray-700 uppercase tracking-[0.1em]">
                 {filteredProducts.length} items handpicked just for you
               </p>
             </div>
@@ -429,7 +431,7 @@ export default function AllProductsPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={openFilters}
-                className="bg-white shadow-sm px-4 py-2 rounded-full border border-gray-200 text-sm flex items-center gap-2 hover:shadow-md transition-all duration-200"
+                className="border border-gray-300 px-6 py-3 text-xs font-light uppercase tracking-[0.15em] text-black hover:border-black hover:bg-gray-50 transition-all duration-300 flex items-center gap-3"
                 aria-expanded={isFilterDrawerOpen}
                 aria-controls="filter-drawer"
               >
@@ -443,24 +445,22 @@ export default function AllProductsPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth={2}
+                    strokeWidth={1}
                     d="M3 4h18M6 10h12M10 16h4"
                   />
                 </svg>
-                <span className="text-gray-700 font-medium">Filters</span>
+                <span>Filters</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-
-
-      {/* Filter drawer (preserve UX) */}
+      {/* Filter drawer */}
       <FilterDrawer
         isOpen={isFilterDrawerOpen}
         onClose={closeFilters}
-        filters={{ ...filters, priceRange: [0, localMaxPrice] }} // show local slider value for UI sync
+        filters={{ ...filters, priceRange: [0, localMaxPrice] }}
         onFilterChange={{
           category: onCategoryChange,
           sortBy: onSortChange,
@@ -478,18 +478,6 @@ export default function AllProductsPage() {
           <ProductsGrid products={filteredProducts} loading={false} />
         )}
       </main>
-
-      {/* slow pulse animation class */}
-      <style jsx>{`
-        .animate-pulse-slow {
-          animation: pulse 2.8s ease-in-out infinite;
-        }
-        @keyframes pulse {
-          0% { transform: translateY(0); opacity: 1; }
-          50% { transform: translateY(-2px); opacity: 0.95; }
-          100% { transform: translateY(0); opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 }

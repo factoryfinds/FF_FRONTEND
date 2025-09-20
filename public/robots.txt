@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Host
-Host: https://factoryfinds.store
+Host: https://www.factoryfinds.store
 
 # Sitemaps
-Sitemap: https://factoryfinds.store/sitemap.xml
+Sitemap: https://www.factoryfinds.store/sitemap.xml
