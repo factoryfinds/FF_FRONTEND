@@ -8,6 +8,7 @@ import { useSwipeable } from "react-swipeable";
 import { FiX, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import Image from 'next/image';
+import LoginDrawer from "@/components/LoginDrawer";
 
 // Define size types to fix TypeScript errors
 interface SizeObject {
@@ -78,6 +79,7 @@ export default function ProductDetails() {
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isMobileFullScreen, setIsMobileFullScreen] = useState(false);
   const [popupMessage, setPopupMessage] = useState<PopupMessage | null>(null);
+  const [isLoginDrawerOpen, setIsLoginDrawerOpen] = useState(false); // for login drawer
 
   const clickTrackedRef = useRef(false);
 
@@ -239,6 +241,10 @@ export default function ProductDetails() {
       localStorage.setItem('cart-updated', Date.now().toString());
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message.toUpperCase() : 'FAILED TO ADD ITEM TO CART';
+      if (errorMessage === 'AUTHENTICATION REQUIRED') {
+        setIsLoginDrawerOpen(true);
+        return; // Don't show the error popup, just open login drawer
+      }
       setPopupMessage({ type: 'error', message: errorMessage });
     } finally {
       setAddingToCart(false);
@@ -257,6 +263,10 @@ export default function ProductDetails() {
       router.push('/checkout');
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message.toUpperCase() : 'FAILED TO PROCEED TO CHECKOUT';
+      if (errorMessage === 'AUTHENTICATION REQUIRED') {
+        setIsLoginDrawerOpen(true);
+        return; // Don't show the error popup, just open login drawer
+      }
       setPopupMessage({ type: 'error', message: errorMessage });
     } finally {
       setBuyingNow(false);
@@ -269,6 +279,7 @@ export default function ProductDetails() {
   const isSelectedSizeAvailable = availableStock > 0;
 
   return (
+
     <div className="min-h-screen bg-white relative">
       {/* Custom Popup - Luxury styling */}
       {popupMessage && (
@@ -654,7 +665,7 @@ export default function ProductDetails() {
                 Questions? Our team is available to assist with your selection.
               </p>
             </div>
-            
+
             {/* Product Description - Luxury typography */}
             {/* Replace description rendering with this */}
             <div className="text-sm text-gray-900 font-light leading-relaxed tracking-wide">
@@ -750,6 +761,11 @@ export default function ProductDetails() {
           </div>
         </div>
       </div>
+      {/* Add this LoginDrawer component in your JSX */}
+      <LoginDrawer
+        isOpen={isLoginDrawerOpen}
+        onClose={() => setIsLoginDrawerOpen(false)}
+      />
     </div>
   );
 }

@@ -332,7 +332,7 @@ export default function AddProductPage() {
 
             // 4. Create or update product
             const url = editingProduct
-                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://192.168.29.110:5000'}/api/products/${editingProduct._id}`
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com'}/api/products/${editingProduct._id}`
                 : `${process.env.NEXT_PUBLIC_API_URL || 'https://ff-backend-00ri.onrender.com'}/api/products`;
 
             const method = editingProduct ? "PUT" : "POST";

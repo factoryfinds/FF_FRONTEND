@@ -97,7 +97,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata = {
-  metadataBase: new URL('https://factoryfinds.store'),
+  metadataBase: new URL('https://www.factoryfinds.store'),
   title: {
     default: "Factory Finds | Buy Premium Clothing Online in India",
     template: "%s | Factory Finds"
@@ -125,7 +125,7 @@ export const metadata = {
   openGraph: {
     title: "Factory Finds | Premium Clothing Online in India",
     description: "Discover premium clothing with unbeatable style and fast nationwide delivery. Shop our curated collection of t-shirts, shirts, jeans, and more.",
-    url: "https://factoryfinds.store",
+    url: "https://www.factoryfinds.store",
     siteName: "Factory Finds",
     locale: "en_IN",
     type: "website",
@@ -206,8 +206,8 @@ export default function RootLayout({
               "@type": "ClothingStore",
               name: "Factory Finds",
               description: "Premium clothing store offering t-shirts, shirts, jeans, jackets and more with fast nationwide delivery in India.",
-              url: "https://factoryfinds.store",
-              logo: "https://factoryfinds.store/logo.png",
+              url: "https://www.factoryfinds.store",
+              logo: "https://www.factoryfinds.store/logo.png",
               contactPoint: {
                 "@type": "ContactPoint",
                 contactType: "customer service",
@@ -251,6 +251,7 @@ export default function RootLayout({
       </head>
 
       <body className="flex flex-col min-h-screen overflow-x-hidden">
+        
 
         {/* Skip to main content for accessibility */}
         <a
