@@ -182,14 +182,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import LoadingOverlay from "./LoadingOverlay";
-import img1 from "@/photos/t-shirt-cateogry.png";
+import img1 from "@/photos/P-1.png";
 import img2 from "@/photos/JACKET.jpg";
 import img3 from "@/photos/jacket-category.png";
 import img4 from "@/photos/SHIRTS.jpg";
 import img5 from "@/photos/TOPS.jpg";
 import img6 from "@/photos/jeans-category.png";
-import img7 from "@/photos/background_for_launch.webp";
+// import img7 from "@/photos/background_for_launch.webp";
 import { notifyUser } from "../../utlis/api";
+import mobileBackgroundImg from "@/photos/THUMBNAIL-1.jpg"
 
 // Move categories to a separate server component for better SEO
 export const categories = [
@@ -377,16 +378,41 @@ const MainScreen = () => {
       )}
 
       {/* Hero Section with proper semantic HTML for SEO */}
-      <section className="relative w-full h-dvh flex flex-col justify-center items-center lg:mb-15 sm:mb-10">
-        <Image
-          src={img7}
-          alt="Factory Finds - Premium clothing launching soon"
-          fill
-          style={{ objectFit: "cover" }}
-          quality={100}
-          placeholder="blur"
-          priority // Critical for LCP
-        />
+      <section 
+      className="relative w-full h-dvh flex flex-col justify-center items-center lg:mb-15 sm:mb-10"
+      aria-label="Hero section"
+    >
+      {/* Mobile-optimized image for screens < 768px */}
+      <Image
+        src={mobileBackgroundImg}
+        alt="Factory Finds - Premium clothing launching soon"
+        fill
+        style={{ objectFit: "cover" }}
+        quality={85} // Optimized for mobile
+        placeholder="blur"
+        priority // Critical for LCP
+        // className="block md:hidden"
+        sizes="100vw"
+      />
+      
+      {/* Desktop-optimized image for screens >= 768px */}
+      {/* <Image
+        src={img7}
+        alt="Factory Finds - Premium clothing launching soon"
+        fill
+        style={{ objectFit: "cover" }}
+        quality={90} // Higher quality for desktop
+        placeholder="blur"
+        priority // Critical for LCP
+        className="hidden md:block"
+        sizes="100vw"
+      /> */}
+      
+      {/* Optional: Overlay for better text readability */}
+      {/* <div 
+        className="absolute inset-0 bg-black/20 z-10" 
+        aria-hidden="true"
+      /> */}
 
         <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_50%_50%,rgba(0,0,0,0.1),transparent_70%)]" />
 
@@ -395,13 +421,13 @@ const MainScreen = () => {
           <div className="w-12 h-px bg-black mx-auto mb-6 sm:mb-8 opacity-60" />
 
           <h1
-            style={{ textShadow: '2px 2px 4px rgba(218, 165, 32, 0.7)' }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extralight tracking-[0.2em] uppercase leading-tight text-black mb-4 sm:mb-6"
+            style={{textShadow: '2px 2px 4px rgba(0, 0, 0, 0)' }}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl  font-extralight tracking-[0.2em] uppercase leading-tight text-white mb-4 sm:mb-6"
           >
             Launching
             <br />
             <span
-              style={{ textShadow: '2px 2px 4px rgba(218, 165, 32, 0.7)' }}
+              // style={{ textShadow: '1px 1px 4px rgba(255, 255, 255, 1)' }}
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl tracking-[0.3em]"
             >
               Soon
@@ -409,13 +435,13 @@ const MainScreen = () => {
           </h1>
 
           <h2
-            className="text-base sm:text-lg md:text-xl lg:text-2xl font-light leading-relaxed text-gray-900 mb-3 sm:mb-4 tracking-wide"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl font-normal leading-relaxed text-gray-900 mb-3 sm:mb-4 tracking-wide"
           >
             Premium T-Shirts. Redefined.
           </h2>
 
           <p
-            className="text-xs sm:text-sm tracking-[0.2em] font-light uppercase text-gray-800 max-w-md mx-auto mb-8 sm:mb-12 leading-loose"
+            className="text-xs sm:text-sm tracking-[0.2em] font-normal uppercase text-white max-w-md mx-auto mb-8 sm:mb-12 leading-loose"
           >
             Superior fabric
             <span className="mx-3 text-gray-400">·</span>
@@ -427,14 +453,14 @@ const MainScreen = () => {
           <div className="flex flex-col items-center gap-4 sm:gap-6">
             <button
               onClick={handleNotifyClick}
-              className="group relative px-6 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm tracking-[0.15em] font-light uppercase text-black border border-black hover:bg-black hover:text-white transition-all duration-300 ease-in-out overflow-hidden"
+              className="group relative px-6 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm tracking-[0.15em] font-normal uppercase text-white border bg-black border-black hover:bg-black hover:text-white transition-all duration-300 ease-in-out overflow-hidden"
               aria-label="Get notified when Factory Finds launches"
             >
               <span className="relative z-10">Notify Me</span>
               <div className="absolute inset-0 bg-black transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             </button>
 
-            <p className="text-xs tracking-[0.2em] uppercase text-gray-800 font-light">
+            <p className="text-xs tracking-[0.2em] uppercase text-white font-normal">
               Est. 2025
             </p>
           </div>
