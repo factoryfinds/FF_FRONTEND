@@ -6,6 +6,15 @@ import ProductCard from "@/components/ProductCard";
 import LoadingOverlay from "@/components/productLoadingOverlay";
 import { Product } from '../../../../utlis/api';
 import Head from 'next/head';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Trending Products - Factory Finds',
+  description: 'Discover the latest trending clothes, fashion styles and popular apparel at Factory Finds',
+  alternates: {
+    canonical: 'https://www.factoryfinds.store/product/trending',
+  },
+};
 
 // Extended Product interface for trending data
 interface TrendingProduct extends Product {

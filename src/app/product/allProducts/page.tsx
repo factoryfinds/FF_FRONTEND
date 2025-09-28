@@ -5,6 +5,15 @@ import { getAllProducts, Product } from "../../../../utlis/api";
 import ProductCard from "@/components/ProductCard";
 import LoadingOverlay from "@/components/productLoadingOverlay";
 import Head from 'next/head';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'All Products - Factory Finds',
+  description: 'Browse our complete collection of trendy clothes, apparel and fashion items at Factory Finds',
+  alternates: {
+    canonical: 'https://www.factoryfinds.store/product/allProducts',
+  },
+};
 
 /* ---------------- Types ---------------- */
 interface ErrorState {
@@ -129,7 +138,7 @@ const FilterDrawer = React.memo(({
   filteredCount: number;
 }) => {
   return (
-    <>
+    <div>
       <Head>
         <title>All Products</title>
         <meta
@@ -242,7 +251,7 @@ const FilterDrawer = React.memo(({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 });
 FilterDrawer.displayName = "FilterDrawer";
