@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { getAllProducts } from "../../../../utlis/api";
 import ProductCard from "@/components/ProductCard";
