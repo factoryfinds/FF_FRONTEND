@@ -5,7 +5,6 @@ import { getAllProducts } from "../../../../utlis/api";
 import ProductCard from "@/components/ProductCard";
 import LoadingOverlay from "@/components/productLoadingOverlay";
 import { Product } from '../../../../utlis/api';
-import Head from 'next/head';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -359,12 +358,6 @@ export default function TrendingProductsPage() {
     // Main render
     return (
         <>
-            <Head>
-                <meta
-                    name="description"
-                    content="Shop trending premium fashion at Factory Finds — discover the latest styles, premium quality, and quick delivery across India."
-                />
-            </Head>
             <div className="bg-white min-h-screen w-full">
                 <PageHeader
                     filteredProductsCount={trendingProducts.length}
