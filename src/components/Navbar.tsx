@@ -19,9 +19,9 @@ import {
 import { FiSettings } from "react-icons/fi";
 import {
     FaWhatsapp,
-    FaPhoneAlt,
+    // FaPhoneAlt,
     FaQuestion,
-    FaPeopleArrows
+    // FaPeopleArrows
 } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import LoginDrawer from "@/components/LoginDrawer";
@@ -260,7 +260,7 @@ const Navbar = () => {
     };
 
     return (
-        
+
         <>
             {/* Fixed Navbar Container with Gradient */}
             <div className="fixed top-0 left-0 right-0 z-50 ">
@@ -270,7 +270,7 @@ const Navbar = () => {
                 {/* Overlay for mobile when drawers are open */}
                 {isMobile && (isMenuOpen || isCallDrawerOpen) && (
                     <div
-                        className="fixed inset-0 bg-black bg-opacity-50 z-30"
+                        className="fixed inset-0 bg-transparent z-30"
                         onClick={() => {
                             setIsMenuOpen(false);
                             setIsCallDrawerOpen(false);
@@ -659,62 +659,63 @@ const Navbar = () => {
             </div>
 
             {/* Call Us Drawer (Right Sidebar) */}
-            <div className={`fixed top-0 right-0 h-full bg-white z-50 shadow-lg transform transition-transform duration-300 ease-in-out ${isCallDrawerOpen ? "translate-x-0" : "translate-x-full"
-                } ${isMobile ? "w-4/5 max-w-sm" : "w-full max-w-sm"}`}>
+            <div className={`fixed top-0 right-0 h-full bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out ${isCallDrawerOpen ? "translate-x-0" : "translate-x-full"} ${isMobile ? "w-full" : "w-full sm:w-4/5 md:w-3/5 lg:w-2/5"}`}>
 
-                <div className="flex justify-between items-center px-4 md:px-6 py-12 border-b border-gray-200">
-                    <h2 className="text-xl font-semibold text-black">Contact Us</h2>
+                <div className="flex items-center justify-between px-8 lg:px-12 py-8 lg:py-10 border-b border-gray-200">
+                    <h2 className="text-xs sm:text-sm font-black text-black uppercase tracking-[0.15em]">Contact Us</h2>
                     <button
                         onClick={() => setIsCallDrawerOpen(false)}
-                        className="p-1 hover:bg-gray-100 rounded transition-colors"
+                        className="text-black cursor-pointer p-2 hover:bg-gray-50 transition-colors"
                     >
                         <FiX size={20} />
                     </button>
                 </div>
 
-                <div className="px-4 md:px-6 py-6">
-                    <p className="text-sm text-gray-600 mb-6">
-                        Wherever you are, our Factory Finds team will be delighted to assist you.
-                    </p>
+                <div className="px-8 lg:px-12 pb-10 overflow-y-auto h-full">
+                    <div className="space-y-8 mt-8">
+                        <div className="space-y-6">
+                            <a
+                                href="mailto:factoryfinds.business@gmail.com"
+                                className="block border border-gray-300 hover:border-black transition-colors duration-300"
+                            >
+                                <div className="px-6 py-5 flex items-center gap-4">
+                                    <MdEmail className="text-black" size={20} />
+                                    <div>
+                                        <p className="text-xs font-black text-black uppercase tracking-[0.15em]">Email</p>
+                                        <p className="text-sm text-gray-600 font-light tracking-wide mt-1">factoryfinds.business@gmail.com</p>
+                                    </div>
+                                </div>
+                            </a>
 
-                    <div className="space-y-4 text-sm text-gray-800">
-                        <a
-                            href="tel:+919027661442"
-                            className="flex items-center gap-3 p-3 rounded hover:bg-gray-100 transition-colors"
-                        >
-                            <FaPhoneAlt className="text-green-600" />
-                            <span>+91 90276 61442</span>
-                        </a>
+                            <a
+                                href="https://wa.me/919027661442"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block border border-gray-300 hover:border-black transition-colors duration-300"
+                            >
+                                <div className="px-6 py-5 flex items-center gap-4">
+                                    <FaWhatsapp className="text-black" size={20} />
+                                    <div>
+                                        <p className="text-xs font-black text-black uppercase tracking-[0.15em]">WhatsApp</p>
+                                        <p className="text-sm text-gray-600 font-light tracking-wide mt-1">Chat with us</p>
+                                    </div>
+                                </div>
+                            </a>
 
-                        <a
-                            href="mailto:factoryfinds.business@gmail.com"
-                            className="flex items-center gap-3 p-3 rounded hover:bg-gray-100 transition-colors"
-                        >
-                            <MdEmail className="text-red-600" />
-                            <span>Send an Email</span>
-                        </a>
-
-                        <a
-                            href="https://wa.me/919027661442"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-3 p-3 rounded hover:bg-gray-100 transition-colors"
-                        >
-                            <FaWhatsapp className="text-green-600" />
-                            <span>WhatsApp</span>
-                        </a>
-
-                        <hr className="my-6" />
-
-                        <div className="flex items-center gap-3 p-3 rounded hover:bg-gray-100 cursor-pointer transition-colors">
-                            <FaPeopleArrows className="text-blue-600" />
-                            <span>Need Help?</span>
+                            <div className="border border-gray-300 hover:border-black transition-colors duration-300 cursor-pointer">
+                                <div className="px-6 py-5 flex items-center gap-4">
+                                    <FaQuestion className="text-black" size={20} />
+                                    <div>
+                                        <p className="text-xs font-black text-black uppercase tracking-[0.15em]">FAQ</p>
+                                        <p className="text-sm text-gray-600 font-light tracking-wide mt-1">Find answers</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                    </div>
 
-                        <div className="flex items-center gap-3 p-3 rounded hover:bg-gray-100 cursor-pointer transition-colors">
-                            <FaQuestion className="text-purple-600" />
-                            <span>FAQ</span>
-                        </div>
+                    <div className="mt-12 text-center">
+                        <p className="text-xs font-black text-black uppercase tracking-[0.15em]">FactoryFinds</p>
                     </div>
                 </div>
             </div>

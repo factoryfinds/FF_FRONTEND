@@ -46,32 +46,32 @@ const INITIAL_FILTERS: FilterOptions = {
 
 // Components
 const ProductCardSkeleton = () => (
-  <div className="bg-white rounded-lg shadow-sm border animate-pulse">
-    <div className="aspect-square bg-gray-200 rounded-t-lg"></div>
+  <div className="bg-white border border-gray-300 animate-pulse">
+    <div className="aspect-square bg-gray-200"></div>
     <div className="p-4 space-y-2">
-      <div className="h-4 bg-gray-200 rounded"></div>
-      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-4 bg-gray-200"></div>
+      <div className="h-4 bg-gray-200 w-3/4"></div>
       <div className="flex gap-2">
-        <div className="h-4 bg-gray-200 rounded w-16"></div>
-        <div className="h-4 bg-gray-200 rounded w-20"></div>
+        <div className="h-4 bg-gray-200 w-16"></div>
+        <div className="h-4 bg-gray-200 w-20"></div>
       </div>
     </div>
   </div>
 );
 
 const ErrorFallback = ({ error, onRetry }: { error: string; onRetry: () => void }) => (
-  <div className="text-center py-12 px-4">
+  <div className="text-center py-16 px-8">
     <div className="max-w-md mx-auto">
-      <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="w-16 h-16 bg-red-50 flex items-center justify-center mx-auto mb-6 border border-red-200">
         <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h3>
-      <p className="text-gray-600 mb-6">{error}</p>
+      <h3 className="text-xs font-black text-black uppercase tracking-[0.15em] mb-4">Something Went Wrong</h3>
+      <p className="text-sm text-gray-600 font-light tracking-wide mb-8">{error}</p>
       <button
         onClick={onRetry}
-        className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+        className="px-8 py-4 bg-black text-white text-xs font-light uppercase tracking-[0.2em] hover:bg-gray-800 transition-all duration-300"
       >
         Try Again
       </button>
@@ -88,13 +88,13 @@ const EmptyState = ({
   onClearFilters: () => void;
   hasActiveFilters: boolean;
 }) => (
-  <div className="text-center py-12 px-4">
+  <div className="text-center py-16 px-8">
     <div className="max-w-md mx-auto">
-      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="w-16 h-16 bg-gray-50 flex items-center justify-center mx-auto mb-6 border border-gray-200">
         <FiSearch className="w-8 h-8 text-gray-400" />
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
-      <p className="text-gray-600 mb-6">
+      <h3 className="text-xs font-black text-black uppercase tracking-[0.15em] mb-4">No Products Found</h3>
+      <p className="text-sm text-gray-600 font-light tracking-wide mb-8">
         {query 
           ? `We couldn't find any products matching "${query}"`
           : hasActiveFilters 
@@ -105,7 +105,7 @@ const EmptyState = ({
       {hasActiveFilters && (
         <button
           onClick={onClearFilters}
-          className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+          className="px-8 py-4 bg-black text-white text-xs font-light uppercase tracking-[0.2em] hover:bg-gray-800 transition-all duration-300"
         >
           Clear Filters
         </button>
@@ -127,14 +127,14 @@ const PageHeader = ({
   viewMode: 'grid' | 'list';
   onViewModeChange: (mode: 'grid' | 'list') => void;
 }) => (
-  <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
-    <div className="flex flex-col gap-6 border-b border-gray-200 pb-6">
+  <div className="w-full px-8 lg:px-12 py-8">
+    <div className="flex flex-col gap-8 border-b border-gray-200 pb-8">
       {/* Title Section */}
-      <div className="text-center px-4 mt-12 mb-8">
-        <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 mb-2">
+      <div className="text-center px-4 mt-8">
+        <h1 className="text-sm sm:text-base font-black text-black uppercase tracking-[0.15em] mb-3">
           {query ? `Search Results for "${query}"` : 'All Products'}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm text-gray-600 font-light tracking-wide">
           {filteredProductsCount} products found
         </p>
       </div>
@@ -144,23 +144,23 @@ const PageHeader = ({
         {/* Filter Button */}
         <button
           onClick={onOpenFilters}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-white border border-gray-300 hover:border-black transition-colors duration-300"
         >
           <FiFilter size={18} />
-          <span className="hidden md:inline">Filters</span>
+          <span className="hidden md:inline text-xs font-black uppercase tracking-[0.15em]">Filters</span>
         </button>
 
         {/* View Mode Toggle */}
-        <div className="flex border border-gray-200 rounded-lg overflow-hidden">
+        <div className="flex border border-gray-300 overflow-hidden">
           <button
             onClick={() => onViewModeChange('grid')}
-            className={`p-2 ${viewMode === 'grid' ? 'bg-black text-white' : 'bg-white text-gray-600 hover:bg-gray-50'} transition-colors`}
+            className={`p-3 ${viewMode === 'grid' ? 'bg-black text-white' : 'bg-white text-gray-600 hover:bg-gray-50'} transition-colors`}
           >
             <FiGrid size={18} />
           </button>
           <button
             onClick={() => onViewModeChange('list')}
-            className={`p-2 ${viewMode === 'list' ? 'bg-black text-white' : 'bg-white text-gray-600 hover:bg-gray-50'} transition-colors`}
+            className={`p-3 border-l border-gray-300 ${viewMode === 'list' ? 'bg-black text-white' : 'bg-white text-gray-600 hover:bg-gray-50'} transition-colors`}
           >
             <FiList size={18} />
           </button>
@@ -194,7 +194,7 @@ const FilterDrawer = ({
     {/* Overlay */}
     {isOpen && (
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
+        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -202,7 +202,7 @@ const FilterDrawer = ({
 
     {/* Drawer */}
     <div
-      className={`fixed top-0 right-0 h-full w-full sm:w-96 max-w-md bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
+      className={`fixed top-0 right-0 h-full w-full sm:w-4/5 md:w-3/5 lg:w-2/5 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
       role="dialog"
@@ -210,34 +210,34 @@ const FilterDrawer = ({
       aria-modal="true"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
-        <h2 id="filter-title" className="text-lg sm:text-xl font-semibold text-black">FILTERS</h2>
+      <div className="flex items-center justify-between px-8 lg:px-12 py-8 lg:py-16 border-b border-gray-200">
+        <h2 id="filter-title" className="text-xs sm:text-sm font-black text-black uppercase tracking-[0.15em]">Filters</h2>
         <button
           onClick={onClose}
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="text-black cursor-pointer p-2 hover:bg-gray-50 transition-colors"
           aria-label="Close filters"
         >
-          <FiX className="w-5 h-5 sm:w-6 sm:h-6" />
+          <FiX size={20} />
         </button>
       </div>
 
       {/* Content */}
-      <div className="p-4 sm:p-6 space-y-6 sm:space-y-8 overflow-y-auto h-full pb-32">
+      <div className="px-8 lg:px-12 py-8 space-y-8 overflow-y-auto h-full pb-32">
         {/* Sort Section */}
         <div>
-          <h3 className="text-base sm:text-lg font-medium text-black mb-3 sm:mb-4">SORT BY</h3>
-          <div className="space-y-2 sm:space-y-3">
+          <h3 className="text-xs font-black text-black uppercase tracking-[0.15em] mb-4">Sort By</h3>
+          <div className="space-y-3">
             {SORT_OPTIONS.map((option) => (
-              <label key={option.value} className="flex items-center cursor-pointer">
+              <label key={option.value} className="flex items-center cursor-pointer group">
                 <input
                   type="radio"
                   name="sortBy"
                   value={option.value}
                   checked={filters.sortBy === option.value}
                   onChange={(e) => onFilterChange.sortBy(e.target.value)}
-                  className="mr-3 accent-black"
+                  className="mr-3 w-4 h-4 border-2 border-gray-300 appearance-none checked:bg-black checked:border-black cursor-pointer"
                 />
-                <span className="text-gray-700 text-sm sm:text-base">{option.label}</span>
+                <span className="text-sm text-gray-700 font-light tracking-wide group-hover:text-black transition-colors">{option.label}</span>
               </label>
             ))}
           </div>
@@ -245,19 +245,19 @@ const FilterDrawer = ({
 
         {/* Category Section */}
         <div>
-          <h3 className="text-base sm:text-lg font-medium text-black mb-3 sm:mb-4">CATEGORY</h3>
-          <div className="space-y-2 sm:space-y-3">
+          <h3 className="text-xs font-black text-black uppercase tracking-[0.15em] mb-4">Category</h3>
+          <div className="space-y-3">
             {CATEGORIES.map((category) => (
-              <label key={category.value} className="flex items-center cursor-pointer">
+              <label key={category.value} className="flex items-center cursor-pointer group">
                 <input
                   type="radio"
                   name="category"
                   value={category.value}
                   checked={filters.category === category.value}
                   onChange={(e) => onFilterChange.category(e.target.value)}
-                  className="mr-3 accent-black"
+                  className="mr-3 w-4 h-4 border-2 border-gray-300 appearance-none checked:bg-black checked:border-black cursor-pointer"
                 />
-                <span className="text-gray-700 text-sm sm:text-base">{category.label}</span>
+                <span className="text-sm text-gray-700 font-light tracking-wide group-hover:text-black transition-colors">{category.label}</span>
               </label>
             ))}
           </div>
@@ -265,12 +265,12 @@ const FilterDrawer = ({
 
         {/* Price Range Section */}
         <div>
-          <h3 className="text-base sm:text-lg font-medium text-black mb-3 sm:mb-4">PRICE RANGE</h3>
+          <h3 className="text-xs font-black text-black uppercase tracking-[0.15em] mb-4">Price Range</h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between text-xs sm:text-sm">
-              <span className="text-gray-600">₹0</span>
-              <span className="font-medium text-black">₹{filters.priceRange[1].toLocaleString()}</span>
-              <span className="text-gray-600">₹20,000</span>
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-600 font-light">₹0</span>
+              <span className="font-black text-black uppercase tracking-wider">₹{filters.priceRange[1].toLocaleString()}</span>
+              <span className="text-gray-600 font-light">₹20,000</span>
             </div>
             <input
               type="range"
@@ -279,10 +279,10 @@ const FilterDrawer = ({
               step="500"
               value={filters.priceRange[1]}
               onChange={(e) => onFilterChange.priceRange(parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-black"
+              className="w-full h-0.5 bg-gray-300 appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-black [&::-webkit-slider-thumb]:cursor-pointer"
               aria-label={`Price range up to ${filters.priceRange[1].toLocaleString()} rupees`}
             />
-            <div className="text-center text-sm sm:text-base font-medium text-black">
+            <div className="text-center text-sm font-light text-gray-600 tracking-wide">
               Up to ₹{filters.priceRange[1].toLocaleString()}
             </div>
           </div>
@@ -290,30 +290,30 @@ const FilterDrawer = ({
 
         {/* Stock Filter */}
         <div>
-          <label className="flex items-center cursor-pointer">
+          <label className="flex items-center cursor-pointer group">
             <input
               type="checkbox"
               checked={filters.inStockOnly}
               onChange={(e) => onFilterChange.inStockOnly(e.target.checked)}
-              className="mr-3 accent-black rounded"
+              className="mr-3 w-4 h-4 border-2 border-gray-300 appearance-none checked:bg-black checked:border-black cursor-pointer"
             />
-            <span className="text-gray-700 text-sm sm:text-base">In Stock Only</span>
+            <span className="text-sm text-gray-700 font-light tracking-wide group-hover:text-black transition-colors">In Stock Only</span>
           </label>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 border-t border-gray-200 bg-white">
-        <div className="flex gap-3 sm:gap-4">
+      <div className="absolute bottom-0 left-0 right-0 px-8 lg:px-12 py-8 border-t border-gray-200 bg-white">
+        <div className="flex gap-4">
           <button
             onClick={onClearFilters}
-            className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm sm:text-base"
+            className="flex-1 px-6 py-4 text-xs text-black underline hover:no-underline font-light uppercase tracking-[0.1em] transition-all duration-300"
           >
             Clear All
           </button>
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium text-sm sm:text-base"
+            className="flex-1 px-6 py-4 bg-black text-white text-xs font-light uppercase tracking-[0.2em] hover:bg-gray-800 transition-all duration-300"
           >
             Show Results ({filteredProductsCount})
           </button>
@@ -334,7 +334,7 @@ const ProductsGrid = ({
 }) => {
   if (loading) {
     return (
-      <div className="w-full px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="w-full px-8 lg:px-12 pb-12">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2 lg:gap-4">
           {Array.from({ length: 8 }).map((_, index) => (
             <ProductCardSkeleton key={index} />
@@ -349,7 +349,7 @@ const ProductsGrid = ({
     : "grid grid-cols-1 gap-4";
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 pb-12">
+    <div className="w-full px-8 lg:px-12 pb-12">
       <div className={gridClasses}>
         {products.map((product) => (
           <ProductCard
