@@ -116,27 +116,48 @@ import MainScreen from "@/components/MainScreen";
 import MostSoldProduct from "@/components/MostSoldProduct";
 // import MiddleBanner from "@/components/MiddleBanner";
 import ClientAnimationWrapper from "@/components/ClientAnimationWrapper";
+// import the sale ribbon 
+import DiwaliSaleRibbon from "@/components/saleRibbon";
+import TrustBadges from "@/components/TrustBadges";
+import WhyChooseUs from "@/components/WhyChooseUs";
+import FounderStory from "@/components/FounderStory";
+import FAQ from "@/components/FAQ";
+// import StickyCountdownBanner from "@/components/StickyCountdownBanner";
+import ExitIntentPopup from "@/components/ExitIntentPopup";
+import LandingPopup from "@/components/LandingPopup";
+import StickyCountdownBanner from "@/components/StickyCountdownBanner";
 
 export default function HomePage() {
   return (
     <ClientAnimationWrapper>
+      <ExitIntentPopup/>
+      <LandingPopup/>
+      <StickyCountdownBanner />
+      <DiwaliSaleRibbon/>
       {/* Hero Section - Server Rendered */}
       <div className="relative z-10">
         <MainScreen />
       </div>
 
+      {/* Trust Badges - RIGHT AFTER HERO */}
+      <TrustBadges />
+
       {/* Scrollable Banner & Product - Server Rendered */}
-      <div className="relative min-h-[200vh]">
+      <div className="relative min-h-[50vh]">
         {/* <div className="sticky top-0 w-full h-screen flex items-center justify-center z-20">
           <MiddleBanner />
         </div> */}
 
         <div className="relative z-30">
-          <div className="bg-white ">
+          <div className="bg-white mt-10">
             <MostSoldProduct />
           </div>
         </div>
       </div>
+      {/* Trust Building Sections - AFTER PRODUCTS */}
+      <WhyChooseUs />
+      <FounderStory />
+      <FAQ />
     </ClientAnimationWrapper>
   );
 }

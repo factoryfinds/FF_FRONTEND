@@ -223,7 +223,7 @@ const ProductsGrid = ({
     products: TrendingProduct[];
     loading: boolean;
 }) => (
-    <div className="w-full px-2 sm:px-0 lg:px-2 pb-12">
+    <div className="w-full pb-12">
         {loading ? (
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2">
                 {Array.from({ length: 8 }).map((_, index) => (
@@ -231,7 +231,7 @@ const ProductsGrid = ({
                 ))}
             </div>
         ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-2 sm:gap-2">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-6">
                 {products.map((product, index) => (
                     <TrendingProductCard
                         key={product._id}

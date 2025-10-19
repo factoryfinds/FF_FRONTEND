@@ -243,11 +243,11 @@ FilterDrawer.displayName = "FilterDrawer";
 const ProductsGrid = React.memo(({ products, loading }: { products: Product[]; loading: boolean }) => (
   <div className="w-full px-0 sm:px-0 lg:px-0 pb-12">
     {loading ? (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)}
       </div>
     ) : (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-8 gap-x-2 sm:gap-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-6 ">
         {products.map((product) => (
           <ProductCard key={product._id} {...product} />
         ))}
@@ -463,7 +463,7 @@ export default function AllProductsPage() {
       />
 
       {/* Main content */}
-      <main className="max-w-8xl mx-auto px-2 sm:px-0 lg:px-2 py-8">
+      <main className="py-8">
         {filteredProducts.length === 0 ? (
           <EmptyState onClearFilters={onClearFilters} />
         ) : (

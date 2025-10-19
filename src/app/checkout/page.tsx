@@ -594,7 +594,7 @@ export default function CheckoutPage() {
             {step === 2 && (
               <motion.section key="step2" {...stepMotion} className="bg-white border border-black p-6 lg:p-8">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-md font-semibold text-black tracking-tight uppercase tracking-[0.15em]">Delivery Address</h2>
+                  <h2 className="text-md font-semibold text-black tracking-tight uppercase ">Delivery Address</h2>
                   <div className="flex items-center gap-4">
                     <button
                       onClick={openAddForm}
@@ -765,7 +765,7 @@ export default function CheckoutPage() {
                           Online Payment
                         </p>
                         <p className="text-xs text-green-600 tracking-wide">
-                          Extra 5% OFF · Faster checkout
+                          Free Delivery Worth ₹89  · Faster checkout
                         </p>
                       </div>
                       <input

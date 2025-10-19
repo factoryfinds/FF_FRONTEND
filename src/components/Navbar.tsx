@@ -28,6 +28,7 @@ import LoginDrawer from "@/components/LoginDrawer";
 import { useRouter } from "next/navigation";
 import { toast } from 'react-hot-toast';
 
+
 // ✅ Define user interface for better type safety
 interface User {
     role?: string;
@@ -70,6 +71,7 @@ const AnimatedBrandText = ({ onClick }: { onClick: () => void }) => {
     }, []);
 
     return (
+
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div
                 className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl tracking-tighter cursor-pointer font-bold group transition-all duration-300 hover:scale-105 hover:text-black ${isVisible
@@ -263,7 +265,8 @@ const Navbar = () => {
 
         <>
             {/* Fixed Navbar Container with Gradient */}
-            <div className="fixed top-0 left-0 right-0 z-50 ">
+            <div className="fixed top-0 left-0 right-0 z-50 border-b-3">
+                
                 {/* Gradient Background */}
                 <div className="absolute inset-0 bg-white"></div>
 

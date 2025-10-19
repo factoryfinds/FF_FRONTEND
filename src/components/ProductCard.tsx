@@ -74,21 +74,31 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Content */}
         <div className="p-3 sm:p-4 space-y-2">
-          <h3 className="text-xs sm:text-xs text-gray-900 font-bold leading-snug tracking-tight truncate uppercase group-hover:text-black transition-colors duration-200">
+          <h3 className="text-xs sm:text-xs text-gray-900 font-[20px] leading-snug tracking-widest truncate uppercase group-hover:text-black transition-colors duration-200">
             {title}
           </h3>
 
           <div>
             <div className="flex items-center justify-between flex-wrap gap-2">
               <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-xs text-gray-500 font-semibold leading-snug tracking-normal">
-                  RS. {discountedPrice.toLocaleString()}
-                </span>
                 {originalPrice > discountedPrice && (
-                  <span className="text-xs text-gray-500 line-through font-normal tracking-wide">
-                    RS. {originalPrice.toLocaleString()}
+                  <span className="text-[12px] text-black line-through font-normal tracking-widest">
+                    ₹ {originalPrice.toLocaleString()}
                   </span>
                 )}
+                <span className="text-sm text-black font-normal leading-snug tracking-widest">
+                  ₹ {discountedPrice.toLocaleString()}
+                </span>
+
+                <span className="text-xs text-black font-normal leading-snug tracking-widest">
+                  {discountPercentage > 0 && (
+                      <div className=" text-red-600 text-[14px] tracking-wide font-normal px-2 py-1 ">
+                        {discountPercentage}%
+                      </div>
+                  )}
+
+                </span>
+
               </div>
 
               {/* {originalPrice > discountedPrice && (

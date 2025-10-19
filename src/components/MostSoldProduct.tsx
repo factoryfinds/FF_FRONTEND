@@ -64,7 +64,7 @@ export default function PopularProductsSection() {
   }, []);
   return (
     <>
-      <section className="sm: px3 px-2  bg-white text-black">
+      <section className=" bg-white text-black">
         
         <div className="relative  z-10 max-w-4xl mx-auto px-8 text-center w-full">
           <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium leading-relaxed text-gray-800 mb-3 sm:mb-4 tracking-wide">
@@ -76,7 +76,7 @@ export default function PopularProductsSection() {
         </div>
 
         {/* Updated grid layout with wider gaps and a cleaner look */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-2">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 md:gap-0">
           {popularProducts.slice(0, 8).map((product) => (
             <ProductCard
               key={product._id}
@@ -87,11 +87,11 @@ export default function PopularProductsSection() {
         </div>
 
         {/* You may want to add a "View All" button */}
-        <div className="text-center mt-12">
+        <div className="text-center mt-12 mb-12">
           <button
             onClick={() => router.push('/product/allProducts')}
             className="border border-gray-700 py-3 px-8 text-sm uppercase tracking-widest hover:bg-gray-100 transition-colors duration-300">
-            View All Products
+            View Products
           </button>
         </div>
       </section>

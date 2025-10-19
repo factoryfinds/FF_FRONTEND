@@ -417,7 +417,7 @@ const LoginDrawer: React.FC<LoginDrawerProps> = ({ isOpen, onClose, onLoginSucce
           {/* Additional Info */}
           <div className="mt-8 text-center">
             <p className="text-xs text-gray-600 font-light uppercase tracking-[0.1em] leading-relaxed">
-              By continuing, you agree to our Terms of Service and Privacy Policy
+              By continuing, you agree to our Terms of Service and Privacy Policy, We’ll only use this number to send a secure one-time code. No marketing SMS. Verified for your safety.
             </p>
           </div>
 

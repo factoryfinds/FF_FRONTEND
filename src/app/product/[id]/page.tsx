@@ -101,12 +101,10 @@ export default function ProductDetails() {
   // Luxury size guide data with refined styling
   const sizeGuideData = {
     men: [
-      { size: 'XS', chest: '36', waist: '30', length: '26' },
-      { size: 'S', chest: '38', waist: '32', length: '27' },
-      { size: 'M', chest: '40', waist: '34', length: '28' },
-      { size: 'L', chest: '42', waist: '36', length: '29' },
-      { size: 'XL', chest: '44', waist: '38', length: '30' },
-      { size: 'XXL', chest: '46', waist: '40', length: '31' },
+      { size: 'S', chest: '41.5', shoulder: '18', length: '25' },
+      { size: 'M', chest: '44', shoulder: '20', length: '26' },
+      { size: 'L', chest: '46.5', shoulder: '22', length: '27' },
+      { size: 'XL', chest: '49', shoulder: '24', length: '28' },
     ],
   };
 
@@ -589,7 +587,7 @@ export default function ProductDetails() {
                       <tr className="border-b border-gray-300">
                         <th className="text-left py-3 font-medium uppercase tracking-wider">Size</th>
                         <th className="text-left py-3 font-medium uppercase tracking-wider">Chest</th>
-                        <th className="text-left py-3 font-medium uppercase tracking-wider">Waist</th>
+                        <th className="text-left py-3 font-medium uppercase tracking-wider">Shoulder</th>
                         <th className="text-left py-3 font-medium uppercase tracking-wider">Length</th>
                       </tr>
                     </thead>
@@ -598,7 +596,7 @@ export default function ProductDetails() {
                         <tr key={index} className="border-b border-gray-200">
                           <td className="py-3 font-medium">{item.size}</td>
                           <td className="py-3 font-light">{item.chest}&quot;</td>
-                          <td className="py-3 font-light">{item.waist}&quot;</td>
+                          <td className="py-3 font-light">{item.shoulder}&quot;</td>
                           <td className="py-3 font-light">{item.length}&quot;</td>
                         </tr>
                       ))}
