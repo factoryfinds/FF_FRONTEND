@@ -1,8 +1,12 @@
 // global.d.ts
-export {};
+export { };
 
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void;
   }
+  interface Window {
+    fbq?: (event: string, action: string, params?: Record<string, any>) => void;
+  }
+
 }

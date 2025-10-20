@@ -236,9 +236,8 @@ export default function ProductDetails() {
       await addProductToCart({ productId: product._id, quantity, size: selectedSize });
 
       // Fire Facebook Pixel AddToCart event
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-      if ((window as any).fbq) {
-        (window as any).fbq('track', 'AddToCart', {
+      if (window.fbq) {
+        window.fbq('track', 'AddToCart', {
           content_ids: [product._id],
           content_type: 'product',
           value: product.discountedPrice,
