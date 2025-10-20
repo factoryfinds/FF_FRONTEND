@@ -234,6 +234,19 @@ export default function ProductDetails() {
     try {
       setAddingToCart(true);
       await addProductToCart({ productId: product._id, quantity, size: selectedSize });
+
+      // Fire Facebook Pixel AddToCart event
+      if ((window as any).fbq) {
+        (window as any).fbq('track', 'AddToCart', {
+          content_ids: [product._id],
+          content_type: 'product',
+          value: product.discountedPrice,
+          currency: 'INR',
+        });
+      }
+
+
+
       setPopupMessage({ type: 'success', message: "ADDED TO CART" });
       window.dispatchEvent(new CustomEvent('cartUpdated'));
       localStorage.setItem('cart-updated', Date.now().toString());
