@@ -264,7 +264,7 @@ export default function CheckoutPage() {
             console.log('Payment completed, polling for order...');
 
             // Poll for order status
-            const pollOrderStatus = async (attempts = 0): Promise<any> => {
+            const pollOrderStatus = async (attempts = 0): Promise<{ orderNumber: string } | void> => {
               if (attempts > 15) {
                 toast.error('Order confirmation pending. Check your orders page.');
                 router.push('/profile/orders');
@@ -278,7 +278,7 @@ export default function CheckoutPage() {
                   setOrderId(statusResponse.order.orderNumber);
                   setStep(4);
                   toast.success("Payment successful! Order placed.");
-                  return statusResponse.order;
+                  return { orderNumber: statusResponse.order.orderNumber };
                 }
 
                 // Wait 2 seconds and retry
@@ -286,12 +286,13 @@ export default function CheckoutPage() {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 return pollOrderStatus(attempts + 1);
 
-              } catch (error) {
-                console.error('Poll error:', error);
+              } catch (err: unknown) {
+                console.error('Poll error:', err);
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 return pollOrderStatus(attempts + 1);
               }
             };
+
 
             await pollOrderStatus();
 
