@@ -107,7 +107,7 @@ export default function CheckoutPage() {
   const router = useRouter();
 
   // Razorpay hook
-  const { createOrder, verifyPayment, loading: paymentLoading, error: paymentError } = useRazorpay();
+  const { createOrder, checkOrderStatus, loading: paymentLoading, error: paymentError } = useRazorpay();
 
   // page state
   const [loading, setLoading] = useState(true);
@@ -219,26 +219,11 @@ export default function CheckoutPage() {
       return;
     }
 
-    // For COD, directly place order
     if (paymentMethod === "cod") {
-      setLoading(true);
-      try {
-        setTimeout(() => {
-          setLoading(false);
-          const id = `ORD-${Date.now().toString().slice(-6)}`;
-          setOrderId(id);
-          setStep(4);
-          toast.success("Order placed successfully!");
-        }, 1400);
-      } catch (error) {
-        setLoading(false);
-        console.error('COD Order error:', error);
-        toast.error("Failed to place order. Please try again.");
-      }
+      toast.error("COD is currently unavailable. Please use online payment.");
       return;
     }
 
-    // For online payment, initiate Razorpay
     try {
       setProcessingPayment(true);
 
@@ -256,77 +241,78 @@ export default function CheckoutPage() {
         shippingAddress: {
           fullName: selectedAddress.fullName,
           phone: selectedAddress.phone,
-          address: selectedAddress.street,
+          street: selectedAddress.street,
           city: selectedAddress.city,
           state: selectedAddress.state,
           pincode: selectedAddress.pincode,
         }
       });
 
-      console.log('Key received from backend:', orderData.key_id);
-      console.log('Key type check:', {
-        isLiveKey: orderData.key_id?.startsWith('rzp_live_'),
-        isTestKey: orderData.key_id?.startsWith('rzp_test_'),
-        keyPrefix: orderData.key_id?.substring(0, 12)
-      });
+      console.log('Razorpay order created:', orderData.razorpay_order.id);
 
       const options: RazorpayOptions = {
         key: orderData.key_id,
-        amount: orderData.cart_summary.totalAmount,
-        currency: "INR",
+        amount: orderData.razorpay_order.amount,
+        currency: orderData.razorpay_order.currency,
         name: 'Factory Finds',
         description: `Purchase of ${cartItems.length} item(s)`,
         image: '/logo.png',
         order_id: orderData.razorpay_order.id,
+
         handler: async function (response: RazorpayResponse) {
           try {
-            setProcessingPayment(true);
-            const verificationResult = await verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              shippingAddress: {
-                street: selectedAddress.street,
-                pincode: selectedAddress.pincode,
-                city: selectedAddress.city,
-                state: selectedAddress.state,
-                fullName: selectedAddress.fullName,
-                phone: selectedAddress.phone,
-              },
-            });
+            console.log('Payment completed, polling for order...');
 
-            if (verificationResult.success) {
-              setOrderId(response.razorpay_payment_id);
-              setStep(4);
-              toast.success("Payment successful! Order placed.");
-            } else {
-              toast.error('Payment verification failed');
-            }
+            // Poll for order status
+            const pollOrderStatus = async (attempts = 0): Promise<any> => {
+              if (attempts > 15) {
+                toast.error('Order confirmation pending. Check your orders page.');
+                router.push('/profile/orders');
+                return;
+              }
+
+              try {
+                const statusResponse = await checkOrderStatus(response.razorpay_order_id);
+
+                if (statusResponse.success && statusResponse.order?.paymentStatus === 'paid') {
+                  setOrderId(statusResponse.order.orderNumber);
+                  setStep(4);
+                  toast.success("Payment successful! Order placed.");
+                  return statusResponse.order;
+                }
+
+                // Wait 2 seconds and retry
+                console.log(`Poll attempt ${attempts + 1}/15 - Order not ready yet`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                return pollOrderStatus(attempts + 1);
+
+              } catch (error) {
+                console.error('Poll error:', error);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                return pollOrderStatus(attempts + 1);
+              }
+            };
+
+            await pollOrderStatus();
+
           } catch (error) {
-            console.error('Payment verification error:', error);
-            toast.error('Payment verification failed. Please contact support.');
+            console.error('Payment handler error:', error);
+            toast.error('Payment successful but confirmation pending.');
+            router.push('/profile/orders');
           } finally {
             setProcessingPayment(false);
           }
         },
+
         prefill: {
           name: selectedAddress.fullName,
-          email: '',
           contact: selectedAddress.phone
         },
-        notes: {
-          address: `${selectedAddress.street}, ${selectedAddress.city}, ${selectedAddress.state} - ${selectedAddress.pincode}`
-        },
-        method: {
-          upi: true,
-          card: true,
-          wallet: true,
-          paylater: false,
-          netbanking: true
-        },
+
         theme: {
           color: '#000000'
         },
+
         modal: {
           ondismiss: function () {
             setProcessingPayment(false);
@@ -755,8 +741,8 @@ export default function CheckoutPage() {
                   <div
                     onClick={() => setPaymentMethod("prepaid")}
                     className={`border rounded-lg p-4 cursor-pointer transition ${paymentMethod === "prepaid"
-                        ? "border-black bg-gray-50"
-                        : "border-gray-300 hover:border-black"
+                      ? "border-black bg-gray-50"
+                      : "border-gray-300 hover:border-black"
                       }`}
                   >
                     <div className="flex items-center justify-between">

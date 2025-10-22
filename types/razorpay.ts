@@ -14,6 +14,16 @@ interface CreateOrderRequest {
   couponCode?: string;
 }
 
+interface shippingAddress1 {
+    fullName: string;
+    phone: string;
+    address: string;
+    city: string;
+    state: string;
+    pincode: string;
+    landmark?: string;
+  };
+
 
 interface CreateOrderResponse {
   success: boolean;
@@ -87,13 +97,9 @@ export interface RazorpayOptions {
   handler: (response: RazorpayResponse) => void;
   prefill: {
     name: string;
-    email: string;
     contact: string;
   };
   method?: PaymentMethodConfig;
-  notes: {
-    address: string;
-  };
   theme: {
     color: string;
   };
