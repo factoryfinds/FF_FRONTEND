@@ -249,7 +249,16 @@ const ProductsGrid = React.memo(({ products, loading }: { products: Product[]; l
     ) : (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-6 ">
         {products.map((product) => (
-          <ProductCard key={product._id} {...product} />
+          <ProductCard
+            key={product._id}
+            {...product}
+            onProductClick={(productId) => {
+              // Add your navigation logic here
+              window.location.href = `/product/${productId}`;
+              // OR if you're using Next.js router:
+              // router.push(`/product/${productId}`);
+            }}
+          />
         ))}
       </div>
     )}
@@ -374,7 +383,7 @@ export default function AllProductsPage() {
   }, []);
 
   // Loading / Error UI
-  if (isLoading) return <LoadingOverlay/>;
+  if (isLoading) return <LoadingOverlay />;
 
   if (error.hasError) {
     return <ErrorFallback error={error.message ?? "Failed to load products."} onRetry={() => fetchProducts()} />;
