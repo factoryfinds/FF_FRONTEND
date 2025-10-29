@@ -2,7 +2,7 @@ import { toast } from 'react-hot-toast';
 import { GetOrdersResponse } from "../types/razorpay";
 
 // Base configuration
-const BASE_URL = 'http://192.168.29.110:5000/api'; // <- url changes required
+const BASE_URL = 'https://ff-backend-00ri.onrender.com/api'; // <- url changes required
 
 // 🔹 Shared Order Type (match backend `Order` model populate response)
 export interface Order {
