@@ -27,6 +27,7 @@ import { MdEmail } from "react-icons/md";
 import LoginDrawer from "@/components/LoginDrawer";
 import { useRouter } from "next/navigation";
 import { toast } from 'react-hot-toast';
+import DiwaliSaleRibbon from "./saleRibbon";
 
 
 // ✅ Define user interface for better type safety
@@ -38,17 +39,17 @@ interface User {
 // ✅ Animated Brand Text Component
 const AnimatedBrandText = ({ onClick }: { onClick: () => void }) => {
     const languages = [
-        { text: "FACTORY FINDS", lang: "English" },
+        { text: "Factory Finds", lang: "English" },
         { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
-        { text: "FACTORY FINDS", lang: "English" },
+        { text: "Factory Finds", lang: "English" },
         { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
         { text: "ફેક્ટરી ફાઇન્ડ્સ", lang: "Gujarati" },
         { text: "फैक्टरी फाइंड्स", lang: "Marathi" },
-        { text: "FACTORY FINDS", lang: "English" },
+        { text: "Factory Finds", lang: "English" },
         { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
         { text: "ఫ్యాక్టరీ ఫైండ్స్", lang: "Telugu" },
         { text: "ಫ್ಯಾಕ್ಟರಿ ಫೈಂಡ್ಸ್", lang: "Kannada" },
-        { text: "FACTORY FINDS", lang: "English" },
+        { text: "Factory Finds", lang: "English" },
         { text: "फैक्टरी फाइंड्स", lang: "Hindi" },
         { text: "ফেক্টরি ফাইন্ডস", lang: "Assamese" },
     ];
@@ -74,7 +75,7 @@ const AnimatedBrandText = ({ onClick }: { onClick: () => void }) => {
 
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div
-                className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl tracking-tighter cursor-pointer font-bold group transition-all duration-300 hover:scale-105 hover:text-black ${isVisible
+                className={`text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl tracking-wide cursor-pointer font-normal group transition-all duration-300 hover:scale-105 hover:text-black ${isVisible
                     ? 'opacity-100 transform translate-y-0'
                     : 'opacity-0 transform -translate-y-2'
                     }`}
@@ -99,8 +100,6 @@ const Navbar = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoginDrawerOpen, setIsLoginDrawerOpen] = useState(false);
     const [role, setRole] = useState<string | null>(null);
-    // const [showMen, setShowMen] = useState(false);
-    // const [showWomen, setShowWomen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -265,7 +264,7 @@ const Navbar = () => {
 
         <>
             {/* Fixed Navbar Container with Gradient */}
-            <div className="fixed top-0 left-0 right-0 z-50 border-b-3">
+            <div className="fixed top-0 left-0 right-0 z-50 ">
                 
                 {/* Gradient Background */}
                 <div className="absolute inset-0 bg-white"></div>
@@ -282,7 +281,9 @@ const Navbar = () => {
                 )}
 
                 {/* Top Navbar */}
+                <DiwaliSaleRibbon/>
                 <nav className="w-full h-20 md:h-28 px-4 md:px-8 relative z-30">
+                    
                     <div className="flex items-center justify-between h-full">
                         {/* Left Section */}
                         <div className="flex items-center gap-4 md:gap-10 text-sm text-black font-medium flex-1">
@@ -291,7 +292,7 @@ const Navbar = () => {
                                 onClick={() => setIsMenuOpen(true)}
                             >
                                 <FiMenu size={18} />
-                                <span className="hidden sm:inline tracking-tighter text-sm">MENU</span>
+                                <span className="hidden sm:inline tracking-widest text-sm">Menu</span>
                             </div>
 
                             {/* ✅ Desktop Search with Dropdown */}
@@ -301,7 +302,7 @@ const Navbar = () => {
                                     onClick={() => setIsDesktopSearchOpen(!isDesktopSearchOpen)}
                                 >
                                     <FiSearch size={18} />
-                                    <span>SEARCH</span>
+                                    <span className="hidden sm:inline tracking-widest text-sm">Search</span>
                                 </div>
 
                                 {/* Desktop Search Dropdown */}
@@ -333,7 +334,7 @@ const Navbar = () => {
                                             {query && (
                                                 <button
                                                     onClick={() => handleSearch(query)}
-                                                    className="w-full mb-3 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors text-sm font-medium"
+                                                    className="w-full mb-3 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors tracking-widest text-sm font-medium"
                                                 >
                                                     Search for &quot;{query}&quot;
                                                 </button>
@@ -409,7 +410,7 @@ const Navbar = () => {
                                 className="hidden md:flex items-center gap-1 tracking-tighter text-sm cursor-pointer font-light group transition-transform duration-300 hover:scale-105 "
                                 onClick={() => setIsCallDrawerOpen(true)}
                             >
-                                <span>CONTACT US</span>
+                                <span className="hidden sm:inline tracking-widest text-sm">Contact Us</span>
                             </div>
 
                             {/* Heart Icon – shown only on desktop */}
@@ -437,83 +438,82 @@ const Navbar = () => {
                                                 {/* Admin Dashboard – Mobile only */}
                                                 {role === "admin" && (
                                                     <li
-                                                        className="px-4 py-2 hover:bg-gray-100 tracking-tighter text-sm cursor-pointer md:hidden flex items-center gap-2"
+                                                        className="px-4 py-2 hover:bg-gray-100 tracking-widest text-sm cursor-pointer md:hidden flex items-center gap-2"
                                                         onClick={() => {
                                                             setIsAccountOpen(false);
                                                             router.push("/admin/dashboard");
                                                         }}
                                                     >
                                                         <FiSettings size={16} />
-                                                        ADMIN
+                                                        Admin
                                                     </li>
                                                 )}
                                                 {/* 👤 Profile */}
                                                 <li
-                                                    className="px-4 py-2 hover:bg-gray-100  tracking-tighter text-sm cursor-pointer flex items-center gap-2"
+                                                    className="px-4 py-2 hover:bg-gray-100  tracking-widest text-sm cursor-pointer flex items-center gap-2"
                                                     onClick={() => {
                                                         setIsAccountOpen(false);
                                                         router.push("/profile/cart");
                                                     }}
                                                 >
                                                     <FiUser size={16} />
-                                                    PROFILE
+                                                    Profile
                                                 </li>
                                                 {/* 🛍️ Check-out Bag */}
                                                 <li
-                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer tracking-widest flex items-center gap-2"
                                                     onClick={() => {
                                                         setIsAccountOpen(false);
                                                         router.push("/profile/cart");
                                                     }}
                                                 >
 
-                                                    <div className="w-[18px] h-[18px] tracking-tighter text-sm flex items-center justify-center">
+                                                    <div className="w-[18px] h-[18px] tracking-widest text-sm flex items-center justify-center">
                                                         <FiBox size={16} />
                                                     </div>
-                                                    CHECKOUT-BAG
+                                                    Checkout-Bag
                                                 </li>
                                                 {/* ❤️ Wishlist – Mobile only */}
                                                 <li
-                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer md:hidden flex items-center gap-2"
+                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer tracking-widest md:hidden flex items-center gap-2"
                                                     onClick={() => {
                                                         setIsAccountOpen(false);
                                                         router.push("/profile/wishlist");
                                                     }}
                                                 >
                                                     <div className="w-[18px] h-[18px] flex items-center justify-center">
-                                                        <FiUser size={18} className="cursor-pointer tracking-tighter text-sm hover:scale-105 transition-colors" />
+                                                        <FiUser size={18} className="cursor-pointer tracking-widest text-sm hover:scale-105 transition-colors" />
                                                     </div>
-
-                                                    WISHLIST
+                                                    Wishlist
                                                 </li>
                                                 {/* 📞 Call Us – Mobile only */}
                                                 <li
-                                                    className="px-4 py-2 hover:bg-gray-100 tracking-tighter text-sm cursor-pointer md:hidden flex items-center gap-2"
+                                                    className="px-4 py-2 hover:bg-gray-100 tracking-widest text-sm cursor-pointer md:hidden flex items-center gap-2"
                                                     onClick={() => {
                                                         setIsCallDrawerOpen(true);
                                                         setIsAccountOpen(false);
                                                     }}
                                                 >
                                                     <FiPhone size={16} />
-                                                    CONTACT US
+                                                    Contact Us
                                                 </li>
 
                                                 {/* 🚪 Logout */}
                                                 <li
-                                                    className="px-4 py-2 hover:bg-gray-100 tracking-tighter text-sm cursor-pointer flex items-center gap-2"
+                                                    className="px-4 py-2 hover:bg-gray-100 tracking-widest text-sm cursor-pointer flex items-center gap-2"
                                                     onClick={handleLogout}
                                                 >
                                                     <FiPower size={16} />
-                                                    LOGOUT
+                                                    Logout
                                                 </li>
 
                                             </ul>
 
                                         ) : (
                                             <div className="p-4 text-sm">
-                                                <p className="mb-2 text-center uppercase tracking-tighter text-sm text-gray-800">You&rsquo;re not logged in.</p>
+                                                <p className="mb-2 text-center uppercase tracking-widest text-sm text-gray-800">You&rsquo;re not logged in.</p>
                                                 <button
-                                                    className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-900 transition-colors"
+                                                    className="w-full bg-black tracking-widest text-white py-2 rounded-lg hover:bg-gray-900 transition-colors"
                                                     onClick={() => {
                                                         setIsLoginDrawerOpen(true);
                                                         setIsAccountOpen(false);

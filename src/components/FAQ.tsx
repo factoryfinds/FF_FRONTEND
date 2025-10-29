@@ -1,5 +1,3 @@
-
-// components/FAQ.tsx
 "use client";
 
 import { useState } from "react";
@@ -14,7 +12,7 @@ export default function FAQ() {
         },
         {
             question: "What's your return policy?",
-            answer: "We offer a hassle-free 7-day return policy. If you're not completely satisfied with your purchase, contact us within 7 days of delivery for a full refund or exchange. Product must be unworn with tags attached.",
+            answer: "We accept returns only in cases of defective, damaged, or incorrect items. If you receive a product that is defective or not as described, you must email us at [factoryfinds.business@gmail.com] within 24 hours (1 day) of delivery",
         },
         {
             question: "How long does shipping take?",
@@ -30,42 +28,42 @@ export default function FAQ() {
         },
         {
             question: "Are the colors accurate to the photos?",
-            answer: "We photograph our products in natural lighting to show true colors. However, screens vary—there may be slight differences. If you're unhappy with the color, our return policy has you covered.",
+            answer: "We photograph our products in natural lighting to show true colors. However, screens vary—there may be slight differences. our return policy has you covered.",
         },
     ];
 
     return (
-        <section className="bg-white py-16 sm:py-20">
-            <div className="max-w-4xl mx-auto px-8">
+        <section className="bg-zinc-50 py-20 sm:py-24">
+            <div className="max-w-3xl mx-auto px-6">
                 {/* Section Header */}
-                <div className="text-center mb-12 sm:mb-16">
-                    <div className="w-12 h-px bg-black mx-auto mb-6 opacity-60" />
-                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-light tracking-[0.2em] uppercase text-gray-900 mb-4">
-                        Questions?
+                <div className="text-center mb-16">
+                    <div className="w-12 h-px bg-black mx-auto mb-6 opacity-40" />
+                    <h2 className="text-3xl sm:text-4xl font-light tracking-tight text-gray-900 mb-3">
+                        Common Questions
                     </h2>
-                    <p className="text-sm tracking-[0.15em] uppercase text-gray-500 font-normal">
-                        We&apos;ve Got Answers
+                    <p className="text-xs tracking-[0.2em] uppercase text-gray-500">
+                        Everything You Need to Know
                     </p>
                 </div>
 
                 {/* FAQ List */}
-                <div className="space-y-4">
+                <div className="space-y-1 mb-16">
                     {faqs.map((faq, index) => (
-                        <div key={index} className="border-b border-gray-200">
+                        <div key={index} className="bg-white border border-gray-200">
                             <button
                                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                                className="w-full py-5 flex items-center justify-between text-left hover:opacity-70 transition-opacity"
+                                className="w-full py-6 px-6 sm:px-8 flex items-center justify-between text-left hover:bg-gray-50 transition-colors"
                             >
-                                <h3 className="text-sm sm:text-base uppercase tracking-[0.1em] font-medium text-gray-900 pr-4">
+                                <h3 className="text-sm sm:text-base font-medium text-gray-900 pr-6 tracking-wide">
                                     {faq.question}
                                 </h3>
-                                <span className="text-gray-400 text-xl flex-shrink-0">
+                                <span className="text-gray-400 text-2xl flex-shrink-0 font-light">
                                     {openIndex === index ? "−" : "+"}
                                 </span>
                             </button>
                             {openIndex === index && (
-                                <div className="pb-6 pr-8">
-                                    <p className="text-sm text-gray-600 leading-relaxed font-light">
+                                <div className="px-6 sm:px-8 pb-6">
+                                    <p className="text-sm text-gray-600 leading-relaxed">
                                         {faq.answer}
                                     </p>
                                 </div>
@@ -75,13 +73,13 @@ export default function FAQ() {
                 </div>
 
                 {/* Contact CTA */}
-                <div className="text-center mt-12">
-                    <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-4">
+                <div className="text-center">
+                    <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-6">
                         Still Have Questions?
                     </p>
                     <a
                         href="mailto:factoryfinds.business@gmail.com"
-                        className="inline-block border border-gray-700 py-3 px-8 text-xs uppercase tracking-[0.15em] hover:bg-gray-100 transition-colors duration-300"
+                        className="inline-block bg-black text-white py-4 px-10 text-xs uppercase tracking-[0.15em] hover:bg-gray-800 transition-colors"
                     >
                         Contact Us
                     </a>

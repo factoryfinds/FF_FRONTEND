@@ -28,7 +28,7 @@ interface PopupMessage {
   type: 'success' | 'error';
   message: string;
 }
-// helper - paste above your JSX or in a utils file
+
 // helper - parse only the 3 required sections
 function parseProductDescription(text: string | undefined) {
   if (!text) return [];
@@ -79,7 +79,7 @@ export default function ProductDetails() {
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isMobileFullScreen, setIsMobileFullScreen] = useState(false);
   const [popupMessage, setPopupMessage] = useState<PopupMessage | null>(null);
-  const [isLoginDrawerOpen, setIsLoginDrawerOpen] = useState(false); // for login drawer
+  const [isLoginDrawerOpen, setIsLoginDrawerOpen] = useState(false);
 
   const clickTrackedRef = useRef(false);
 
@@ -245,8 +245,6 @@ export default function ProductDetails() {
         });
       }
 
-
-
       setPopupMessage({ type: 'success', message: "ADDED TO CART" });
       window.dispatchEvent(new CustomEvent('cartUpdated'));
       localStorage.setItem('cart-updated', Date.now().toString());
@@ -254,7 +252,7 @@ export default function ProductDetails() {
       const errorMessage = error instanceof Error ? error.message.toUpperCase() : 'FAILED TO ADD ITEM TO CART';
       if (errorMessage === 'AUTHENTICATION REQUIRED') {
         setIsLoginDrawerOpen(true);
-        return; // Don't show the error popup, just open login drawer
+        return;
       }
       setPopupMessage({ type: 'error', message: errorMessage });
     } finally {
@@ -276,7 +274,7 @@ export default function ProductDetails() {
       const errorMessage = error instanceof Error ? error.message.toUpperCase() : 'FAILED TO PROCEED TO CHECKOUT';
       if (errorMessage === 'AUTHENTICATION REQUIRED') {
         setIsLoginDrawerOpen(true);
-        return; // Don't show the error popup, just open login drawer
+        return;
       }
       setPopupMessage({ type: 'error', message: errorMessage });
     } finally {
@@ -290,18 +288,19 @@ export default function ProductDetails() {
   const isSelectedSizeAvailable = availableStock > 0;
 
   return (
-
     <div className="min-h-screen bg-white relative">
-      {/* Custom Popup - Luxury styling */}
-      {popupMessage && (
-        <div
-          className={`fixed top-8 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 text-white transition-all duration-500 font-light tracking-widest text-xs uppercase
-          ${popupMessage.type === 'success' ? 'bg-black' : 'bg-red-600'}
-          ${popupMessage ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
-        >
-          {popupMessage.message}
-        </div>
-      )}
+      {/* Custom Popup - Fixed position to prevent layout shift */}
+      <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none h-12">
+        {popupMessage && (
+          <div
+            className={`px-6 py-3 text-white transition-all duration-500 font-light tracking-widest text-xs uppercase pointer-events-auto
+            ${popupMessage.type === 'success' ? 'bg-black' : 'bg-red-600'}
+            ${popupMessage ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}
+          >
+            {popupMessage.message}
+          </div>
+        )}
+      </div>
 
       {/* MOBILE FULL SCREEN VIEWER */}
       {isMobileFullScreen && (
@@ -382,11 +381,12 @@ export default function ProductDetails() {
 
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-0">
         <div className="flex flex-col lg:flex-row">
-          {/* LEFT SIDE */}
+          {/* LEFT SIDE - Fixed aspect ratio to prevent shift */}
           <div className="w-full lg:w-6/10">
+            {/* Main image with fixed aspect ratio */}
             <div
               {...swipeHandlers}
-              className="w-full aspect-square mb-4 overflow-hidden cursor-crosshair relative transition-all duration-300 "
+              className="w-full aspect-square mb-4 overflow-hidden cursor-crosshair relative transition-all duration-300"
               onMouseMove={(e) => {
                 if (!isMobile) {
                   const rect = e.currentTarget.getBoundingClientRect();
@@ -407,7 +407,8 @@ export default function ProductDetails() {
                     src={product.images[currentImageIndex]}
                     alt={`${product.title} ${currentImageIndex}`}
                     fill
-                    sizes="2048px"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 60vw"
                     style={{
                       objectFit: 'cover',
                       transformOrigin: `${isZoomed.x}% ${isZoomed.y}%`,
@@ -430,54 +431,92 @@ export default function ProductDetails() {
               )}
             </div>
 
-            {/* Thumbnails - Luxury styling */}
+            {/* Thumbnails - Fixed aspect ratio with reserved space */}
             <div className="hidden sm:grid sm:grid-cols-4 lg:grid-cols-2 gap-2 sm:mt-4">
               {product.images.slice(0, 4).map((img, index) => (
                 <div
                   key={index}
-                  className={`aspect-square overflow-hidden cursor-pointer transition-all duration-300  ${index === currentImageIndex
-                    ? "border-black opacity-100"
+                  className={`aspect-square overflow-hidden cursor-pointer transition-all duration-300 ${index === currentImageIndex
+                    ? " opacity-100"
                     : "border-gray-200 hover:border-gray-400 opacity-100 hover:opacity-100"
                     }`}
                   onClick={() => setCurrentImageIndex(index)}
                 >
-                  <img
-                    src={img}
-                    alt={`${product.title} ${index}`}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                  />
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={img}
+                      alt={`${product.title} ${index}`}
+                      fill
+                      sizes="(max-width: 640px) 25vw, (max-width: 1024px) 12vw, 15vw"
+                      style={{ objectFit: 'cover' }}
+                      className="transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
                 </div>
               ))}
             </div>
 
-            {/* Mobile thumbnails */}
-            <div className="flex sm:hidden gap-2 mt-4 overflow-x-auto scrollbar-hide">
+            {/* Mobile thumbnails - Fixed height */}
+            <div className="flex sm:hidden gap-2 mt-4 overflow-x-auto scrollbar-hide h-16">
               {product.images.map((img, index) => (
                 <div
                   key={index}
                   className={`w-16 h-16 flex-shrink-0 overflow-hidden cursor-pointer transition-all duration-300 border ${index === currentImageIndex
-                    ? "border-black opacity-100"
+                    ? ""
                     : "border-gray-200 opacity-80"
                     }`}
                   onClick={() => setCurrentImageIndex(index)}
                 >
-                  <img
-                    src={img}
-                    alt={`${product.title} ${index}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="relative w-full h-full">
+                    <Image
+                      src={img}
+                      alt={`${product.title} ${index}`}
+                      fill
+                      sizes="64px"
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right Side: Product Details - Luxury typography */}
+
+          {/* Right Side: Product Details */}
           <div className="w-full lg:w-1/2 mt-8 lg:mt-16 px-4 lg:pl-24 lg:pr-16">
-            {/* Brand Name - Refined */}
-            <div className="flex items-center mb-3">
-              <p className="text-xs font-light uppercase text-gray-800 tracking-[0.2em]">FactoryFinds</p>
-              <svg
-                className="w-4 h-4 text-gray-400 ml-auto cursor-pointer hover:text-red-500 transition-colors duration-300"
+            {/* Brand Name - Fixed height - left side */}
+            <div className="flex items-center justify-between mb-3 h-5">
+              {/* Left: Brand */}
+              <p className="text-xs font-light uppercase text-gray-800 tracking-[0.2em]">
+                FactoryFinds
+              </p>
+
+              {/* Center: Inventory display */}
+              <div className="ml-auto text-xs text-red-500 font-light uppercase tracking-wide text-right">
+                <div className="flex items-center gap-1 animate-pulse">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    className="w-4 h-4 text-red-500 drop-shadow-[0_0_6px_#facc15]"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.3 5.2A1 1 0 007 20h10a1 1 0 00.9-.6L21 13M7 13h10m-6 4h.01M13 17h.01"
+                    />
+                  </svg>
+                  <span className="text-[11px] text-red-600 font-medium animate-[pulse_2s_infinite]">
+                    Selling Fast
+                  </span>
+                </div>
+              </div>
+
+              {/* Right: Heart icon */}
+              {/* <svg
+                className="w-4 h-4 text-gray-400 ml-3 cursor-pointer hover:text-red-500 transition-colors duration-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -488,30 +527,33 @@ export default function ProductDetails() {
                   strokeWidth={1}
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                 />
-              </svg>
+              </svg> */}
             </div>
 
-            {/* Product Title - More refined */}
-            <h1 className="text-md sm:text-md font-semibold text-black mb-6 leading-tight tracking-tighter">
+            {/* Product Title - Reserve min height */}
+            <h1 className="text-md sm:text-md font-semibold text-black mb-2 leading-tight tracking-tighter min-h-[3rem]">
               {product.title}
             </h1>
 
-            {/* Price - Luxury styling */}
-            <div className="mb-8">
+
+            {/* Price - Fixed height */}
+            <div className="mb-8 h-14">
               <div className="flex items-baseline gap-4 mb-1">
                 <span className="text-base sm:text-lg font-medium text-gray-800 tracking-wide">
                   ₹{product.discountedPrice.toLocaleString()}
                 </span>
-                <span className="text-sm font-light text-gray-400 line-through tracking-wide">
-                  {product.originalPrice !== product.discountedPrice ? `₹${product.originalPrice.toLocaleString()}` : ''}
-                </span>
+                {product.originalPrice !== product.discountedPrice && (
+                  <span className="text-sm font-light text-gray-400 line-through tracking-wide">
+                    ₹{product.originalPrice.toLocaleString()}
+                  </span>
+                )}
               </div>
               <p className="text-xs font-light text-gray-700 uppercase tracking-widest">incl. all taxes</p>
             </div>
 
-            {/* Select Your Size - Refined */}
+            {/* Select Your Size - Reserve space for expanded state */}
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4 h-6">
                 <div
                   onClick={() => setShowSizes(!showSizes)}
                   className="cursor-pointer flex items-center justify-between flex-1"
@@ -535,8 +577,9 @@ export default function ProductDetails() {
 
               <hr className="mb-6 border-black border-t-[1px]" />
 
-              {showSizes && (
-                <div className="flex flex-wrap gap-2 transition-all duration-300 ease-in-out mb-4">
+              {/* Size buttons with fixed height container */}
+              <div className={`transition-all duration-300 ease-in-out overflow-hidden ${showSizes ? 'max-h-32 mb-4' : 'max-h-0 mb-0'}`}>
+                <div className="flex flex-wrap gap-2">
                   {product.sizes.map((sizeItem, index) => {
                     const sizeValue = getSizeValue(sizeItem);
                     const sizeStock = getSizeStock(sizeItem, product.inventory);
@@ -545,7 +588,7 @@ export default function ProductDetails() {
                       <button
                         key={`${sizeValue}-${index}`}
                         onClick={() => setSelectedSize(sizeValue)}
-                        className={`px-4 py-2 border text-xs font-light uppercase tracking-wider transition-all duration-300 ${selectedSize === sizeValue
+                        className={`px-4 py-2 border text-xs font-light uppercase tracking-wider transition-all duration-300 h-10 ${selectedSize === sizeValue
                           ? "border-black bg-black text-white"
                           : "border-gray-400 text-black hover:border-black hover:bg-gray-100"
                           } ${sizeStock === 0 ? "opacity-30 cursor-not-allowed" : ""}`}
@@ -556,11 +599,11 @@ export default function ProductDetails() {
                     );
                   })}
                 </div>
-              )}
+              </div>
             </div>
 
-            {/* Quantity Selector - Refined */}
-            <div className="mb-6">
+            {/* Quantity Selector - Fixed height */}
+            <div className="mb-6 h-20">
               <p className="text-xs font-medium text-black uppercase tracking-[0.15em] mb-3">Quantity</p>
               <div className="flex items-center gap-4">
                 <button
@@ -581,17 +624,19 @@ export default function ProductDetails() {
               </div>
             </div>
 
-            {/* Size Guide Button - Luxury styling */}
-            <button
-              onClick={() => setShowSizeGuide(!showSizeGuide)}
-              className="text-xs text-black underline hover:no-underline mb-6 font-light uppercase tracking-[0.1em] transition-all duration-300"
-            >
-              Size Guide
-            </button>
+            {/* Size Guide Button - Fixed height */}
+            <div className="mb-6 h-6">
+              <button
+                onClick={() => setShowSizeGuide(!showSizeGuide)}
+                className="text-xs text-black underline hover:no-underline font-light uppercase tracking-[0.1em] transition-all duration-300"
+              >
+                Size Guide
+              </button>
+            </div>
 
-            {/* Size Guide Table - Refined */}
-            {showSizeGuide && (
-              <div className="mb-8 p-6 border border-gray-200 bg-gray-50">
+            {/* Size Guide Table - Reserve space with max-height transition */}
+            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${showSizeGuide ? 'max-h-[500px] mb-8' : 'max-h-0 mb-0'}`}>
+              <div className="p-6 border border-gray-200 bg-gray-50">
                 <h3 className="text-xs font-medium text-black uppercase mb-6 tracking-[0.15em]">Size Guide</h3>
 
                 <div className="overflow-x-auto">
@@ -623,23 +668,14 @@ export default function ProductDetails() {
                   <p>• Contact for sizing assistance</p>
                 </div>
               </div>
-            )}
-
-            {/* Inventory display - Refined */}
-            <div className="text-xs text-gray-500 mb-8 font-light uppercase tracking-wide">
-              {!selectedSize ? (
-                <span>Please select size</span>
-              ) : isSelectedSizeAvailable ? (
-                <span>{availableStock} available in size {selectedSize}</span>
-              ) : (
-                <span className="text-red-500">Size {selectedSize} unavailable</span>
-              )}
             </div>
 
-            {/* Action Section - Luxury buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-12">
+
+
+            {/* Action Section - Fixed height */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-12 h-16 sm:h-14">
               <button
-                className="flex-1 bg-black text-white py-4 px-8 text-xs font-light uppercase tracking-[0.2em] hover:bg-gray-800 transition-all duration-300 disabled:opacity-30 flex items-center justify-center"
+                className="flex-1 bg-black text-white py-4 px-8 text-xs font-light uppercase tracking-[0.2em] hover:bg-gray-800 transition-all duration-300 disabled:opacity-30 flex items-center justify-center h-full"
                 disabled={buyingNow || !selectedSize || !isSelectedSizeAvailable}
                 onClick={handleBuyNow}
               >
@@ -650,7 +686,7 @@ export default function ProductDetails() {
                 )}
               </button>
               <button
-                className="flex-1 border border-black text-black py-4 px-8 text-xs font-light uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+                className="flex-1 border border-black text-black py-4 px-8 text-xs font-light uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center h-full"
                 onClick={handleAddToCart}
                 disabled={addingToCart || !selectedSize || !isSelectedSizeAvailable}
               >
@@ -665,21 +701,19 @@ export default function ProductDetails() {
               </button>
             </div>
 
-            {/* Questions Section - Refined */}
-            {/* Location indicator - Refined */}
-            <div className="mt-8">
-              <p className="text-xs uppercase font-black text-black mb-5 tracking-[0.15em]">made  in India | made for Indians</p>
+            {/* Questions Section - Fixed height */}
+            <div className="mt-18 h-6">
+              <p className="text-xs uppercase font-black text-black mb-5 tracking-[0.15em]">made in India | made for Indians</p>
             </div>
 
-            <div className="mb-8">
+            <div className="mb-8 h-12">
               <p className="text-xs uppercase text-black font-light tracking-[0.1em] leading-relaxed">
                 Questions? Our team is available to assist with your selection.
               </p>
             </div>
 
-            {/* Product Description - Luxury typography */}
-            {/* Replace description rendering with this */}
-            <div className="text-sm text-gray-900 font-light leading-relaxed tracking-wide">
+            {/* Product Description - Reserve minimum space */}
+            <div className="text-sm text-gray-900 font-light leading-relaxed tracking-wide min-h-[200px]">
               {product.description && (() => {
                 const sections = parseProductDescription(product.description);
 
@@ -711,19 +745,16 @@ export default function ProductDetails() {
                 );
               })()}
             </div>
-
-
-
           </div>
         </div>
 
-        {/* Related Products Section - Refined */}
+        {/* Related Products Section - Fixed minimum height */}
         <div className="mt-16 mb-16 px-4 sm:px-6 lg:px-8">
           <h2 className="text-xs font-black text-black mb-8 uppercase tracking-[0.15em]">Related Products</h2>
 
-          <div className="min-h-[360px]">
+          <div className="min-h-[400px]">
             {loadingRelated ? (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex items-center justify-center h-[400px]">
                 <div className="w-4 h-4 border border-black border-t-transparent rounded-full animate-spin"></div>
                 <span className="ml-3 text-gray-600 text-xs uppercase tracking-wide">Loading</span>
               </div>
@@ -755,7 +786,7 @@ export default function ProductDetails() {
                   ))}
                 </div>
 
-                <div className="flex justify-center mt-4 gap-2">
+                <div className="flex justify-center mt-4 gap-2 h-2">
                   {relatedProducts.map((_, index) => (
                     <div
                       key={index}
@@ -765,14 +796,15 @@ export default function ProductDetails() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-600">
+              <div className="text-center py-8 text-gray-600 h-[400px] flex items-center justify-center">
                 <p>No related products found in the same category.</p>
               </div>
             )}
           </div>
         </div>
       </div>
-      {/* Add this LoginDrawer component in your JSX */}
+
+      {/* Login Drawer */}
       <LoginDrawer
         isOpen={isLoginDrawerOpen}
         onClose={() => setIsLoginDrawerOpen(false)}
