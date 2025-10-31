@@ -9,6 +9,7 @@ import {
   deleteAddress,
   getProductsFromUserCart,
   APIError,
+  validateCoupon,
 } from "../../../utlis/api";
 import LoadingOverlay from "@/components/LoadingOverlay";
 import { toast } from "react-hot-toast";
@@ -28,6 +29,7 @@ import {
   RazorpayOptions,
   RazorpayResponse
 } from "../../../types/razorpay";
+import { ValidatedCoupon } from "../../../utlis/api";
 
 /* ----- Types ----- */
 type CartItem = {
@@ -102,6 +104,35 @@ const stepMotion = {
   transition: { duration: 0.3, ease: "easeInOut" as const },
 };
 
+// Add this function near the top of your component (after imports)
+// Place this function inside your component or in a utils file
+const triggerFacebookPurchaseEvent = (cartItems: CartItem[], grandTotal: number) => {
+  try {
+    if (typeof window !== "undefined" && (window as any).fbq) {
+      const productIds = cartItems.map(item => item.product._id);
+
+      (window as any).fbq("track", "Purchase", {
+        content_ids: productIds,
+        content_type: "product",
+        value: grandTotal,
+        currency: "INR",
+        num_items: cartItems.length,
+      });
+
+      console.log("✅ Facebook Purchase event triggered:", {
+        content_ids: productIds,
+        value: grandTotal,
+        currency: "INR",
+        num_items: cartItems.length,
+      });
+    } else {
+      console.warn("⚠️ Facebook Pixel (fbq) not found on window.");
+    }
+  } catch (error) {
+    console.error("❌ Error triggering Facebook Purchase event:", error);
+  }
+};
+
 /* ----- Component ----- */
 export default function CheckoutPage() {
   const router = useRouter();
@@ -141,7 +172,38 @@ export default function CheckoutPage() {
     country: "India",
   });
 
+  // coupon code thing
+  const [couponCode, setCouponCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [isCouponApplied, setIsCouponApplied] = useState(false);
+
+
   const topRef = useRef<HTMLDivElement | null>(null);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    try {
+      const res = await validateCoupon(couponCode, grandTotal);
+      if (res.success && res.coupon) {
+        toast.success(res.message);
+        setDiscount(res.coupon.discount || res.coupon.discountValue || 0);
+        setIsCouponApplied(true);
+      } else {
+        toast.error(res.message || "Invalid coupon");
+        setDiscount(0);
+        setIsCouponApplied(false);
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Invalid coupon");
+      setDiscount(0);
+      setIsCouponApplied(false);
+    }
+  };
+
 
   /* ----- Razorpay Script Loader ----- */
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -209,7 +271,13 @@ export default function CheckoutPage() {
     [cartItems, getItemPrice]
   );
 
-  const grandTotal = bagTotal;
+  const totalBeforeDiscount = Number(bagTotal) || 0;
+  const discountAmount = Number(discount) || 0;
+  const grandTotal = isCouponApplied
+    ? totalBeforeDiscount - discountAmount
+    : totalBeforeDiscount;
+
+
   console.log(grandTotal);
 
   /* ----- Payment Handler ----- */
@@ -278,6 +346,7 @@ export default function CheckoutPage() {
                   setOrderId(statusResponse.order.orderNumber);
                   setStep(4);
                   toast.success("Payment successful! Order placed.");
+                  triggerFacebookPurchaseEvent(cartItems, grandTotal);
                   return { orderNumber: statusResponse.order.orderNumber };
                 }
 
@@ -832,7 +901,9 @@ export default function CheckoutPage() {
                   <button onClick={() => router.push("/product/allProducts")} className="px-4 py-2 bg-black text-white rounded border border-black">Continue shopping</button>
                   <button onClick={() => router.push("/profile/orders")} className="px-4 py-2 border border-gray-300 rounded">View orders</button>
                 </div>
+                
               </motion.section>
+              
             )}
           </AnimatePresence>
         </div>
@@ -855,6 +926,28 @@ export default function CheckoutPage() {
                 <span>Original Price</span>
                 <span>₹{bagTotal.toLocaleString()}</span>
               </div>
+              <div className="flex gap-2 mt-4">
+                <input
+                  type="text"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Enter coupon code"
+                  className="border p-2 rounded w-full"
+                />
+                <button
+                  onClick={handleApplyCoupon}
+                  className="bg-black text-white px-4 py-2 rounded"
+                >
+                  Apply
+                </button>
+              </div>
+
+              {isCouponApplied && (
+                <p className="text-green-600 mt-2">
+                  Coupon applied! You saved ₹{discount}.
+                </p>
+              )}
+
             </div>
 
             {/* Grand Total */}

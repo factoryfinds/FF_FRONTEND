@@ -1,6 +1,7 @@
 import { toast } from 'react-hot-toast';
 import { GetOrdersResponse } from "../types/razorpay";
 
+
 // Base configuration
 const BASE_URL = 'https://ff-backend-00ri.onrender.com/api'; // <- url changes required
 
@@ -415,6 +416,22 @@ export interface AdminOrdersFilter {
   userSearch?: string;
 }
 
+
+export interface ValidatedCoupon {
+  code: string;
+  description: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  discount: number;
+  originalTotal: number;
+  finalTotal: number;
+}
+
+export interface ValidateCouponResponse {
+  success: boolean;
+  message: string;
+  coupon: ValidatedCoupon;
+}
 
 // Token management
 const getToken = (): string | null => {
@@ -1016,4 +1033,34 @@ export const notifyUser = async (email: string): Promise<NotifyResponse> => {
       message: err.message || "Something went wrong",
     };
   }
+};
+
+// validate coupon
+// ---- Validate Coupon ---- //
+// 📌 Validate Coupon
+export const validateCoupon = async (
+  code: string,
+  cartTotal: number
+): Promise<ValidateCouponResponse> => {
+  const token = localStorage.getItem("accessToken");
+  if (!token) {
+    throw new APIError("No authentication token found", 401);
+  }
+
+  const response = await fetch(`${BASE_URL}/couponRoute/validate`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ code, cartTotal }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new APIError(data.message || "Failed to validate coupon", response.status);
+  }
+
+  return data as ValidateCouponResponse;
 };
