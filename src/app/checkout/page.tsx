@@ -29,7 +29,7 @@ import {
   RazorpayOptions,
   RazorpayResponse
 } from "../../../types/razorpay";
-import { ValidatedCoupon } from "../../../utlis/api";
+// import { ValidatedCoupon } from "../../../utlis/api";
 
 /* ----- Types ----- */
 type CartItem = {
@@ -108,10 +108,10 @@ const stepMotion = {
 // Place this function inside your component or in a utils file
 const triggerFacebookPurchaseEvent = (cartItems: CartItem[], grandTotal: number) => {
   try {
-    if (typeof window !== "undefined" && (window as any).fbq) {
+    if (typeof window !== "undefined" && window.fbq) {
       const productIds = cartItems.map(item => item.product._id);
 
-      (window as any).fbq("track", "Purchase", {
+      window.fbq("track", "Purchase", {
         content_ids: productIds,
         content_type: "product",
         value: grandTotal,
@@ -197,10 +197,42 @@ export default function CheckoutPage() {
         setDiscount(0);
         setIsCouponApplied(false);
       }
-    } catch (err: any) {
-      toast.error(err.message || "Invalid coupon");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        toast.error(err.message);
+      } else {
+        toast.error("Invalid coupon");
+      }
       setDiscount(0);
       setIsCouponApplied(false);
+      // Custom popup (using toast as base, or you can replace with your modal)
+      toast.custom(t => (
+        <div className="bg-red-500 text-white p-4 rounded-xl shadow-lg flex items-center justify-between min-w-[250px]">
+          <div className="flex items-center space-x-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M18.364 5.636L5.636 18.364m0-12.728l12.728 12.728"
+              />
+            </svg>
+            <span>{"Invalid coupon"}</span>
+          </div>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            className="ml-3 text-sm bg-white text-red-600 px-2 py-1 rounded-md"
+          >
+            Close
+          </button>
+        </div>
+      ));
     }
   };
 
@@ -901,9 +933,9 @@ export default function CheckoutPage() {
                   <button onClick={() => router.push("/product/allProducts")} className="px-4 py-2 bg-black text-white rounded border border-black">Continue shopping</button>
                   <button onClick={() => router.push("/profile/orders")} className="px-4 py-2 border border-gray-300 rounded">View orders</button>
                 </div>
-                
+
               </motion.section>
-              
+
             )}
           </AnimatePresence>
         </div>
